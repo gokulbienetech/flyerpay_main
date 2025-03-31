@@ -1,0 +1,963 @@
+{% load static %}
+
+
+<!doctype html>
+
+<html
+  lang="en"
+  class="layout-navbar-fixed layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-skin="default"
+  data-static-path="../../static/"
+  data-template="vertical-menu-template-starter"
+  data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>Demo: FlyerPay</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <meta name="description" content="" />
+    <!-- intlTelInput -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../../static/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+      rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../static/vendor/fonts/iconify-icons.css" />
+
+    <!-- Core CSS -->
+    <!-- build:css static/vendor/css/theme.css  -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/node-waves/node-waves.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/libs/pickr/pickr-themes.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/css/core.css" />
+    <link rel="stylesheet" href="../../static/css/demo.css" />
+
+    <!-- Vendors CSS -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- endbuild -->
+
+    <!-- Page CSS -->
+
+    <!-- Helpers -->
+    <script src="../../static/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+    <script src="../../static/vendor/js/template-customizer.js"></script>
+
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+
+    <script src="../../static/js/config.js"></script>
+  </head>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+    }
+    .container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 600px;
+        margin: auto;
+    }
+    .box {
+        width: 45%;
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+    }
+    .btn-container {
+        margin-top: 20px;
+    }
+    .btn {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    .filter-container {
+        margin: 20px auto;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    #full_client_table th{
+        text-align: center; /* Center the column header */
+      }
+  
+      
+      #full_client_table td {
+          text-align: center; /* Align data properly */
+          padding: 5px 10px; /* Adjust padding for better readability */
+      }
+</style>
+
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        <aside id="layout-menu" class="layout-menu menu-vertical menu">
+          <div class="app-brand demo">
+            <a href="{% url 'home_page' %}" class="app-brand-link">
+              <span class="app-brand-logo demo">
+                <span class="text-primary">
+                  {% comment %} <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
+                      fill="currentColor" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
+                      fill="#161616" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
+                      fill="#161616" />
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
+                      fill="currentColor" />
+                  </svg> {% endcomment %}
+                </span>
+              </span>
+              <span class="app-brand-text demo menu-text fw-bold ms-3"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" style="height: 70px; width:70px; margin-top:10px;  margin-right: 10px;">
+              </span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
+              <i class="icon-base ti tabler-x d-block d-xl-none"></i>
+            </a>
+          </div>
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <!-- Page -->
+            <li class="menu-item ">
+              <a href="{% url 'home_page' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-smart-home"></i>
+                <div data-i18n="Page 1">Home</div>
+              </a>
+            </li>
+            <li class="menu-item active">
+              <a href="{% url 'client_details_view' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-app-window"></i>
+                <div data-i18n="Page 2">Merchant Onboarding</div>
+              </a>
+            </li>
+            <li class="menu-item ">
+                <a href="{% url 'upload_excel' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Payout Reconciliation Process</div>
+                </a>
+              </li>
+            <li class="menu-item">
+                <a href="{% url 'membership_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Membership</div>
+                </a>
+              </li>
+            <li class="menu-item">
+                <a href="{% url 'aggregator_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Aggregator</div>
+                </a>
+              </li>
+          </ul>
+        </aside>
+
+        <div class="menu-mobile-toggler d-xl-none rounded-1">
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-secondary p-2 rounded-1">
+            <i class="ti tabler-menu icon-base"></i>
+            <i class="ti tabler-chevron-right icon-base"></i>
+          </a>
+        </div>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          <nav
+          class="layout-navbar container-xxl navbar navbar-expand-xl align-items-center "
+          id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+              <i class="icon-base ti tabler-menu-2 icon-md"></i>
+            </a>
+          </div>
+
+          
+           
+        </nav>
+
+       
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+            <!-- <h2>Client Management</h2> -->
+
+            <!-- Add Client Button -->
+            <!-- <button class="btn btn-success" id="showFormBtn">Add Client</button> -->
+            <h3 class="mt-4">Client List</h3>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button class="btn btn-success btn-sm" id="showFormBtn">Add Client</button>
+            </div>
+            <table class="table table-bordered" id="full_client_table">
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Location</th>
+                        <th>Email</th>
+                        <th>Business Type</th>
+                        <th>Membership Type</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clientTable">
+                    {% for client in clients %}
+                    <tr id="row-{{ client.id }}">
+                        <td>{{ client.client_name }}</td>
+                        <td>{{ client.location }}</td>
+                        <td>{{ client.email }}</td>
+                        <td>{{ client.business_type }}</td>
+                        <td>{{ client.membership_type }}</td>
+                        <td>
+                            <button class="btn btn-warning edit-btn" data-id="{{ client.id }}"><i class="bi bi-pencil-square"></i></button>
+                            <button class="btn btn-danger delete-btn" data-id="{{ client.id }}"><i class="bi bi-trash3"></i></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <!-- Add/Edit Form (Hidden Initially) -->
+                <form id="clientForm" method="post" style="display: none;" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" id="client_id" name="client_id">
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form.client_name.label_tag }}
+                            {{ form.client_name }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.location.label_tag }}
+                            {{ form.location }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.email.label_tag }}
+                            {{ form.email }}
+                        </div>
+                        
+                    </div>
+    <br>
+
+                
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form.postal_address.label_tag }}
+                            {{ form.postal_address }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.postel_code.label_tag }}
+                            {{ form.postel_code }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.email_password.label_tag }}
+                            {{ form.email_password }}
+                        </div>
+                        
+                    </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.contact_number.label_tag }}
+                            {{ form.contact_number }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            {{ form.business_type.label_tag }}
+                            {{ form.business_type }}
+                        </div>
+                    </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="partnership_vendor">Partnership Vendor</label>
+                                {{ form.partnership_vendor }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.membership_type.label_tag }}
+                            {{ form.membership_type }}
+                        </div>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ form.zomato_restaurant_id.label_tag }}
+                            {{ form.zomato_restaurant_id }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.swiggy_restaurant_id.label_tag }}
+                            {{ form.swiggy_restaurant_id }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.flyereats_restaurant_id.label_tag }}
+                            {{ form.flyereats_restaurant_id }}
+                        </div>
+                    </div>
+                <br>
+                <div class="row">
+                    <div class="col-md-4">
+
+                        <label for="zomato_tax" >Zomato With Tax</label>
+                        {{ form.zomato_tax }}
+                        {{ form.zomato_commission_percentage.label_tag }}
+                        {{ form.zomato_commission_percentage }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="swiggy_tax" >Swiggy With Tax</label>
+                        {{ form.swiggy_tax }}
+                        {{ form.swiggy_commission_percentage.label_tag }}
+                        {{ form.swiggy_commission_percentage }}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="flyereats_tax" >FlyerEats With Tax</label>
+                        {{ form.flyereats_tax }}
+                        {{ form.flyereats_commission_percentage.label_tag }}
+                        {{ form.flyereats_commission_percentage }}
+                    </div>
+                </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.zomato_finance_poc.label_tag }}
+                            {{ form.zomato_finance_poc }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.zomato_escalation_manager.label_tag }}
+                            {{ form.zomato_escalation_manager }}
+                        </div>
+                    </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.swiggy_finance_poc.label_tag }}
+                            {{ form.swiggy_finance_poc }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.swiggy_escalation_manager.label_tag }}
+                            {{ form.swiggy_escalation_manager }}
+                        </div>
+                    </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.fe_finance_poc.label_tag }}
+                            {{ form.fe_finance_poc }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.fe_escalation_manager.label_tag }}
+                            {{ form.fe_escalation_manager }}
+                        </div>
+                    </div>
+                <br>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.fp_username.label_tag }}
+                            {{ form.fp_username }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.fp_password.label_tag }}
+                            {{ form.fp_password }}
+                        </div>
+                    </div>
+                
+                    <br>
+                    <button type="submit" class="btn btn-primary" id="submitBtn" onclick="console.log('Inline click works!')">Add Client</button>
+                    <button type="button" class="btn btn-secondary" id="cancelbtn">Cancel</button>
+                </form>
+            
+           
+            
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+               
+                    <script>
+$(document).ready(function () {
+    
+    console.log("jQuery is loaded and script is running!");
+
+    function getCSRFToken() {
+        return document.querySelector("[name=csrfmiddlewaretoken]").value;
+    }
+
+    // Function to validate form fields
+    function validateForm() {
+        let isValid = true;
+
+        $(".invalid-feedback").remove();
+        $(".is-invalid").removeClass("is-invalid");
+
+        const requiredFields = [
+            "client_name", "location", "postal_address", "postel_code",
+            "email", "business_type", "membership_type",
+            "fp_username", "fp_password"
+        ];
+
+        requiredFields.forEach(function (field) {
+            let fieldValue = $("#" + field).val().trim();
+            if (fieldValue === "") {
+                isValid = false;
+                $("#" + field).addClass("is-invalid").after(`<div class="invalid-feedback">${field.replace(/_/g, " ")} is required.</div>`);
+            }
+        });
+
+        // Validate Multi-Select Field (Partnership Vendor)
+        if ($("#partnership_vendor").val() == null) {
+            isValid = false;
+            $("#partnership_vendor").addClass("is-invalid").after(`<div class="invalid-feedback">At least one Partnership Vendor is required.</div>`);
+        }
+
+        // Email Validation
+        let email = $("#email").val().trim();
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (email !== "" && !emailRegex.test(email)) {
+            isValid = false;
+            $("#email").addClass("is-invalid").after(`<div class="invalid-feedback">Invalid email format.</div>`);
+        }
+
+        // Mobile Number Validation (For India: 10 digits, starting with 6-9)
+        let contactNumber = $("#contact_number").val().trim();
+        let mobileRegex = /^[6-9]\d{9}$/;
+        if (!mobileRegex.test(contactNumber)) {
+            isValid = false;
+            $("#contact_number").addClass("is-invalid").after(`<div class="invalid-feedback">Invalid Indian mobile number format.</div>`);
+        }
+       
+        return isValid;
+    }
+
+    // Real-time validation on typing
+    $("input, select").on("input change", function () {
+        $(this).removeClass("is-invalid");
+        $(this).next(".invalid-feedback").remove();
+    });
+
+    // Show Form When "Add Client" Button is Clicked
+    $("#showFormBtn").click(function () {
+        $("#clientForm").toggle();
+        $("#client_id").val("");
+        $("#clientForm")[0].reset();
+        $("#partnership_vendor").val([]).trigger("change");  // Reset multi-select
+        $(".is-invalid").removeClass("is-invalid");
+        $(".invalid-feedback").remove();
+        $("#submitBtn").text("Add Client");
+    });
+
+    $("#cancelbtn").click(function () {
+        hideform();
+    });
+
+    function hideform() {
+    console.log("Cancel button clicked! Resetting form...");
+
+    $("#clientForm").toggle();  // Hide the form
+    $("#client_id").val("");  // Reset hidden client ID field
+    $("#clientForm")[0].reset();  // Reset all input fields
+    $("input[name='partnership_vendor']").prop("checked", false);  // Uncheck checkboxes
+    $("#partnership_vendor").val([]).trigger("change");  // Reset multi-select
+    $(".is-invalid").removeClass("is-invalid");  // Remove error highlights
+    $(".invalid-feedback").remove();  // Remove error messages
+    $("#submitBtn").text("Add Client");  // Reset button text
+
+    console.log("Form has been reset!");
+}
+
+    // Add or Update Client
+ 
+    $(document).ready(function () {
+    $("#clientForm").submit(function (e) {
+        e.preventDefault();  // Prevent default form submission
+
+        var clientId = $("#client_id").val(); // Get the client ID (if editing)
+        var formData = $(this).serialize();
+        var url = clientId ? `/clients/edit/${clientId}/` : "{% url 'client_details_view' %}";  
+        var method = clientId ? "POST" : "POST";  // Django typically uses POST for updates
+
+        $.ajax({
+            type: method,
+            url: url,
+            data: formData,
+            dataType: "json",
+            success: function (response) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Success!",
+                    text: response.message,
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    location.reload();  // Refresh after success
+                });
+            },
+            error: function (xhr) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "Something went wrong!",
+                });
+            }
+        });
+    });
+
+    // Edit Client
+    $(document).on("click", ".edit-btn", function () {
+        var clientId = $(this).data("id");
+        
+
+        $.get(`/clients/edit/${clientId}/`, function (data) {
+            console.log(data.client)
+            if (data.client) {
+                $("#client_id").val(data.client.id);
+                $("#client_name").val(data.client.client_name);
+                $("#location").val(data.client.location);
+                $("#postal_address").val(data.client.postal_address);
+                $("#postel_code").val(data.client.postel_code);
+                $("#email").val(data.client.email);
+                $("#contact_number").val(data.client.contact_number);
+                $("#business_type").val(data.client.business_type);
+                $("#membership_type").val(data.client.membership_type).trigger("change");
+                $("#zomato_finance_poc").val(data.client.zomato_finance_poc);
+                $("#zomato_escalation_manager").val(data.client.zomato_escalation_manager);
+                $("#swiggy_finance_poc").val(data.client.swiggy_finance_poc);
+                $("#swiggy_escalation_manager").val(data.client.swiggy_escalation_manager);
+                $("#fe_finance_poc").val(data.client.fe_finance_poc);
+                $("#fe_escalation_manager").val(data.client.fe_escalation_manager);
+                $("#fp_username").val(data.client.fp_username);
+                $("#fp_password").val(data.client.fp_password);
+                $("#zomato_res_id").val(data.client.zomato_restaurant_id);
+                $("#swiggy_res_id").val(data.client.swiggy_restaurant_id);
+                $("#flyereats_res_id").val(data.client.flyereats_restaurant_id);
+                $("#zomato_commission_percentage").val(data.client.zomato_commission_percentage);
+                $("#swiggy_commission_percentage").val(data.client.swiggy_commission_percentage);
+                $("#flyereats_commission_percentage").val(data.client.flyereats_commission_percentage);
+                $("#email_password").val(data.client.email_password);
+                $("#zomato_tax").prop("checked", data.client.zomato_tax === true);
+                $("#swiggy_tax").prop("checked", data.client.swiggy_tax === true);
+                $("#flyereats_tax").prop("checked", data.client.flyereats_tax === true);
+                
+
+                // Fix: Uncheck all checkboxes first to prevent issues
+                $("input[name='partnership_vendor']").prop("checked", false);
+
+                // Fix: Check the correct checkboxes based on received data
+                if (Array.isArray(data.client.partnership_vendor)) {
+                    data.client.partnership_vendor.forEach(function (vendorId) {
+                        $("input[name='partnership_vendor'][value='" + vendorId + "']").prop("checked", true);
+                    });
+                }
+                $("#submitBtn").text("Update Client");
+                $("#clientForm").show();
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error!",
+                    text: "Invalid response data."
+                });
+            }
+        }).fail(function () {
+            Swal.fire({
+                icon: "error",
+                title: "Error!",
+                text: "Error fetching client details."
+            });
+        });
+    });
+});
+
+
+    // Delete Client
+    $(document).on("click", ".delete-btn", function () {
+        var clientId = $(this).data("id");
+    
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    type: "POST",
+                    url: `/clients/delete/${clientId}/`,
+                    data: { csrfmiddlewaretoken: getCSRFToken() },
+                    success: function (response) {
+                        Swal.fire("Deleted!", response.message, "success");
+                        $("#row-" + clientId).fadeOut(300, function () { $(this).remove(); });
+                    },
+                    error: function () {
+                        Swal.fire("Error!", "Failed to delete the client.", "error");
+                    }
+                });
+            }
+        });
+    });
+    
+
+    // Initialize Select2 for Multi-Select Partnership Vendor
+    $("#partnership_vendor").select2({
+        placeholder: "Select Vendors",
+        allowClear: true
+    });
+});
+</script> 
+
+
+<!-- <script>
+    $(document).ready(function () {
+        console.log("jQuery is loaded and script is running!");
+    
+        function getCSRFToken() {
+            return document.querySelector("[name=csrfmiddlewaretoken]").value;
+        }
+    
+        // Function to validate form fields
+        function validateForm() {
+            let isValid = true;
+    
+            $(".invalid-feedback").remove();
+            $(".is-invalid").removeClass("is-invalid");
+    
+            const requiredFields = [
+                "client_name", "location", "postal_address", "postel_code",
+                "email", "business_type", "membership_type",
+                "fp_username", "fp_password"
+            ];
+    
+            requiredFields.forEach(function (field) {
+                let fieldValue = $("#" + field).val().trim();
+                if (fieldValue === "") {
+                    isValid = false;
+                    $("#" + field).addClass("is-invalid").after(`<div class="invalid-feedback">${field.replace(/_/g, " ")} is required.</div>`);
+                }
+            });
+    
+            // Validate Multi-Select Field (Partnership Vendor)
+            if ($("#partnership_vendor").val() == null) {
+                isValid = false;
+                $("#partnership_vendor").addClass("is-invalid").after(`<div class="invalid-feedback">At least one Partnership Vendor is required.</div>`);
+            }
+    
+            // Email Validation
+            let email = $("#email").val().trim();
+            let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (email !== "" && !emailRegex.test(email)) {
+                isValid = false;
+                $("#email").addClass("is-invalid").after(`<div class="invalid-feedback">Invalid email format.</div>`);
+            }
+    
+            // Mobile Number Validation (For India: 10 digits, starting with 6-9)
+            let contactNumber = $("#contact_number").val().trim();
+            let mobileRegex = /^[6-9]\d{9}$/;
+            if (!mobileRegex.test(contactNumber)) {
+                isValid = false;
+                $("#contact_number").addClass("is-invalid").after(`<div class="invalid-feedback">Invalid Indian mobile number format.</div>`);
+            }
+    
+            return isValid;
+        }
+    
+        // Real-time validation on typing
+        $("input, select").on("input change", function () {
+            $(this).removeClass("is-invalid");
+            $(this).next(".invalid-feedback").remove();
+        });
+    
+        // Show Form When "Add Client" Button is Clicked
+        $("#showFormBtn").click(function () {
+            $("#clientForm").toggle();
+            $("#client_id").val("");
+            $("#clientForm")[0].reset();
+            $("#partnership_vendor").val([]).trigger("change");  // Reset multi-select
+            $(".is-invalid").removeClass("is-invalid");
+            $(".invalid-feedback").remove();
+            $("#submitBtn").text("Add Client");
+        });
+    
+        $("#cancelbtn").click(function () {
+            $("#clientForm").hide();
+        });
+    
+        // Add or Update Client
+        $("#clientForm").submit(function (e) {
+            e.preventDefault();
+            
+            if (!validateForm()) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Validation Error",
+                    text: "Please correct the highlighted errors before submitting.",
+                });
+                return;
+            }
+    
+            var clientId = $("#client_id").val();
+            var url = clientId ? `/clients/update/${clientId}/` : "/clients/";
+            
+            var formData = $(this).serializeArray();
+            formData.push({ name: "csrfmiddlewaretoken", value: getCSRFToken() });
+    
+            console.log("Form data:", formData);
+    
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: $.param(formData),
+                dataType: "json",
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 2000, // Auto close after 2 seconds
+                    }).then(() => {
+                        location.reload(); // Refresh the page after showing success
+                    });
+                },
+                error: function (xhr) {
+                    var errors = xhr.responseJSON.errors;
+                    var errorMessages = Object.values(errors).map((msg) => msg.join(" ")).join("\n");
+    
+                    Swal.fire({
+                        icon: "error",
+                        title: "Validation Error",
+                        text: errorMessages,
+                    });
+                },
+            });
+        });
+    
+        // Edit Client
+        $(document).on("click", ".edit-btn", function () {
+            var clientId = $(this).data("id");
+    
+            $.get(`/clients/edit/${clientId}/`, function (data) {
+                if (data.client) {
+                    $("#client_id").val(data.client.id);
+                    $("#client_name").val(data.client.client_name);
+                    $("#location").val(data.client.location);
+                    $("#postal_address").val(data.client.postal_address);
+                    $("#email").val(data.client.email);
+                    $("#contact_number").val(data.client.contact_number);
+                    $("#business_type").val(data.client.business_type);
+                    $("#membership_type").val(data.client.membership_type);
+                    $("#fp_username").val(data.client.fp_username);
+                    $("#fp_password").val(data.client.fp_password);
+    
+                    // Fix: Set multi-select Partnership Vendor
+                    $("#partnership_vendor").val(data.client.partnership_vendor).trigger("change");
+    
+                    $("#submitBtn").text("Update Client");
+                    $("#clientForm").show();
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Invalid response data.",
+                    });
+                }
+            }).fail(function () {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Error fetching client details.",
+                });
+            });
+        });
+    
+        // Delete Client
+        $(document).on("click", ".delete-btn", function () {
+            var clientId = $(this).data("id");
+    
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This action cannot be undone!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        url: `/clients/delete/${clientId}/`,
+                        data: { csrfmiddlewaretoken: getCSRFToken() },
+                        success: function (response) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Deleted!",
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 2000,
+                            }).then(() => {
+                                $("#row-" + clientId).remove(); // Remove the row from UI
+                            });
+                        },
+                        error: function () {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: "Error deleting client.",
+                            });
+                        },
+                    });
+                }
+            });
+        });
+    
+        // Initialize Select2 for Multi-Select Partnership Vendor
+        $("#partnership_vendor").select2({
+            placeholder: "Select Vendors",
+            allowClear: true
+        });
+    });
+    </script> -->
+    
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+   
+            <!-- Footer -->
+            <footer class="content-footer footer bg-footer-theme">
+              <div class="container-xxl">
+                <div
+                  class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                  <div class="text-body">
+                    ©
+                    <script>
+                      document.write(new Date().getFullYear());
+                    </script>
+                    <!-- , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a> -->
+                </div>
+                  
+                </div>
+              </div>
+            </footer>
+            <!-- / Footer -->
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+      <div class="drag-target"></div>
+    </div>
+    <!-- / Layout wrapper -->
+
+    <!-- Core JS -->
+    <!-- build:js static/vendor/js/theme.js -->
+
+    <script src="../../static/vendor/libs/jquery/jquery.js"></script>
+
+    <script src="../../static/vendor/libs/popper/popper.js"></script>
+    <script src="../../static/vendor/js/bootstrap.js"></script>
+    <script src="../../static/vendor/libs/node-waves/node-waves.js"></script>
+
+    <script src="../../static/vendor/libs/@algolia/autocomplete-js.js"></script>
+
+    <script src="../../static/vendor/libs/pickr/pickr.js"></script>
+
+    <script src="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+    <script src="../../static/vendor/libs/hammer/hammer.js"></script>
+
+    <script src="../../static/vendor/js/menu.js"></script>
+
+    <!-- endbuild -->
+
+    <!-- Vendors JS -->
+
+    <!-- Main JS -->
+
+    <script src="../../static/js/main.js"></script>
+
+    <!-- Page JS -->
+  </body>
+</html>

@@ -1,0 +1,1454 @@
+{% load static %}
+<!doctype html>
+
+<html
+  lang="en"
+  class="layout-navbar-fixed layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-skin="default"
+  data-static-path="../../static/"
+  data-template="vertical-menu-template-starter"
+  data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>Demo: FlyerPay</title>
+
+    <meta name="description" content="" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../../static/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+      rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../static/vendor/fonts/iconify-icons.css" />
+
+    <!-- Core CSS -->
+    <!-- build:css static/vendor/css/theme.css  -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/node-waves/node-waves.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/libs/pickr/pickr-themes.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/css/core.css" />
+    <link rel="stylesheet" href="../../static/css/demo.css" />
+
+    <!-- Vendors CSS -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- endbuild -->
+
+    <!-- Page CSS -->
+
+    <!-- Helpers -->
+    <script src="../../static/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+    <script src="../../static/vendor/js/template-customizer.js"></script>
+
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+
+    <script src="../../static/js/config.js"></script>
+  </head>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+    }
+    .container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 600px;
+        margin: auto;
+    }
+    .box {
+        width: 45%;
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+    }
+    /* .btn-container {
+        margin-top: 20px;
+    } */
+    .btn {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+    }
+    /* .btn-primary {
+        background-color: #007bff;
+        color: white;
+    } */
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    .filter-container {
+        margin: 20px auto;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    select, input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #aggregatorSelect{
+          width: 50%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #filter_select{
+          width: 50%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .box {
+            flex: 1;
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .btn-container {
+            text-align: right;
+            margin-top: 15px;
+        }
+
+        .form-container {
+            display: none;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .pending-orders-table th {
+          text-align: center; /* Center the column header */
+      }
+
+      .reconciliation_report_table th{
+        text-align: center; /* Center the column header */
+      }
+
+      
+      .reconciliation_report_table td {
+          text-align: center; /* Align data properly */
+          padding: 5px 10px; /* Adjust padding for better readability */
+      }
+      .pending-orders-table td {
+          text-align: left; /* Align data properly */
+          padding: 5px 10px; /* Adjust padding for better readability */
+      }
+    
+      .modal { display: none; position: fixed; top: 20%; left: 30%; background: white; padding: 20px; border: 1px solid black; box-shadow: 5px 5px 10px gray; }
+      .modal-content { position: relative; padding: 10px; }
+      .close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; }
+
+</style>
+
+
+
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        <aside id="layout-menu" class="layout-menu menu-vertical menu">
+          <div class="app-brand demo">
+            <a href="{% url 'home_page' %}" class="app-brand-link">
+              <span class="app-brand-logo demo">
+                <span class="text-primary">
+                  {% comment %} <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
+                      fill="currentColor" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
+                      fill="#161616" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
+                      fill="#161616" />
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
+                      fill="currentColor" />
+                  </svg> {% endcomment %}
+                </span>
+              </span>
+              <span class="app-brand-text demo menu-text fw-bold ms-3"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" style="height: 70px; width:70px; margin-top:10px;  margin-right: 10px;"></span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
+              <i class="icon-base ti tabler-x d-block d-xl-none"></i>
+            </a>
+          </div>
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <!-- Page -->
+            <li class="menu-item ">
+              <a href="{% url 'home_page' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-smart-home"></i>
+                <div data-i18n="Page 1">Home</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'client_details_view' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-app-window"></i>
+                <div data-i18n="Page 2">Merchant Onboarding</div>
+              </a>
+            </li>
+            <li class="menu-item active">
+                <a href="{% url 'upload_excel' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Payout Reconciliation Process</div>
+                </a>
+              </li>
+            <li class="menu-item">
+                <a href="{% url 'membership_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Membership</div>
+                </a>
+              </li>
+            <li class="menu-item">
+                <a href="{% url 'aggregator_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Aggregator</div>
+                </a>
+              </li>
+          </ul>
+        </aside>
+
+        <div class="menu-mobile-toggler d-xl-none rounded-1">
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-secondary p-2 rounded-1">
+            <i class="ti tabler-menu icon-base"></i>
+            <i class="ti tabler-chevron-right icon-base"></i>
+          </a>
+        </div>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          <nav
+          class="layout-navbar container-xxl  navbar navbar-expand-xl align-items-center "
+          id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+              <i class="icon-base ti tabler-menu-2 icon-md"></i>
+            </a>
+          </div>
+
+         
+        </nav>
+
+       
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+            <!-- <h2>Upload Excel Files</h2> -->
+
+    {% if message %}
+        <p style="color: green;">{{ message }}</p>
+    {% endif %}
+
+    <div>
+      <label for="aggregatorSelect">Select Aggregator:</label>
+      <select id="aggregatorSelect">
+          <option value="">-- Select Aggregator --</option>
+          {% for aggregator in aggregators %}
+              <option value="{{ aggregator.name|lower }}">{{ aggregator.name }}</option>
+          {% endfor %}
+      </select>
+  </div>
+
+  <br>
+
+  <!-- Forms -->
+
+
+    <div id="zomatoForm" class="form-container">
+      <h3>Zomato File Upload</h3>
+      <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="aggregator" value="zomato">
+          {{ zomato_form.as_p }}
+          <button type="submit" class="btn-primary">Upload</button>
+      </form>
+  </div>
+
+  <div id="swiggyForm"  class="form-container">
+      <h3>Swiggy File Upload</h3>
+      <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="aggregator" value="swiggy">
+          {{ swiggy_form.as_p }}
+          <button type="submit" class="btn-primary">Upload</button>
+      </form>
+  </div>
+
+  <div id="flyereatsForm" class="form-container">
+      <h3>Flyer Eats File Upload</h3>
+      <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="aggregator" value="flyereats">
+          {{ flyereats_form.as_p }}
+          <button type="submit" class="btn-primary">Upload</button>
+      </form>
+  </div>
+
+
+
+    <hr>
+
+    <!-- Filter Section -->
+    <h2>Reconciliation Report Filters</h2>
+
+
+    <div class="filter-container">
+      <form method="get">
+          <!-- Aggregator Dropdown -->
+          <select name="aggregator" id="aggregator_select" required>
+              <option value="">Select Aggregator</option>
+              {% for agg in aggregators %}
+                  <option value="{{ agg }}" {% if aggregator == agg %}selected{% endif %}>
+                      {{ agg }}
+                  </option>
+              {% endfor %}
+          </select>
+
+          <!-- Client Name Dropdown -->
+          <select name="client_name" id="client_select" required>
+              <option value="">Select Client</option>
+              {% for client in clients %}
+                  <option value="{{ client }}"  {% if client_name == client %}selected{% endif %}>
+                      {{ client }}
+                  </option>
+              {% endfor %}
+          </select>
+
+          <!-- Restaurant ID Dropdown (Initially Hidden) -->
+          <select name="restaurant_id" id="restaurant_select" required style="display:none;">
+              <option value="" >Select Restaurant</option>
+          </select>
+
+          <!-- Date Range Dropdown -->
+          <select name="date_range" id="date_range_select" required>
+              <option value="" >Select Date Range</option>
+          </select>
+
+          <br>
+          <button type="submit" class="btn btn-success">Apply Filters</button>
+      </form>
+  </div>
+
+  <h3>Reconciliation Highlights {{ report_data.selected_date_range}}</h3>
+
+    {% if report_data %}
+    {% comment %} <h3>Reconciliation Report</h3> {% endcomment %}
+    <h4>{{ report_data.client_name }}</h4>
+    <h4>Restaurant ID:{{ report_data.restaurant_id }}</h4>
+    <table border="1" class="reconciliation_report_table">
+        <thead>
+            <tr>
+                <th>Reconciliation Date</th> 
+                <th>Missing {{ report_data.aggregator }} Orders Count</th>
+                <th>Expected Payout</th>
+                <th>Actual Payout</th>
+                <th>Difference Amount</th>
+                <th>Reason for Difference</th>
+                <th>CPC Ads </th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ reconciliation_date }}</td> 
+                <td>{{ report_data.missing_orders_count }}</td>
+                <td>{{ report_data.expected_payout }}</td>
+                <td>{{ report_data.actual_payout }}</td>
+                {% if report_data.difference <= -1 %}
+                <td style="color:red;">{{ report_data.difference }}</td>
+                {% else %}
+                <td>{{ report_data.difference }}</td>
+                {% endif %}
+                {% if report_data.missing_orders and report_data.pending_orders  %}
+                <td><ul><li>Orders Missing</li><li>Wrong Taxes on Service Payment Fees Deducted</li></ul></td>
+                {% elif report_data.missing_orders  %}
+                <td><ul><li>Orders Missing</li></ul></td>
+                {% elif report_data.pending_orders  %}
+                <td><ul><li>Wrong Service Fee Deducted</li></ul></td>
+                {% else %}
+                <td>....</td>
+                {% endif %}
+                <td>{{ report_data.cpc_ads }}</td>
+                <td>{{ report_data.status }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <br>
+    <br>
+
+
+    <h3>Missing Orders After Reconciliation {{ report_data.selected_date_range}} </h3>
+<table border="1">
+    <tr>
+        <td><strong>Total Missing Orders: {{ report_data.missing_orders_count }} </strong>  <strong>Total Value:{{report_data.total_missing_order_sum}}</strong></td>
+        
+    </tr>
+</table>
+
+{% if report_data.missing_orders %}
+    <table border="1" class="pending-orders-table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Total Amount</th>
+                <th>FP Service Fee</th>
+                <th>FP Payment Mechanism Fee</th>
+                <th>FP Taxes on Service Payment Fees</th>
+                <th>FP Expected Payout</th>
+                <th>Status</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            {% for missing in report_data.missing_orders %}
+                <tr>
+                    <td>{{ missing.order_id }}</td>
+                    <td>{{ missing.order_date }}</td>
+                    <td>{{ missing.fp_total_amt }}</td>
+                    <td>{{ missing.fp_service_fee }}</td>
+                    <td>{{ missing.fp_payment_mechanism_fee }}</td>
+                    <td>{{ missing.fp_taxes_on_service_payment_fees }}</td>
+                    <td>{{ missing.fp_expected_payout }}</td>
+                    <td>{{ missing.fp_status_raw }}</td>
+
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+{% else %}
+    <p>No missing orders found.</p>
+{% endif %}
+
+<br>
+<br>
+<br>
+
+
+{% if report_data.pending_orders %}
+<h3>Detailed Reconciliation Report {{ report_data.selected_date_range}} </h3>
+{% if report_data.aggregator == "Zomato" %}
+<h5>Commission:{{report_data.client_commission.zomato_commission_percentage}}%</h5>
+{% elif report_data.aggregator == "Swiggy"  %}
+<h5>Commission:{{report_data.client_commission.swiggy_commission_percentage}}%</h5>
+{% endif %}
+
+{% if report_data.aggregator == "Zomato" %}
+<table border="1">
+    <tr>
+        <td><strong>Count of Pending Orders: {{ report_data.Pending_Orders_Count }}</strong>      <strong>Total Value:{{report_data.total_difference}}</strong></td>
+        
+    </tr>
+</table>
+<table border="1" class="pending-orders-table">
+  <thead>
+      <tr>
+          <th>Reconciliation_Order_ID</th>
+          <th>Order Date</th>
+          <th>Order Status</th>
+          <th>{{ report_data.aggregator }} Total Amount</th>
+          <th>FP Total Amount</th>
+          <th>{{ report_data.aggregator }} Service fee(Commission)</th>
+          <th style="color: green;">FP Service Fee(Commission)</th>
+          <th>{{ report_data.aggregator }} Payment mechanism fee</th>
+          <th style="color: green;">FP Payment Mechanism Fee</th>
+          <th>{{ report_data.aggregator }} Taxes on service payment mechanism fees</th>
+          <th style="color: green;">FP Taxes on Service Payment Fees</th>
+          <th>{{ report_data.aggregator }} Order Level Payout</th>
+          <th style="color: green;">FP Expected Payout</th>
+          <th>cancelation charge percentage</th>
+          <th style="color: red;">Pending Order Difference</th>
+          <th>Wrong Taxes on Service Payment Fees</th>
+          <th>Wrong Payment Mechanism Fee</th>
+          <th>Wrong Service Fee</th>
+          <th>Cancelled Order Amount Deducted Wrongly</th>
+          <th>TDS Issue</th>
+          <th> Wrong Discount Coupon Deducted</th>
+          <th> Wrong Packaging Charge</th>
+          <th> Wrong Deduction in Merchant Refound Approved by Client</th>
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
+          <th> Wrong Amount Setteled in Bank</th>
+          <th> Wrong CPC Ads Cost Deducted</th>
+          {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
+      </tr>
+  </thead>
+  <tbody>
+    {% for pending in report_data.pending_orders %}
+    {% if   pending.cancelled_order_amount_deducted_wrongly != "-"  %}
+        <tr style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+              <td>{{ pending.wrong_service_fee }}</td>
+
+            <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+           
+            <td>{{ pending.TDS_issue }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+    {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
+        <tr style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+              <td>{{ pending.wrong_service_fee }}</td>
+
+            <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+           
+            <td>{{ pending.TDS_issue }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+        </tr>
+        {% else %}
+        <tr style=" font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+              <td>{{ pending.wrong_service_fee }}</td>
+
+            <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+           
+            <td>{{ pending.TDS_issue }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+        </tr>
+        {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+{% elif report_data.aggregator == "Swiggy" %}
+<table border="1">
+    <tr>
+        <td><strong>Count of Pending Orders:</strong> {{ report_data.Pending_Orders_Count }}   <strong>Total Value:{{report_data.total_difference}}</strong></td>
+        
+    </tr>
+</table>
+<table border="1" class="pending-orders-table">
+  <thead>
+      <tr>
+          <th>Reconciliation_Order_ID</th>
+          <th>Order Date</th>
+          <th>Order Status</th>
+          <th>{{ report_data.aggregator }} Total Amount</th>
+          <th>FP Total Amount</th>
+          <th>{{ report_data.aggregator }} Service fee(Commission)</th>
+          <th style="color: green;">FP Service Fee(Commission)</th>
+          <th>{{ report_data.aggregator }} Payment mechanism fee</th>
+          <th style="color: green;">FP Payment Mechanism Fee</th>
+          <th>{{ report_data.aggregator }} Taxes on service payment mechanism fees</th>
+          <th style="color: green;">FP Taxes on Service Payment Fees</th>
+          <th>{{ report_data.aggregator }} Order Level Payout</th>
+          <th style="color: green;">FP Expected Payout</th>
+          <th>MFR Accurate</th>
+          <th>MFR Pressed</th>
+          <th>cancelation charge percentage</th>
+          <th style="color: red;">Pending Order Difference</th>
+          <th>Wrong Taxes on Service Payment Fees</th>
+          <th>Wrong Payment Mechanism Fee</th>
+          <th>Wrong Service Fee</th>
+          <th>Cancelled Order Amount Deducted Wrongly</th>
+          <th>TDS Issue</th>
+          <th> Wrong Discount Coupon Deducted</th>
+          <th> Wrong Packaging Charge</th>
+          <th> Wrong Deduction in Merchant Refound Approved by Client</th>
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
+          <th> Wrong Amount Setteled in Bank</th>
+          <th> Wrong CPC Ads Cost Deducted</th>
+          {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
+      </tr>
+  </thead>
+  <tbody>
+      {% for pending in report_data.pending_orders %}
+      {% if   pending.cancelled_order_amount_deducted_wrongly != "-"  %}
+          <tr style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                <td>{{ pending.wrong_service_fee }}</td>
+
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+             
+              <td>{{ pending.TDS_issue }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+          </tr>
+        
+      {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
+          <tr style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                <td>{{ pending.wrong_service_fee }}</td>
+
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+             
+              <td>{{ pending.TDS_issue }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+          </tr>
+          {% else %}
+          <tr style=" font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                <td>{{ pending.wrong_service_fee }}</td>
+
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+             
+              <td>{{ pending.TDS_issue }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+          </tr>
+          {% endif %}
+      {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% else %}
+    <p>No pending orders found.</p>
+
+   
+
+{% endif %}
+
+
+<br>
+
+
+ <button onclick="showEmailContent()" class="btn btn-warning">Dispute</button>
+
+
+ <div id="emailContentContainer" style="display: none; margin-top: 10px; border: 1px solid #ccc; padding: 15px;">
+  <label for="fromEmail">From:</label>
+  <input type="text" id="fromEmail" value="{{ report_data.client_email.email }}" disabled style="width: 100%; background: #f3f3f3; border: 1px solid #ccc; padding: 8px; border-radius: 5px;">
+
+    <h3>Edit Dispute Email</h3>
+
+    <label for="emailSubject">Email Subject:</label>
+    <input type="text" id="emailSubject" name="emailSubject" style="width: 100%;" placeholder="Enter email subject">
+
+    
+
+    <label for="ccEmails">CC Emails :</label>
+    <input type="text" id="ccEmails" style="width: 100%;" placeholder="Enter CC emails">
+
+    <!-- Input for Additional Emails -->
+    <label for="additionalEmails">Additional Emails (TO):</label>
+    <input type="text" id="additionalEmails" style="width: 100%;" placeholder="Enter additional emails">
+
+    <br><br>
+    <div contenteditable="true" id="emailContent" style="border: 1px solid #ddd; padding: 10px; min-height: 200px; background: #f9f9f9;"></div>
+    <br>
+    <button onclick="sendReconciliationEmail()" class="btn btn-primary">Send Report via Email</button>
+    <button onclick="closeDisputeSection()" class="btn btn-secondary">Cancel</button>
+
+</div> 
+
+
+
+{% comment %} <label for="ccEmails">CC Emails (comma-separated):</label>
+<input type="text" id="ccEmails" style="width: 100%;" placeholder="Enter CC emails">
+
+
+<label for="additionalEmails">Additional Emails (comma-separated):</label>
+<input type="text" id="additionalEmails" style="width: 100%;" placeholder="Enter additional emails">
+
+<br><br>
+<div contenteditable="true" id="emailContent" style="border: 1px solid #ddd; padding: 10px; min-height: 200px; background: #f9f9f9;"></div>
+<br>
+<button onclick="sendReconciliationEmail(this)" 
+        data-aggregator="{{ report_data.aggregator }}" 
+        data-restaurant-id="{{ report_data.restaurant_id }}" 
+        data-date-range="{{ report_data.selected_date_range }}" 
+        data-client-name="{{ report_data.client_name }}" 
+        class="btn btn-primary">Send Report via Email</button>
+<button onclick="closeDisputeSection()" class="btn btn-secondary">Cancel</button> {% endcomment %}
+
+
+
+{% endif %}
+
+
+            </div>
+            <!-- / Content -->
+
+          <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+          <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+          $(document).ready(function () {
+              // Show/Hide Forms Based on Aggregator Selection
+              $("#aggregatorSelect").change(function () {
+                  $(".form-container").hide();
+                  var selectedAggregator = $(this).val();
+                  $("#" + selectedAggregator + "Form").show();
+                  //alert(selectedAggregator)
+              });
+
+
+             
+
+              $("#id_client_name , #id_swiggy_client_name").change(function () {
+                let aggregator = $("#aggregatorSelect").val(); // Get selected aggregator
+                
+                let clientId = $(this).val(); // Get selected client name
+                //alert(clientId)
+                if (aggregator === "zomato") {
+                    //alert("Fetching Zomato restaurant IDs...");
+                    let $zomatoDropdown = $("#id_zomato_restaurant_id"); // Target Zomato dropdown
+                    
+                    // Reset dropdown
+                    $zomatoDropdown.empty().append('<option value="">Loading...</option>');
+            
+                    if (clientId) {
+                        $.ajax({
+                            url: "{% url 'get_restaurant_ids' %}",
+                            data: { client_id: clientId },
+                            success: function (data) {
+                                $zomatoDropdown.empty().append('<option value="">Select a restaurant</option>');
+            
+                                $.each(data.restaurants, function (index, value) {
+                                    $zomatoDropdown.append('<option value="' + value + '">' + value + '</option>');
+                                });
+                            },
+                            error: function () {
+                                $zomatoDropdown.empty().append('<option value="">Error loading restaurants</option>');
+                            }
+                        });
+                    } else {
+                        $zomatoDropdown.empty().append('<option value="">Select a restaurant</option>');
+                    }
+                } 
+                else if (aggregator === "swiggy") {
+                    //alert("Fetching Swiggy restaurant IDs...");
+                    let $swiggyDropdown = $("#id_swiggy_restaurant_id"); // Target Swiggy dropdown
+                    
+                    // Reset dropdown
+                    $swiggyDropdown.empty().append('<option value="">Loading...</option>');
+            
+                    if (clientId) {
+                        $.ajax({
+                            url: "{% url 'get_swiggy_restaurant_id' %}", // Django API for Swiggy
+                            data: { client_id: clientId },
+                            success: function (data) {
+                                $swiggyDropdown.empty().append('<option value="">Select a restaurant</option>');
+
+
+                                $.each(data.restaurants, function (index, value) {
+                                  $swiggyDropdown.append('<option value="' + value + '">' + value + '</option>');
+                              });
+
+                                
+                            },
+                            error: function () {
+                                $swiggyDropdown.empty().append('<option value="">Error loading restaurants</option>');
+                            }
+                        });
+                    } else {
+                        $swiggyDropdown.empty().append('<option value="">Select a restaurant</option>');
+                    }
+                }
+            });
+      
+
+              
+        
+            // Trigger when Client Name is selected
+            $("#id_client_name").change(function () {
+                let clientName = $(this).val();
+                updateRestaurantDropdown(clientName, "Zomato", "id_zomato_restaurant_id");
+                updateRestaurantDropdown(clientName, "Swiggy", "id_swiggy_restaurant_id");
+            });
+
+
+
+
+            $("#aggregator_select, #client_select").change(function() {
+              let aggregator = $("#aggregator_select").val();
+              let clientName = $("#client_select").val();
+          
+              if (aggregator === "Zomato" && clientName) {
+                  $("#restaurant_select").show();
+                  // Fetch restaurant IDs for the selected client (Zomato)
+                  $.ajax({
+                      url: "{% url 'get_restaurants_for_client' %}",
+                      data: { client_name: clientName },
+                      success: function(data) {
+                          let restaurantDropdown = $("#restaurant_select");
+                          restaurantDropdown.empty().append('<option value="">Select Restaurant</option>');
+          
+                          if (data.restaurants.length > 0) {
+                              restaurantDropdown.show();
+                              data.restaurants.forEach(function(restaurant) {
+                                  restaurantDropdown.append(`<option value="${restaurant.id}">${restaurant.name}</option>`);
+                              });
+                          } else {
+                              restaurantDropdown.hide();
+                          }
+                      },
+                      error: function(xhr, status, error) {
+                          console.log("Error fetching Zomato restaurant IDs:", error);
+                      }
+                  });
+              } 
+              else if (aggregator === "Swiggy" && clientName) {
+                //alert(aggregator)
+                  $("#restaurant_select").show();
+                  // Fetch restaurant IDs for the selected client (Swiggy)
+                  $.ajax({
+                      url: "{% url 'get_swiggy_restaurants_for_client' %}",
+                      data: { client_name: clientName },
+                      success: function(data) {
+                          let restaurantDropdown = $("#restaurant_select");
+                          restaurantDropdown.empty().append('<option value="">Select Restaurant</option>');
+          
+                          if (data.restaurants.length > 0) {
+                              restaurantDropdown.show();
+                              data.restaurants.forEach(function(restaurant) {
+                                  restaurantDropdown.append(`<option value="${restaurant.id}">${restaurant.name}</option>`);
+                              });
+                          } else {
+                              restaurantDropdown.hide();
+                          }
+                      },
+                      error: function(xhr, status, error) {
+                          console.log("Error fetching Swiggy restaurant IDs:", error);
+                      }
+                  });
+              } 
+              else {
+                  $("#restaurant_select").hide().empty().append('<option value="">Select Restaurant</option>');
+              }
+          });
+          
+          // Fetch dates when a restaurant is selected
+          $("#restaurant_select").change(function() {
+              let restaurantId = $(this).val();
+              let aggregator = $("#aggregator_select").val();
+          
+              if (restaurantId && aggregator === "Zomato") {
+                  $.ajax({
+                      url: "{% url 'get_dates_for_restaurant' %}",
+                      data: { restaurant_id: restaurantId },
+                      success: function(data) {
+                          let dateRangeDropdown = $("#date_range_select");
+                          dateRangeDropdown.empty().append('<option value="">Select Date Range</option>');
+          
+                          data.dates.forEach(function(dateRange) {
+                              dateRangeDropdown.append(`<option value="${dateRange}">${dateRange}</option>`);
+                          });
+                      }
+                  });
+              } 
+              else if (restaurantId && aggregator === "Swiggy") {
+                  $.ajax({
+                      url: "{% url 'get_swiggy_dates_for_restaurant' %}",
+                      data: { restaurant_id: restaurantId },
+                      success: function(data) {
+                          let dateRangeDropdown = $("#date_range_select");
+                          dateRangeDropdown.empty().append('<option value="">Select Date Range</option>');
+          
+                          data.dates.forEach(function(dateRange) {
+                              dateRangeDropdown.append(`<option value="${dateRange}">${dateRange}</option>`);
+                          });
+                      }
+                  });
+              }
+          });
+
+
+
+
+
+            
+          document.addEventListener("DOMContentLoaded", function () {
+            // Restore previous values
+            document.querySelectorAll("select").forEach(select => {
+                let savedValue = localStorage.getItem(select.name);
+                if (savedValue) {
+                    select.value = savedValue;
+                }
+            });
+    
+            // Save values when form is submitted
+            document.querySelector("form").addEventListener("submit", function () {
+                document.querySelectorAll("select").forEach(select => {
+                    localStorage.setItem(select.name, select.value);
+                });
+            });
+        });
+
+
+              function getCSRFToken() {
+                return document.querySelector("[name=csrfmiddlewaretoken]").value;
+            }
+
+
+              // Handle File Upload Form Submission
+             
+
+
+
+              $(".form-container form").on("submit", function (event) {
+                event.preventDefault(); // Stop default form submission
+            
+                let formData = new FormData(this);
+                let url = this.action; // Get the form action URL
+            
+                $.ajax({
+                    url: url,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log("Server Response:", data); // Debugging log
+            
+                        // Check if `missing_columns` and `newly_added_columns` exist before using `.length`
+                        let missing = (data.missing_columns && Array.isArray(data.missing_columns)) 
+                                      ? data.missing_columns.join(", ") 
+                                      : "N/A"; // Default value if missing
+            
+                        let added = (data.newly_added_columns && Array.isArray(data.newly_added_columns)) 
+                                    ? data.newly_added_columns.join(", ") 
+                                    : "N/A"; // Default value if missing
+            
+                        Swal.fire({
+                            title: "Upload Successful!",
+                            html: `<b style="color:green;">✅ Newly Added Columns:</b> ${added}<br>
+                                   <b style="color:red;">❌ Missing Columns:</b> ${missing}`,
+                            icon: "success"
+                        }).then(() => {
+                            location.reload(); // Refresh the page after user clicks "OK"
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.log("AJAX Error:", xhr.responseText); // Debugging log
+            
+                        Swal.fire({
+                            title: "Error",
+                            text: "Something went wrong! Please try again.",
+                            icon: "error"
+                        });
+                    }
+                });
+            });
+              
+          });
+
+          
+
+          //Send Email
+
+          function showEmailContent() {
+            let defaultSubject = `Issues With {{ report_data.aggregator }} Payout from {{ report_data.selected_date_range }} - {{ report_data.restaurant_id }} ({{report_data.client_name}})`;
+
+            document.getElementById("emailSubject").value = defaultSubject; // Pre-fill subject
+            let reportData = `
+            <h3>Reconciliation Report - {{ report_data.selected_date_range }}</h3>
+            <p>Dear Sir/Madam,</p>
+            <p>Please find the reconciliation report below and resolve the concern ASAP</p>
+        
+            <h3>Overall Payout Reconciliation Summary</h3>
+            <table border="1" width="100%" style="border-collapse: collapse; text-align: center;" >
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">Reconciliation Date</th>
+                        <th style="text-align: center;">Missing {{ report_data.aggregator }} Orders Count</th>
+                        <th style="text-align: center;">Expected Payout</th>
+                        <th style="text-align: center;">Actual Payout</th>
+                        <th style="text-align: center;">Difference Amount</th>
+                        <th style="text-align: center;">Reason for Difference</th>
+                        <th style="text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ reconciliation_date }}</td>
+                        <td>{{ report_data.missing_orders_count }}</td>
+                        <td>{{ report_data.expected_payout }}</td>
+                        <td>{{ report_data.actual_payout }}</td>
+                        {% if report_data.difference %}{% endif %}
+                        <td style="color:red; font-weight: bold;">{{ report_data.difference }}</td>
+                        {% if report_data.missing_orders and report_data.pending_orders  %}
+                        <td>Orders Missing,Wrong Taxes on Service Payment Fees Deducted</td>
+                        {% elif report_data.missing_orders  %}
+                        <td>Orders Missing</td>
+                        {% elif report_data.pending_orders  %}
+                        <td>Wrong Service Fee Deducted</td>
+                        {% else %}
+                        <td>....</td>
+                        {% endif %}
+                        <td>{{ report_data.status }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        
+            
+            {% if report_data.missing_orders %}
+            <h3>1. Missing Orders</h3>
+            <table border="1" width="100%" style="border-collapse: collapse; text-align: center;">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">Order ID</th>
+                        <th style="text-align: center;">Order Date</th>
+                        <th style="text-align: center;">Total Amount</th>
+                        <th style="text-align: center;">FP Service Fee</th>
+                        <th style="text-align: center;">FP Expected Payout</th>
+                        <th style="text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for missing in report_data.missing_orders %}
+                        <tr>
+                            <td>{{ missing.order_id }}</td>
+                            <td>{{ missing.order_date }}</td>
+                            <td>{{ missing.fp_total_amt }}</td>
+                            <td>{{ missing.fp_service_fee }}</td>
+                            <td>{{ missing.fp_expected_payout }}</td>
+                            <td>{{ missing.fp_status_raw }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+
+            {% endif %}
+        
+            
+            {% if report_data.pending_orders %}
+            {% if report_data.missing_orders %}
+            <h3>2. Pending Orders</h3>
+            {% else %}
+            <h3>1. Pending Orders</h3>
+            {% endif %}
+            <table border="1" width="100%" style="border-collapse: collapse; ">
+                <thead>
+                    <tr>
+                        <th style="text-align: center;">Order ID</th>
+                        <th style="text-align: center;">Order Date</th>
+                        <th style="text-align: center;">Difference Amount</th>
+                        <th style="text-align: center;">Issues</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in report_data.pending_orders %}
+                        <tr>
+                            <td>{{ order.order_id }}</td>
+                            <td>{{ order.fp_order_date }}</td>
+                            <td>₹{{ order.pending_order_difference }}</td>
+                            <td>
+                                {% if order.wrong_taxes_on_service_payment_fees != "-" %} Taxes Issue: {{ order.wrong_taxes_on_service_payment_fees }} <br> {% endif %}
+                                {% if order.wrong_payment_mechanism_fee != "-" %} Payment Mechanism Fee Issue: {{ order.wrong_payment_mechanism_fee }} <br> {% endif %}
+                                {% if order.wrong_service_fee != "-" %} Service Fee Issue: {{ order.wrong_service_fee }} <br> {% endif %}
+                                {% if order.cancelled_order_amount_deducted_wrongly != "-" %} Cancelled Order Issue: {{ order.cancelled_order_amount_deducted_wrongly }} <br> {% endif %}
+                                {% if order.TDS_issue != "-" %} TDS Issue: {{ order.TDS_issue }} {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No pending orders.</p>
+            {% endif %}
+
+            <br>
+            <br>
+
+            {% if report_data.missing_orders %}
+           <h4><strong>Total Missing Orders: {{ report_data.missing_orders_count }} </strong> <strong>Total Value:{{report_data.total_missing_order_sum}}</strong></h4>
+             
+            {% endif %}
+
+            <br>
+            <br>
+
+            {% if report_data.pending_orders %}
+           <h4><strong>Count of Pending Orders:</strong> {{ report_data.Pending_Orders_Count }}   <strong>Total Value:{{report_data.total_difference}}</strong></h4>
+
+{% if report_data.missing_orders and report_data.pending_orders %}
+<h3>Overall Difference (1+2) : <strong>{{ report_data.difference }}</strong></h3>
+
+{% elif report_data.missing_orders %}
+<h3>Overall Difference  : <strong>{{ report_data.difference }}</strong></h3>
+
+{% elif  report_data.pending_orders %}
+<h3>Overall Difference  : <strong>{{ report_data.difference }}</strong></h3>
+
+{% endif %}      
+            {% endif %}
+        
+            <p>Regards,</p>
+            <p>{{ report_data.client_name }}</p>
+            `;
+        
+            document.getElementById("emailContent").innerHTML = reportData;
+            document.getElementById("emailContentContainer").style.display = "block"; // Show content below the button
+        }
+        function closeDisputeSection() {
+          document.getElementById("emailContentContainer").style.display = "none";
+      }
+      
+
+      function sendReconciliationEmail() {
+        let emailBody = document.getElementById("emailContent").innerHTML;
+        let email_Subject = document.getElementById("emailSubject").value.trim();
+        let ccEmails = document.getElementById("ccEmails").value.trim();
+        let additionalEmails = document.getElementById("additionalEmails").value.trim();
+        
+        console.log(emailSubject,"emailSubject")
+    
+        fetch("{% url 'send_reconciliation_email' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                aggregator: "{{ report_data.aggregator }}",
+                restaurant_id: "{{ report_data.restaurant_id }}",
+                selected_date_range: "{{ report_data.selected_date_range }}",
+                client_name: "{{ report_data.client_name }}",
+                email_body: emailBody,
+                email_subject: email_Subject,
+                cc_emails: ccEmails,
+                additional_emails:additionalEmails
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            swal.fire({
+                title: "Success!",
+                text: data.message,
+                icon: "success",
+                button: "OK",
+            }).then(() => {
+                document.getElementById("emailContentContainer").style.display = "none"; // Hide after confirmation
+            });
+        })
+        .catch(error => {
+            console.error("Error sending email:", error);
+            swal.fire({
+                title: "Error!",
+                text: "Failed to send email. Please try again.",
+                icon: "error",
+                button: "OK",
+            });
+        });
+    }
+
+
+
+        
+  </script>
+
+            <!-- Footer -->
+            <footer class="content-footer footer bg-footer-theme">
+              <div class="container-xxl">
+                <div
+                  class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                  <div class="text-body">
+                    ©
+                    <script>
+                      document.write(new Date().getFullYear());
+                    </script>
+                    <!-- , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a> -->
+                  </div>
+                  
+                </div>
+              </div>
+            </footer>
+            <!-- / Footer -->
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <!-- <div class="layout-overlay layout-menu-toggle"></div> -->
+
+      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+      <!-- <div class="drag-target"></div>
+    </div> -->
+    <!-- / Layout wrapper -->
+
+    <!-- Core JS -->
+    <!-- build:js static/vendor/js/theme.js -->
+
+    <script src="../../static/vendor/libs/jquery/jquery.js"></script>
+
+    <script src="../../static/vendor/libs/popper/popper.js"></script>
+    <script src="../../static/vendor/js/bootstrap.js"></script>
+    <script src="../../static/vendor/libs/node-waves/node-waves.js"></script>
+
+    <script src="../../static/vendor/libs/@algolia/autocomplete-js.js"></script>
+
+    <script src="../../static/vendor/libs/pickr/pickr.js"></script>
+
+    <script src="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+    <script src="../../static/vendor/libs/hammer/hammer.js"></script>
+
+    <script src="../../static/vendor/js/menu.js"></script>
+
+    <!-- endbuild -->
+
+    <!-- Vendors JS -->
+
+    <!-- Main JS -->
+
+    <script src="../../static/js/main.js"></script>
+
+    <!-- Page JS -->
+  </body>
+</html>

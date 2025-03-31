@@ -1,0 +1,508 @@
+{% load static %}
+<!doctype html>
+
+<html
+  lang="en"
+  class="layout-navbar-fixed layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-skin="default"
+  data-static-path="../../static/"
+  data-template="vertical-menu-template-starter"
+  data-bs-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>Demo: FlyerPay</title>
+
+    <meta name="description" content="" />
+    <!-- Bootstrap icon cdn -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../../static/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+      rel="stylesheet" />
+
+    <link rel="stylesheet" href="../../static/vendor/fonts/iconify-icons.css" />
+
+    <!-- Core CSS -->
+    <!-- build:css static/vendor/css/theme.css  -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/node-waves/node-waves.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/libs/pickr/pickr-themes.css" />
+
+    <link rel="stylesheet" href="../../static/vendor/css/core.css" />
+    <link rel="stylesheet" href="../../static/css/demo.css" />
+
+    <!-- Vendors CSS -->
+
+    <link rel="stylesheet" href="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+
+    <!-- endbuild -->
+
+    <!-- Page CSS -->
+
+    <!-- Helpers -->
+    <script src="../../static/vendor/js/helpers.js"></script>
+    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
+
+    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
+    <script src="../../static/vendor/js/template-customizer.js"></script>
+
+    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
+
+    <script src="../../static/js/config.js"></script>
+  </head>
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+    }
+    .container {
+        display: flex;
+        justify-content: space-between;
+        max-width: 600px;
+        margin: auto;
+    }
+    .box {
+        width: 45%;
+        padding: 20px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+    }
+    .btn-container {
+        margin-top: 20px;
+    }
+    .btn {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+    .btn-success {
+        background-color: #28a745;
+        color: white;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    table {
+        width: 80%;
+        margin: 20px auto;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #f4f4f4;
+    }
+    .filter-container {
+        margin: 20px auto;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+    #aggregator_table th{
+      text-align: center; /* Center the column header */
+    }
+
+    
+    #aggregator_table td {
+        text-align: center; /* Align data properly */
+        padding: 5px 10px; /* Adjust padding for better readability */
+    }
+</style>
+
+  <body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+      <div class="layout-container">
+        <!-- Menu -->
+
+        <aside id="layout-menu" class="layout-menu menu-vertical menu">
+          <div class="app-brand demo">
+            <a href="{% url 'home_page' %}" class="app-brand-link">
+              <span class="app-brand-logo demo">
+                <span class="text-primary">
+                  {% comment %} <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
+                      fill="currentColor" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
+                      fill="#161616" />
+                    <path
+                      opacity="0.06"
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
+                      fill="#161616" />
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
+                      fill="currentColor" />
+                  </svg> {% endcomment %}
+                </span>
+              </span>
+              <span class="app-brand-text demo menu-text fw-bold ms-3"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" style="height: 70px; width:70px; margin-top:10px;  margin-right: 10px;"></span>
+            </a>
+
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
+              <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
+              <i class="icon-base ti tabler-x d-block d-xl-none"></i>
+            </a>
+          </div>
+
+          <div class="menu-inner-shadow"></div>
+
+          <ul class="menu-inner py-1">
+            <!-- Page -->
+            <li class="menu-item ">
+              <a href="{% url 'home_page' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-smart-home"></i>
+                <div data-i18n="Page 1">Home</div>
+              </a>
+            </li>
+            <li class="menu-item">
+              <a href="{% url 'client_details_view' %}" class="menu-link">
+                <i class="menu-icon icon-base ti tabler-app-window"></i>
+                <div data-i18n="Page 2">Merchant Onboarding</div>
+              </a>
+            </li>
+            <li class="menu-item ">
+                <a href="{% url 'upload_excel' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Payout Reconciliation Process</div>
+                </a>
+              </li>
+            <li class="menu-item">
+                <a href="{% url 'membership_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Membership</div>
+                </a>
+              </li>
+            <li class="menu-item active">
+                <a href="{% url 'aggregator_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Aggregator</div>
+                </a>
+              </li>
+          </ul>
+        </aside>
+
+        <div class="menu-mobile-toggler d-xl-none rounded-1">
+          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-secondary p-2 rounded-1">
+            <i class="ti tabler-menu icon-base"></i>
+            <i class="ti tabler-chevron-right icon-base"></i>
+          </a>
+        </div>
+        <!-- / Menu -->
+
+        <!-- Layout container -->
+        <div class="layout-page">
+          <!-- Navbar -->
+          <nav
+          class="layout-navbar container-xxl  navbar navbar-expand-xl align-items-center "
+          id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <!-- <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+              <i class="icon-base ti tabler-menu-2 icon-md"></i>
+            </a> -->
+          </div>
+
+          
+        </nav>
+
+       
+          <!-- / Navbar -->
+
+          <!-- Content wrapper -->
+          <div class="content-wrapper">
+            <!-- Content -->
+            <h2>Aggregator Management</h2>
+
+            <!-- Add Aggregator Button -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button id="showFormBtn" class="btn btn-success">Add Aggregator</button>
+            </div>
+            
+            
+            <!-- Aggregator Form (Initially Hidden) -->
+            
+            
+            <!-- Aggregator Table -->
+            <table class="table table-bordered" id="aggregator_table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Payment Frequency</th>
+                        <th>Payment Mechanism Fee</th>
+                        <th>Payment Mechanism Fee Online</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for aggregator in aggregators %}
+                    <tr>
+                        <td>{{ aggregator.name }}</td>
+                        <td>{{ aggregator.email }}</td>
+                        <td>{{ aggregator.get_payment_frequency_display }}</td>
+                        <td>{{ aggregator.payment_mechanism_fee }}</td>
+                        <td>{{ aggregator.payment_mechanism_fee_online }}</td>
+                        <td>
+                            <button class="btn btn-warning btn-sm edit-btn" 
+                                    data-id="{{ aggregator.pk }}"
+                                    data-name="{{ aggregator.name }}"
+                                    data-email="{{ aggregator.email }}"
+                                    data-payment_frequency="{{ aggregator.payment_frequency }}">
+                                    <i class="bi bi-pencil-square"></i>
+                            </button>
+                            <a href="#" class="btn btn-danger btn-sm delete-btn" data-id="{{ aggregator.pk }}">
+                                <i class="bi bi-trash3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No Aggregators Found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div id="aggregatorFormContainer" style="display: none;">
+                <form id="aggregatorForm" method="post" class="mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" id="aggregator_id" name="aggregator_id">
+                    <div class="row">
+                        <div class="col-md-3">{{ form.name.label_tag }} {{ form.name }}</div>
+                        <div class="col-md-3">{{ form.email.label_tag }} {{ form.email }}</div>
+                        <div class="col-md-3">{{ form.payment_mechanism_fee.label_tag }} {{ form.payment_mechanism_fee }}</div>
+                        <div class="col-md-3">{{ form.payment_mechanism_fee_online.label_tag }} {{ form.payment_mechanism_fee_online }}</div>
+                        <div class="col-md-3">{{ form.payment_frequency.label_tag }} {{ form.payment_frequency }}</div>
+                        <div>
+                            <button type="submit" class="btn btn-success" id="submitBtn">Submit</button>
+                            <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <!-- / Content -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+                <script>
+                    $(document).ready(function () {
+        console.log("Aggregator script loaded!");
+
+        function getCSRFToken() {
+            return document.querySelector("[name=csrfmiddlewaretoken]").value;
+        }
+
+        // Show Add Aggregator Form
+        $("#showFormBtn").click(function () {
+            $("#aggregatorForm")[0].reset();
+            $("#aggregator_id").val("");  
+            $("#submitBtn").text("Add Aggregator"); 
+            $("#aggregatorFormContainer").css("display", "block");
+        });
+
+        // Hide form when clicking cancel
+        $("#cancelBtn").click(function () {
+            $("#aggregatorFormContainer").hide();
+        });
+
+        // Handle Add / Edit Form Submission
+        $("#aggregatorForm").submit(function (e) {
+            e.preventDefault(); 
+
+            let aggregatorId = $("#aggregator_id").val();
+            let url = aggregatorId ? `/aggregators/edit/${aggregatorId}/` : "/aggregators/add/";
+            let formData = $(this).serialize();
+            formData += "&csrfmiddlewaretoken=" + getCSRFToken();
+
+            console.log("Submitting to:", url, formData);  
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: formData,
+                dataType: "json",
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Success!",
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function (xhr) {
+                    let errors = xhr.responseJSON.errors;
+                    let errorMessage = Object.values(errors).map(msg => msg.join(" ")).join("\n");
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Validation Error",
+                        text: errorMessage
+                    });
+                }
+            });
+        });
+
+        // Edit Aggregator - Prefill form
+        $(document).on("click", ".edit-btn", function () {
+            let aggregatorId = $(this).data("id");
+
+            $.get(`/aggregators/edit/${aggregatorId}/`, function (data) {
+                console.log("Editing:", data);
+
+                $("#aggregator_id").val(aggregatorId);
+                $("#id_name").val(data.name);
+                $("#id_email").val(data.email);
+                $("#id_payment_frequency").val(data.payment_frequency);
+                $("#id_payment_mechanism_fee").val(data.payment_mechanism_fee);
+                $("#id_payment_mechanism_fee_online").val(data.payment_mechanism_fee_online);
+                $("#submitBtn").text("Update Aggregator");
+                $("#aggregatorFormContainer").show();
+            }).fail(function () {
+                alert("Error fetching aggregator details.");
+            });
+        });
+
+        // Delete Aggregator
+        $(document).on("click", ".delete-btn", function () {
+    let aggregatorId = $(this).data("id");  // Get ID from button
+
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This aggregator will be permanently deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: `/aggregators/delete/${aggregatorId}/`,
+                data: { csrfmiddlewaretoken: getCSRFToken() },  // Send CSRF token
+                dataType: "json",
+                success: function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Deleted!",
+                        text: response.message,
+                        timer: 2000
+                    }).then(() => {
+                        // $("#row-" + aggregatorId).remove(); // Remove row from table
+                        location.reload(); 
+                    });
+                },
+                error: function () {
+                    Swal.fire("Error!", "Failed to delete aggregator.", "error");
+                }
+            });
+        }
+    });
+});
+
+// Function to get CSRF Token
+function getCSRFToken() {
+    return document.querySelector("[name=csrfmiddlewaretoken]").value;
+}
+
+
+    });
+
+                </script>
+            <!-- Footer -->
+            <footer class="content-footer footer bg-footer-theme">
+              <div class="container-xxl">
+                <div
+                  class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
+                  <div class="text-body">
+                    ©
+                    <script>
+                      document.write(new Date().getFullYear());
+                    </script>
+                    <!-- , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a> -->
+                  </div>
+                  
+                </div>
+              </div>
+            </footer>
+            <!-- / Footer -->
+
+            <div class="content-backdrop fade"></div>
+          </div>
+          <!-- Content wrapper -->
+        </div>
+        <!-- / Layout page -->
+      </div>
+
+      <!-- Overlay -->
+      <div class="layout-overlay layout-menu-toggle"></div>
+
+      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+      <div class="drag-target"></div>
+    </div>
+    <!-- / Layout wrapper -->
+
+    <!-- Core JS -->
+    <!-- build:js static/vendor/js/theme.js -->
+
+    <script src="../../static/vendor/libs/jquery/jquery.js"></script>
+
+    <script src="../../static/vendor/libs/popper/popper.js"></script>
+    <script src="../../static/vendor/js/bootstrap.js"></script>
+    <script src="../../static/vendor/libs/node-waves/node-waves.js"></script>
+
+    <script src="../../static/vendor/libs/@algolia/autocomplete-js.js"></script>
+
+    <script src="../../static/vendor/libs/pickr/pickr.js"></script>
+
+    <script src="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+    <script src="../../static/vendor/libs/hammer/hammer.js"></script>
+
+    <script src="../../static/vendor/js/menu.js"></script>
+
+    <!-- endbuild -->
+
+    <!-- Vendors JS -->
+
+    <!-- Main JS -->
+
+    <script src="../../static/js/main.js"></script>
+
+    <!-- Page JS -->
+  </body>
+</html>
