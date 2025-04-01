@@ -43,7 +43,7 @@ def client_details_view(request):
         form = ClientDetailsForm(request.POST)
         if form.is_valid():
             client = form.save(commit=False)
-            client.created_date = now()
+            # client.created_date = now()
             client.updated_date = now()
             client.save()
             form.save_m2m()  # Save ManyToMany relationships

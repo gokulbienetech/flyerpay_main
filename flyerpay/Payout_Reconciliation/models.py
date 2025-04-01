@@ -224,7 +224,7 @@ class ClientDetails(models.Model):
     fp_username = models.CharField(max_length=20)
     fp_password = models.CharField(max_length=10)
 
-    create_date = models.DateTimeField(null=True)  # Automatically set when created
+    # create_date = models.DateTimeField(null=True)  # Automatically set when created
     updated_date = models.DateTimeField(null=True) # Automatically update when modified
     delflag = models.IntegerField(default=1)  # 1 = Active, 0 = Deleted (soft delete)
     postel_code = models.CharField(max_length=20)
