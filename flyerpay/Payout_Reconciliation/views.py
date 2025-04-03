@@ -201,7 +201,7 @@ def send_reconciliation_email(request):
             recipient_emails.extend([email.strip() for email in additional_emails if email.strip()])  # Add additional emails
             if not recipient_emails:
                 return JsonResponse({"message": "No recipient emails found!"}, status=400)
-
+            
             # email_subject = f"Issue in {aggregator} Payout for {selected_date_range} - {restaurant_id}"
 
             # Check if client has custom SMTP settings
@@ -228,6 +228,7 @@ def send_reconciliation_email(request):
             )
             email.content_subtype = "html"  # Set email format to HTML
             email.send()
+            print("recipient_emails:",recipient_emails)
 
             return JsonResponse({"message": "Email sent successfully!"})
 
@@ -296,11 +297,12 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
         cursor.nextset()
         pending_orders = []
         pending_order = []
+        total_issue_code = set()
         pending_orders_result = cursor.fetchall()
         if aggregator == "Zomato":
             for row in pending_orders_result:
                 issue_codes = row[16].split(',') if row[16] else []
-
+                total_issue_code.update(issue_codes)
                 pending_orders.append({
             "order_id": row[0],
             "fp_expected_payout": row[1],
@@ -325,15 +327,19 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "fp_status": row[10],
             "fp_total_amt": row[11],
             "zo_total_amt": row[12],
-            "zo_TDS": row[13]
+            "zo_TDS": row[13],
+            "issue":len(issue_codes)
         })
             pending_orders.append(pending_order)
-            print(pending_order,"pending_order555")
-
+            print(pending_orders,"pending_order555")
+        
         elif aggregator == "Swiggy":
+            
             for row in pending_orders_result:
                 issue_codes = row[18].split(',') if row[18] else []
                 print(issue_codes,"issue_codes",row[18])
+                total_issue_code.update(issue_codes)
+                
 
                 pending_orders.append( {
             "order_id": row[0],
@@ -361,10 +367,13 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "zo_total_amt": row[12],
             "zo_TDS": row[13],
             "mfr_accurate": row[14],  # column index 14 is `mfr_accurate`
-            "mfr_pressed": row[15]    # column index 15 is `mfr_pressed`
+            "mfr_pressed": row[15],    # column index 15 is `mfr_pressed`
+            "issue":len(issue_codes),
+            
         })
 
         pending_orders.append(pending_order)
+        print(pending_orders,"pending orders555")
         # print(pending_orders,"pending_orders6666")
         # for i in pending_orders:
         #     print(i["order_id"],i["issue_codes"])
@@ -417,7 +426,8 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
         "client_email":client_email,
         "cpc_ads" : (cpc_ads["cpc_value"] if cpc_ads and cpc_ads["cpc_value"] else 0),
         "total_difference":total_difference,
-        "total_missing_order_sum":total_missing_order_sum,     
+        "total_missing_order_sum":total_missing_order_sum,    
+        "total_issue_code":sorted(list(total_issue_code) )
         
     }
 
@@ -430,6 +440,7 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
 
     # print("Session Data Stored:", json.dumps(request.session.get("report_data"), indent=2))
     print(report_data["expected_payout"],"expected_payout5555666",report_data["cpc_ads"],"cpc_ads")
+    print("total_issue_code",report_data["total_issue_code"])
 
     return report_data
 

@@ -118,6 +118,27 @@
         justify-content: center;
         gap: 10px;
     }
+    #aggregator_select{
+        margin-bottom:5px;
+        height:20px;
+        width: 50%;
+        
+    }
+    #client_select{
+        margin-bottom:5px;
+        height:20px;
+        width: 50%;
+    }
+    #restaurant_select{
+        margin-bottom:5px;
+        height:20px;
+        width: 50%;
+    }
+    #date_range_select{
+        margin-bottom:5px;
+        height:20px;
+        width: 50%;
+    }
 
     select, input {
             width: 100%;
@@ -195,9 +216,9 @@
           padding: 5px 10px; /* Adjust padding for better readability */
       }
     
-      .modal { display: none; position: fixed; top: 20%; left: 30%; background: white; padding: 20px; border: 1px solid black; box-shadow: 5px 5px 10px gray; }
+      {% comment %} .modal { display: none; position: fixed; top: 20%; left: 30%; background: white; padding: 20px; border: 1px solid black; box-shadow: 5px 5px 10px gray; }
       .modal-content { position: relative; padding: 10px; }
-      .close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; }
+      .close { position: absolute; top: 5px; right: 10px; cursor: pointer; font-size: 20px; } {% endcomment %}
 
 </style>
 
@@ -520,11 +541,19 @@
 
 {% if report_data.aggregator == "Zomato" %}
 <table border="1">
+     <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
+        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
+        <button style="width: 20px; height: 20px; background-color: Black; border-radius: 50%; border: none; cursor: pointer;" onclick="show_all()"></button><div style="color: black; font-weight: bold;" >All</div>
+    </div>
     <tr>
         <td><strong>Count of Pending Orders: {{ report_data.Pending_Orders_Count }}</strong>      <strong>Total Value:{{report_data.total_difference}}</strong></td>
         
     </tr>
 </table>
+
 <table border="1" class="pending-orders-table">
   <thead>
       <tr>
@@ -548,19 +577,20 @@
           <th>Wrong Service Fee</th>
           <th>Cancelled Order Amount Deducted Wrongly</th>
           <th>TDS Issue</th>
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
           <th> Wrong Discount Coupon Deducted</th>
           <th> Wrong Packaging Charge</th>
           <th> Wrong Deduction in Merchant Refound Approved by Client</th>
-          <th> Wrong penalty Charges Imposed for Order Rejection</th>
+          
           <th> Wrong Amount Setteled in Bank</th>
-          <th> Wrong CPC Ads Cost Deducted</th>
+          {% comment %} <th> Wrong CPC Ads Cost Deducted</th> {% endcomment %}
           {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
       </tr>
   </thead>
   <tbody>
     {% for pending in report_data.pending_orders %}
     {% if   pending.cancelled_order_amount_deducted_wrongly != "-"  %}
-        <tr style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+        <tr id="cancelled" style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
         padding: 8px;
         border-radius: 5px;
         color: black; font-weight: bold;">
@@ -591,15 +621,58 @@
             <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
            
             <td>{{ pending.TDS_issue }}</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
             <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            
+            <td>{{ pending. }}-</td>
+            {% comment %} <td>{{ pending. }}-</td> {% endcomment %}
+            
+            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+            {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
+            {% elif pending.issue > 1 %}
+            <tr id="two_or_more_issues" style="background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+              <td>{{ pending.wrong_service_fee }}</td>
+
+            <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+           
+            <td>{{ pending.TDS_issue }}</td>
+            <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            
             <td>{{ pending. }}-</td>
             <td>{{ pending. }}-</td>
             {% comment %} <td>{{ pending. }}</td> {% endcomment %}
     {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
-        <tr style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+        <tr id="single_issue" style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
         padding: 8px;
         border-radius: 5px;
         color: black; font-weight: bold;">
@@ -630,16 +703,17 @@
             <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
            
             <td>{{ pending.TDS_issue }}</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
             <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            
             <td>{{ pending. }}-</td>
             <td>{{ pending. }}-</td>
             {% comment %} <td>{{ pending. }}</td> {% endcomment %}
         </tr>
         {% else %}
-        <tr style=" font-weight: bold;">
+        <tr  style=" font-weight: bold;">
             <td>{{ pending.order_id }}</td>
             <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
             <td>{{ pending.fp_status }}</td>
@@ -667,10 +741,11 @@
             <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
            
             <td>{{ pending.TDS_issue }}</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
             <td>{{ pending.Wrong_penalty }}</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            <td>{{ pending. }}-</td>
+            
             <td>{{ pending. }}-</td>
             <td>{{ pending. }}-</td>
             {% comment %} <td>{{ pending. }}</td> {% endcomment %}
@@ -680,7 +755,16 @@
   </tbody>
 </table>
 {% elif report_data.aggregator == "Swiggy" %}
+
+
 <table border="1">
+    <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
+        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
+        <button style="width: 20px; height: 20px; background-color: Black; border-radius: 50%; border: none; cursor: pointer;" onclick="show_all()"></button><div style="color: black; font-weight: bold;" >All</div>
+    </div>
     <tr>
         <td><strong>Count of Pending Orders:</strong> {{ report_data.Pending_Orders_Count }}   <strong>Total Value:{{report_data.total_difference}}</strong></td>
         
@@ -711,10 +795,10 @@
           <th>Wrong Service Fee</th>
           <th>Cancelled Order Amount Deducted Wrongly</th>
           <th>TDS Issue</th>
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
           <th> Wrong Discount Coupon Deducted</th>
           <th> Wrong Packaging Charge</th>
           <th> Wrong Deduction in Merchant Refound Approved by Client</th>
-          <th> Wrong penalty Charges Imposed for Order Rejection</th>
           <th> Wrong Amount Setteled in Bank</th>
           <th> Wrong CPC Ads Cost Deducted</th>
           {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
@@ -722,8 +806,8 @@
   </thead>
   <tbody>
       {% for pending in report_data.pending_orders %}
-      {% if   pending.cancelled_order_amount_deducted_wrongly != "-"  %}
-          <tr style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+      {% if  pending.cancelled_order_amount_deducted_wrongly != "-"  %}
+          <tr  id="cancelled"  style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
           padding: 8px;
           border-radius: 5px;
           color: black; font-weight: bold;">
@@ -756,17 +840,62 @@
               <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
              
               <td>{{ pending.TDS_issue }}</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
               <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              
+              <td>{{ pending. }}-</td>
+              <td>{{ pending.}}-</td>
+              {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+          </tr>
+          {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"    or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.wrong_service_fee != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.TDS_issue != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.Wrong_penalty != "-"  or pending.wrong_service_fee != "-" and pending.TDS_issue != "-" or pending.wrong_service_fee != "-" and pending.Wrong_penalty != "-" or pending.TDS_issue != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
+          {% elif pending.issue > 1 %}
+          <tr id="two_or_more_issues" style="background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(247, 207, 30, 0.83));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                <td>{{ pending.wrong_service_fee }}</td>
+
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+             
+              <td>{{ pending.TDS_issue }}</td>
+              <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              
               <td>{{ pending. }}-</td>
               <td>{{ pending. }}-</td>
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
           </tr>
         
       {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
-          <tr style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+          <tr id="single_issue" style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
           padding: 8px;
           border-radius: 5px;
           color: black; font-weight: bold;">
@@ -799,10 +928,11 @@
               <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
              
               <td>{{ pending.TDS_issue }}</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
               <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              
               <td>{{ pending. }}-</td>
               <td>{{ pending. }}-</td>
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
@@ -838,10 +968,11 @@
               <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
              
               <td>{{ pending.TDS_issue }}</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
               <td>{{ pending.Wrong_penalty }}</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              <td>{{ pending. }}-</td>
+              
               <td>{{ pending. }}-</td>
               <td>{{ pending. }}-</td>
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
@@ -1261,43 +1392,628 @@
             {% else %}
 
             {% endif %}
-        
-            
-            {% if report_data.pending_orders %}
-            {% if report_data.missing_orders %}
+{% if report_data.pending_orders %}
+{% if report_data.aggregator == "Zomato" %}
+
+{% if report_data.missing_orders %}
             <h3>2. Pending Orders</h3>
             {% else %}
             <h3>1. Pending Orders</h3>
             {% endif %}
-            <table border="1" width="100%" style="border-collapse: collapse; ">
-                <thead>
-                    <tr>
-                        <th style="text-align: center;">Order ID</th>
-                        <th style="text-align: center;">Order Date</th>
-                        <th style="text-align: center;">Difference Amount</th>
-                        <th style="text-align: center;">Issues</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in report_data.pending_orders %}
-                        <tr>
-                            <td>{{ order.order_id }}</td>
-                            <td>{{ order.fp_order_date }}</td>
-                            <td>₹{{ order.pending_order_difference }}</td>
-                            <td>
-                                {% if order.wrong_taxes_on_service_payment_fees != "-" %} Taxes Issue: {{ order.wrong_taxes_on_service_payment_fees }} <br> {% endif %}
-                                {% if order.wrong_payment_mechanism_fee != "-" %} Payment Mechanism Fee Issue: {{ order.wrong_payment_mechanism_fee }} <br> {% endif %}
-                                {% if order.wrong_service_fee != "-" %} Service Fee Issue: {{ order.wrong_service_fee }} <br> {% endif %}
-                                {% if order.cancelled_order_amount_deducted_wrongly != "-" %} Cancelled Order Issue: {{ order.cancelled_order_amount_deducted_wrongly }} <br> {% endif %}
-                                {% if order.TDS_issue != "-" %} TDS Issue: {{ order.TDS_issue }} {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No pending orders.</p>
+            <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
+        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
+        <button style="width: 20px; height: 20px; background-color: Black; border-radius: 50%; border: none; cursor: pointer;" onclick="show_all()"></button><div style="color: black; font-weight: bold;" >All</div>
+    </div>
+            <table border="1" class="pending-orders-table" >
+  <thead>
+      <tr>
+          <th >Reconciliation_Order_ID</th>
+          <th>Order Date</th>
+          <th>Order Status</th>
+          <th>{{ report_data.aggregator }} Total Amount</th>
+          <th>FP Total Amount</th>
+          <th>{{ report_data.aggregator }} Service fee(Commission)</th>
+          <th style="color: green;">FP Service Fee(Commission)</th>
+          <th>{{ report_data.aggregator }} Payment mechanism fee</th>
+          <th style="color: green;">FP Payment Mechanism Fee</th>
+          <th>{{ report_data.aggregator }} Taxes on service payment mechanism fees</th>
+          <th style="color: green;">FP Taxes on Service Payment Fees</th>
+          <th>{{ report_data.aggregator }} Order Level Payout</th>
+          <th style="color: green;">FP Expected Payout</th>
+          <th>cancelation charge percentage</th>
+          <th style="color: red;">Pending Order Difference</th>
+          {% if '2' in report_data.total_issue_code %}
+          <th>Wrong Taxes on Service Payment Fees</th>
+          {% else %}
+          {% comment %} <th>Wrong Taxes on Service Payment Fees</th> {% endcomment %}
+          {% endif %}
+          {% if '3' in report_data.total_issue_code %}
+          <th>Wrong Payment Mechanism Fee</th>
+          {% else %}
+          {% comment %} <th>Wrong Payment Mechanism Fee</th> {% endcomment %}
+          {% endif %}
+          {% if '4' in report_data.total_issue_code %}
+          <th>Wrong Service Fee</th>
+          {% else %}
+          {% comment %} <th>Wrong Service Fee</th> {% endcomment %}
+          {% endif %}
+          {% if '5' in report_data.total_issue_code %}
+          <th>Cancelled Order Amount Deducted Wrongly</th>
+          {% else %}
+          {% comment %} <th>Cancelled Order Amount Deducted Wrongly</th> {% endcomment %}
+          {% endif %}
+          {% if '6' in report_data.total_issue_code %}
+          <th>TDS Issue</th>
+          {% else %}
+          {% comment %} <th>TDS Issue</th> {% endcomment %}
+          {% endif %}
+          {% if '7' in report_data.total_issue_code %}
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
+          {% else %}
+          {% comment %} <th> Wrong penalty Charges Imposed for Order Rejection</th> {% endcomment %}
+          {% endif %}
+
+
+      </tr>
+  </thead>
+  <tbody>
+    {% for pending in report_data.pending_orders %}
+    {% if   pending.cancelled_order_amount_deducted_wrongly != "-"  %}
+        <tr id="cancelled" style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
             {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+            
+            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+            {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
+            {% elif pending.issue > 1 %}
+            <tr id="two_or_more_issues" style="background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+            
+
+    {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
+        <tr id="single_issue" style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+        padding: 8px;
+        border-radius: 5px;
+        color: black; font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+
+        </tr>
+        {% else %}
+        <tr  style=" font-weight: bold;">
+            <td>{{ pending.order_id }}</td>
+            <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+            <td>{{ pending.fp_status }}</td>
+            <td>{{ pending.zo_total_amt }}</td>
+            <td>{{ pending.fp_total_amt }}</td>
+            <td>{{ pending.zomato_service_fee }}</td>
+            <td style="color: green;">{{ pending.fp_service_fee }}</td>
+            <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+            <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+            <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+            <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+            <td>{{ pending.zomato_order_level_payout }}</td>
+            <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+            {% if pending.cancellation_charge_percentage ==  0  %} 
+            <td>-</td>
+            {% elif pending.cancellation_charge_percentage  %}
+            <td>{{ pending.cancellation_charge_percentage }}%</td>
+            {% endif %}
+            <td style="color: red;">{{ pending.pending_order_difference }}</td>
+            
+            {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+          
+        </tr>
+        {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+{% elif report_data.aggregator == "Swiggy" %}
+
+{% if report_data.missing_orders %}
+            <h3>2. Pending Orders</h3>
+            {% else %}
+            <h3>1. Pending Orders</h3>
+            {% endif %}
+            <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
+        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
+        <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
+        <button style="width: 20px; height: 20px; background-color: Black; border-radius: 50%; border: none; cursor: pointer;" onclick="show_all()"></button><div style="color: black; font-weight: bold;" >All</div>
+    </div>
+<table border="1" class="pending-orders-table" >
+  <thead>
+      <tr>
+          <th>Reconciliation_Order_ID</th>
+          <th>Order Date</th>
+          <th>Order Status</th>
+          <th>{{ report_data.aggregator }} Total Amount</th>
+          <th>FP Total Amount</th>
+          <th>{{ report_data.aggregator }} Service fee(Commission)</th>
+          <th style="color: green;">FP Service Fee(Commission)</th>
+          <th>{{ report_data.aggregator }} Payment mechanism fee</th>
+          <th style="color: green;">FP Payment Mechanism Fee</th>
+          <th>{{ report_data.aggregator }} Taxes on service payment mechanism fees</th>
+          <th style="color: green;">FP Taxes on Service Payment Fees</th>
+          <th>{{ report_data.aggregator }} Order Level Payout</th>
+          <th style="color: green;">FP Expected Payout</th>
+          <th>MFR Accurate</th>
+          <th>MFR Pressed</th>
+          <th>cancelation charge percentage</th>
+          <th style="color: red;">Pending Order Difference</th>
+          {% if '2' in report_data.total_issue_code %}
+          <th>Wrong Taxes on Service Payment Fees</th>
+          {% else %}
+          {% comment %} <th>Wrong Taxes on Service Payment Fees</th> {% endcomment %}
+          {% endif %}
+          {% if '3' in report_data.total_issue_code %}
+          <th>Wrong Payment Mechanism Fee</th>
+          {% else %}
+          {% comment %} <th>Wrong Payment Mechanism Fee</th> {% endcomment %}
+          {% endif %}
+          {% if '4' in report_data.total_issue_code %}
+          <th>Wrong Service Fee</th>
+          {% else %}
+          {% comment %} <th>Wrong Service Fee</th> {% endcomment %}
+          {% endif %}
+          {% if '5' in report_data.total_issue_code %}
+          <th>Cancelled Order Amount Deducted Wrongly</th>
+          {% else %}
+          {% comment %} <th>Cancelled Order Amount Deducted Wrongly</th> {% endcomment %}
+          {% endif %}
+          {% if '6' in report_data.total_issue_code %}
+          <th>TDS Issue</th>
+          {% else %}
+          {% comment %} <th>TDS Issue</th> {% endcomment %}
+          {% endif %}
+          {% if '7' in report_data.total_issue_code %}
+          <th> Wrong penalty Charges Imposed for Order Rejection</th>
+          {% else %}
+          {% comment %} <th> Wrong penalty Charges Imposed for Order Rejection</th> {% endcomment %}
+          {% endif %}
+
+
+      </tr>
+  </thead>
+  <tbody>
+      {% for pending in report_data.pending_orders %}
+      {% if  pending.cancelled_order_amount_deducted_wrongly != "-"  %}
+          <tr  id="cancelled"  style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+          </tr>
+          {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"    or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.wrong_service_fee != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.TDS_issue != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.Wrong_penalty != "-"  or pending.wrong_service_fee != "-" and pending.TDS_issue != "-" or pending.wrong_service_fee != "-" and pending.Wrong_penalty != "-" or pending.TDS_issue != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
+          {% elif pending.issue > 1 %}
+          <tr id="two_or_more_issues" style="background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(247, 207, 30, 0.83));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+             
+
+          </tr>
+        
+      {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
+          <tr id="single_issue" style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
+          padding: 8px;
+          border-radius: 5px;
+          color: black; font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+             
+              
+          </tr>
+          {% else %}
+          <tr style=" font-weight: bold;">
+              <td>{{ pending.order_id }}</td>
+              <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
+              <td>{{ pending.fp_status }}</td>
+              <td>{{ pending.zo_total_amt }}</td>
+              <td>{{ pending.fp_total_amt }}</td>
+              <td>{{ pending.zomato_service_fee }}</td>
+              <td style="color: green;">{{ pending.fp_service_fee }}</td>
+              <td>{{ pending.zomato_payment_mechanism_fee }}</td>
+              <td style="color: green;">{{ pending.fp_payment_mechanism_fee }}</td>
+              <td>{{ pending.zomato_taxes_on_service_payment_mechanism_fees }}</td>
+              <td style="color: green;">{{ pending.fp_taxes_on_service_payment_fees }}</td>
+              <td>{{ pending.zomato_order_level_payout }}</td>
+              <td style="color: green;">{{ pending.fp_expected_payout }}</td>
+              <td >{{ pending.mfr_accurate }}</td>
+              <td >{{ pending.mfr_pressed }}</td>
+              {% if pending.cancellation_charge_percentage ==  0  %} 
+              <td>-</td>
+              {% elif pending.cancellation_charge_percentage  %}
+              <td>{{ pending.cancellation_charge_percentage }}%</td>
+              {% endif %}
+              <td style="color: red;">{{ pending.pending_order_difference }}</td>
+              
+              {% if '2' in report_data.total_issue_code %}
+              <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.wrong_taxes_on_service_payment_fees }}</td> {% endcomment %}
+                {% endif %}
+                {% if '3' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_payment_mechanism_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_payment_mechanism_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '4' in report_data.total_issue_code %}
+                <td>{{ pending.wrong_service_fee }}</td>
+                {% else %}
+                {% comment %} <td>{{ pending.wrong_service_fee }}</td> {% endcomment %}
+                {% endif %}
+                {% if '5' in report_data.total_issue_code %}
+              <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.cancelled_order_amount_deducted_wrongly }}</td> {% endcomment %}
+             {% endif %}
+             {% if '6' in report_data.total_issue_code %}
+              <td>{{ pending.TDS_issue }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.TDS_issue }}</td> {% endcomment %}
+              {% endif %}
+              {% if '7' in report_data.total_issue_code %}
+              <td>{{ pending.Wrong_penalty }}</td>
+              {% else %}
+              {% comment %} <td>{{ pending.Wrong_penalty }}</td> {% endcomment %}
+                {% endif %}
+
+              
+          </tr>
+          {% endif %}
+      {% endfor %}
+  </tbody>
+</table>
+
+{% endif %}
+
+{% else %}
+<p>No pending orders.</p>
+
+{% endif %}
 
             <br>
             <br>
@@ -1307,8 +2023,8 @@
              
             {% endif %}
 
-            <br>
-            <br>
+         
+           
 
             {% if report_data.pending_orders %}
            <h4><strong>Count of Pending Orders:</strong> {{ report_data.Pending_Orders_Count }}   <strong>Total Value:{{report_data.total_difference}}</strong></h4>
@@ -1335,7 +2051,25 @@
         function closeDisputeSection() {
           document.getElementById("emailContentContainer").style.display = "none";
       }
-      
+
+      function show_only_cancelled() {
+        document.querySelectorAll("#cancelled").forEach(el => el.style.display = "");
+        document.querySelectorAll("#two_or_more_issues, #single_issue").forEach(el => el.style.display = "none");
+    }
+    
+    function show_only_two_or_more_issues() {
+        document.querySelectorAll("#two_or_more_issues").forEach(el => el.style.display = "");
+        document.querySelectorAll("#cancelled, #single_issue").forEach(el => el.style.display = "none");
+    }
+    
+    function show_only_single_issue() {
+        document.querySelectorAll("#single_issue").forEach(el => el.style.display = "");
+        document.querySelectorAll("#cancelled, #two_or_more_issues").forEach(el => el.style.display = "none");
+    }
+    
+    function show_all() {
+        document.querySelectorAll("#cancelled, #two_or_more_issues, #single_issue").forEach(el => el.style.display = "");
+    }  
 
       function sendReconciliationEmail() {
         let emailBody = document.getElementById("emailContent").innerHTML;
