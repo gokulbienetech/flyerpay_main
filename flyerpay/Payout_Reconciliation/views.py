@@ -1,13 +1,15 @@
+from email.utils import parsedate_to_datetime
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
 import pandas as pd
 from django.core.files.storage import default_storage
 from django.contrib import messages
 from sqlalchemy import create_engine, text
-from .models import zomato_order,sales_report,sales_report_swiggy,SwiggyOrder,ReconciliationSummary, ClientDetails,Aggregator,Membership,clients_zomato,clients_swiggy,swiggy_CPC_Ads,zomato_cpc_ads
+from .models import  EmailConversation, SentEmailLog, SummeryLog, zomato_order,sales_report,sales_report_swiggy,SwiggyOrder,ReconciliationSummary, ClientDetails,Aggregator,Membership,clients_zomato,clients_swiggy,swiggy_CPC_Ads,zomato_cpc_ads
 from django.http import JsonResponse
 from .forms import ClientDetailsForm ,UploadExcelForm_Zomato,AggregatorForm,UploadExcelForm_Swiggy,UploadExcelForm_FlyerEats,MembershipForm
-from datetime import datetime
+from datetime import datetime,date
 from django.db.models import Sum, F
 from django.utils.timezone import make_aware        
 from django.db import connection,transaction
@@ -21,6 +23,9 @@ import logging
 from django.db.models import Q
 from sqlalchemy.types import String
 import decimal
+from django.db.models.functions import TruncDate
+from .email_utils import fetch_replies_from_gmail
+
 
 
 
@@ -228,7 +233,44 @@ def send_reconciliation_email(request):
             )
             email.content_subtype = "html"  # Set email format to HTML
             email.send()
+            SentEmailLog.objects.create(
+                    subject=email_subject,                     # Comes from frontend or generated
+                    body=email_body,                           # HTML or text content
+                    sender=sender_email,                       # Client's sender email
+                    recipients=",".join(recipient_emails),     # Converts list to comma-separated string
+                    cc=",".join(cc_emails),                    # Converts list to string for logging
+                    bcc="gokulms7885@gmail.com",                # Hardcoded or dynamic BCC for tracking
+                    # order_ids=",".join(data.get("order_ids", [])) 
+                    aggregator = aggregator,
+                    restaurant_id = restaurant_id,
+                    date_range = selected_date_range,
+                    client_name = client_name,
+                )
+
+            add_dispute_raised(aggregator,restaurant_id,selected_date_range)
             print("recipient_emails:",recipient_emails)
+            
+            if aggregator == "Zomato":
+                print(clients_zomato.objects.count())
+                print(sales_report.objects.all())
+                print("start_processing_update_fp_status")
+                date_range = data.get("selected_date_range")  # e.g., "10-Mar-2025 to 16-Mar-2025"
+                start_date_str, end_date_str = date_range.split(" to ")
+                start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+                end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+                print(type(restaurant_id),type(start_date), end_date,)
+                update_sales_status_proc(restaurant_id, start_date, end_date)
+            elif aggregator == "Swiggy":
+                print(clients_zomato.objects.count())
+                print(sales_report.objects.all())
+                print("start_processing_update_fp_status")
+                date_range = data.get("selected_date_range")  # e.g., "10-Mar-2025 to 16-Mar-2025"
+                start_date_str, end_date_str = date_range.split(" to ")
+                start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+                end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+                print(type(restaurant_id),type(start_date), end_date,)
+                update_sales_status_proc_swiggy(restaurant_id, start_date, end_date)
+
 
             return JsonResponse({"message": "Email sent successfully!"})
 
@@ -301,7 +343,7 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
         pending_orders_result = cursor.fetchall()
         if aggregator == "Zomato":
             for row in pending_orders_result:
-                issue_codes = row[16].split(',') if row[16] else []
+                issue_codes = row[17].split(',') if row[17] else []
                 total_issue_code.update(issue_codes)
                 pending_orders.append({
             "order_id": row[0],
@@ -313,14 +355,14 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "zomato_taxes_on_service_payment_mechanism_fees": row[6],
             "zomato_payment_mechanism_fee": row[7],
             "zomato_service_fee": row[8],
-            "cancellation_charge_percentage": row[14],
-            "pending_order_difference": row[15],
+            "cancellation_charge_percentage": row[15],
+            "pending_order_difference": row[16],
             "issue_codes": issue_codes,
             "wrong_payout_settled": "Yes" if '1' in issue_codes else "-",
             "wrong_taxes_on_service_payment_fees": f"instead of ₹{row[2]} Deducted ₹{row[6]}, Difference {round((row[2]-row[6]),2)}" if '2' in issue_codes else "-",
             "wrong_payment_mechanism_fee": f"instead of ₹{row[3]} Deducted ₹{row[7]}, Difference {round((row[3]-row[7]),2)}" if '3' in issue_codes else "-",
             "wrong_service_fee": f"instead of ₹{row[4]} Deducted ₹{row[8]}, Difference {round((row[4]-row[8]),3)}" if '4' in issue_codes else "-",
-            "cancelled_order_amount_deducted_wrongly": f"instead of {row[14]}% Settled only {round((row[5]/row[11]*100),2)}% Difference ₹{row[15]}" if '5' in issue_codes else "-",
+            "cancelled_order_amount_deducted_wrongly": f"instead of {row[15]}% Settled only {round((row[5]/row[11]*100),2)}% Difference ₹{row[16]}" if '5' in issue_codes else "-",
             "TDS_issue": f"TDS Calculated Wrongly instead of {round(row[11]*0.001,2)} Deducted {row[13]}, Difference {round(((row[11]*0.001)-row[13]),2)}" if '6' in issue_codes else "-",
             "Wrong_penalty": f"Wrong penalty Charges Imposed instead of {row[5]} Deducted {round((row[5]/row[11]*100),2)}, Difference {row[15]}" if '7' in issue_codes else "-",
             "fp_order_date": row[9],
@@ -328,15 +370,17 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "fp_total_amt": row[11],
             "zo_total_amt": row[12],
             "zo_TDS": row[13],
+            "Reconcilation_status":row[14],
             "issue":len(issue_codes)
         })
             pending_orders.append(pending_order)
             print(pending_orders,"pending_order555")
         
+        
         elif aggregator == "Swiggy":
             
             for row in pending_orders_result:
-                issue_codes = row[18].split(',') if row[18] else []
+                issue_codes = row[19].split(',') if row[19] else []
                 print(issue_codes,"issue_codes",row[18])
                 total_issue_code.update(issue_codes)
                 
@@ -351,16 +395,16 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "zomato_taxes_on_service_payment_mechanism_fees": row[6],
             "zomato_payment_mechanism_fee": row[7],
             "zomato_service_fee": row[8],
-            "cancellation_charge_percentage": row[16],
-            "pending_order_difference": row[17],
+            "cancellation_charge_percentage": row[17],
+            "pending_order_difference": row[18],
             "issue_codes": issue_codes,
             "wrong_payout_settled": "Yes" if '1' in issue_codes else "-",
             "wrong_taxes_on_service_payment_fees": f"instead of ₹{row[2]} Deducted ₹{row[6]}, Difference {round((row[2]-row[6]),2)}" if '2' in issue_codes else "-",
             "wrong_payment_mechanism_fee": f"instead of ₹{row[3]} Deducted ₹{row[7]}, Difference {round((row[3]-row[7]),2)}" if '3' in issue_codes else "-",
             "wrong_service_fee": f"instead of ₹{row[4]} Deducted ₹{row[8]}, Difference {round((row[4]-row[8]),3)}" if '4' in issue_codes else "-",
-            "cancelled_order_amount_deducted_wrongly": f"instead of {row[16]}% Settled only {round((row[5]/row[11]*100),2)}% Difference ₹{row[17]}" if '5' in issue_codes else "-",
+            "cancelled_order_amount_deducted_wrongly": f"instead of {row[17]}% Settled only {round((row[5]/row[11]*100),2)}% Difference ₹{row[18]}" if '5' in issue_codes else "-",
             "TDS_issue": f"TDS Calculated Wrongly instead of {round(row[11]*0.001,2)} Deducted {row[13]}, Difference {round(((row[11]*0.001)-row[13]),2)}" if '6' in issue_codes else "-",
-            "Wrong_penalty": f"Wrong penalty Charges Imposed instead of {row[16]}% Deducted {round((row[5]/row[11]*100),2)}%, Difference {row[17]}" if '7' in issue_codes else "-",
+            "Wrong_penalty": f"Wrong penalty Charges Imposed instead of {row[17]}% Deducted {round((row[5]/row[11]*100),2)}%, Difference {row[18]}" if '7' in issue_codes else "-",
             "fp_order_date": row[9],
             "fp_status": row[10],
             "fp_total_amt": row[11],
@@ -369,16 +413,10 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
             "mfr_accurate": row[14],  # column index 14 is `mfr_accurate`
             "mfr_pressed": row[15],    # column index 15 is `mfr_pressed`
             "issue":len(issue_codes),
+            "Reconcilation_status":row[16]
             
         })
-
         pending_orders.append(pending_order)
-        print(pending_orders,"pending orders555")
-        # print(pending_orders,"pending_orders6666")
-        # for i in pending_orders:
-        #     print(i["order_id"],i["issue_codes"])
-
-        # Fetch Missing Orders
         cursor.nextset()
         missing_orders = [
             {
@@ -392,16 +430,110 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
                 "fp_status_raw": row[7],
             } for row in cursor.fetchall()
         ]
+        
+        if aggregator == "Swiggy":
+            for row in pending_orders_result:
+                issue_codes = row[19].split(',')
+
+                if issue_codes and issue_codes != ['']:
+                    exists = SummeryLog.objects.filter(
+            restaurant_id=restaurant_id,
+            aggregator=aggregator,
+            order_id=row[0]
+        ).exists()
+
+                    if not exists:
+                        SummeryLog.objects.create(
+                restaurant_id=restaurant_id,
+                aggregator=aggregator,
+                order_id=row[0],
+                wrong_payout_settled=f"instead of ₹{row[1]} Setteled Only ₹{row[5]}" if '1' in issue_codes else "-",
+                wrong_taxes_on_service_payment_fees=f"instead of ₹{row[2]} Deducted ₹{row[6]}, Difference {round((row[2]-row[6]), 2)}" if '2' in issue_codes else "-",
+                wrong_payment_mechanism_fee=f"instead of ₹{row[3]} Deducted ₹{row[7]}, Difference {round((row[3]-row[7]), 2)}" if '3' in issue_codes else "-",
+                wrong_service_fee=f"instead of ₹{row[4]} Deducted ₹{row[8]}, Difference {round((row[4]-row[8]), 3)}" if '4' in issue_codes else "-",
+                cancelled_order_amount_deducted_wrongly=f"instead of {row[17]}% Settled only {round((row[5]/row[11]*100), 2)}% Difference ₹{row[18]}" if '5' in issue_codes else "-",
+                TDS_issue=f"TDS Calculated Wrongly instead of {round(row[11]*0.001, 2)} Deducted {row[13]}, Difference {round(((row[11]*0.001)-row[13]), 2)}" if '6' in issue_codes else "-",
+                Wrong_penalty=f"Wrong penalty Charges Imposed instead of {row[17]}% Deducted {round((row[5]/row[11]*100), 2)}%, Difference {row[18]}" if '7' in issue_codes else "-",
+                fp_order_date=row[9],
+                fp_status=row[16],
+                missing_order_with="-"
+            )
+
+        elif aggregator == "Zomato":
+            for row in pending_orders_result:
+                issue_codes = row[17].split(',')
+
+                if issue_codes and issue_codes != ['']:
+                    exists = SummeryLog.objects.filter(
+            restaurant_id=restaurant_id,
+            aggregator=aggregator,
+            order_id=row[0]
+        ).exists()
+
+                    if not exists:
+                        SummeryLog.objects.create(
+                restaurant_id=restaurant_id,
+                aggregator=aggregator,
+                order_id=row[0],
+                wrong_payout_settled=f"instead of ₹{row[1]} Setteled Only ₹{row[5]}" if '1' in issue_codes else "-",
+                wrong_taxes_on_service_payment_fees=f"instead of ₹{row[2]} Deducted ₹{row[6]}, Difference {round((row[2]-row[6]), 2)}" if '2' in issue_codes else "-",
+                wrong_payment_mechanism_fee=f"instead of ₹{row[3]} Deducted ₹{row[7]}, Difference {round((row[3]-row[7]), 2)}" if '3' in issue_codes else "-",
+                wrong_service_fee=f"instead of ₹{row[4]} Deducted ₹{row[8]}, Difference {round((row[4]-row[8]), 3)}" if '4' in issue_codes else "-",
+                cancelled_order_amount_deducted_wrongly=f"instead of {row[15]}% Settled only {round((row[5]/row[11]*100), 2)}% Difference ₹{row[16]}" if '5' in issue_codes else "-",
+                TDS_issue=f"TDS Calculated Wrongly instead of {round(row[11]*0.001, 2)} Deducted {row[13]}, Difference {round(((row[11]*0.001)-row[13]), 2)}" if '6' in issue_codes else "-",
+                Wrong_penalty=f"Wrong penalty Charges Imposed instead of {row[5]} Deducted {round((row[5]/row[11]*100), 2)}, Difference {row[15]}" if '7' in issue_codes else "-",
+                fp_order_date=row[9],
+                fp_status=row[14],
+                missing_order_with="-"
+            )
+
+        
+        # print(pending_orders,"pending orders555")
+
+        
+        for order in missing_orders:
+            SummeryLog.objects.get_or_create(
+        restaurant_id=restaurant_id,
+        aggregator=aggregator,
+        order_id=order["order_id"],
+        defaults={
+            "wrong_payout_settled": "-",
+            "wrong_taxes_on_service_payment_fees": "-",
+            "wrong_payment_mechanism_fee": "-",
+            "wrong_service_fee": "-",
+            "cancelled_order_amount_deducted_wrongly": "-",
+            "TDS_issue": "-",
+            "Wrong_penalty": "-",
+            "fp_order_date": order.get("order_date", "-"),
+            "fp_status": "Missing",
+            "missing_order_with": "Missing in payout but found in internal records"
+        }
+    )
 
     print( summary_result[2],"6666")
-    # print(cpc_ads["cpc_value"],"cpccccc") 
+
+
         
     from_date = datetime.strptime(from_date, "%Y-%m-%d")
     to_date = datetime.strptime(to_date, "%Y-%m-%d")
-
     # Format as needed
     from_date_1 = from_date.strftime("%d-%b-%Y")
     to_date_1 = to_date.strftime("%d-%b-%Y")
+    latest_log = SentEmailLog.objects.filter(
+    aggregator=aggregator,
+    restaurant_id=restaurant_id,
+    date_range=f"{from_date_1} to {to_date_1}"
+        ).order_by('-timestamp').last()
+    latest_log_1 = SentEmailLog.objects.filter(
+    aggregator=aggregator,
+    restaurant_id=restaurant_id,
+    date_range=f"{from_date_1} to {to_date_1}"
+        ).order_by('-timestamp').first()
+    print(latest_log_1,"latest_log_one")
+    # print(latest_log,"latest_log")
+    days_since_email = (date.today() - latest_log.timestamp.date()).days if latest_log else None
+    days_since_email_new = (date.today() - latest_log_1.timestamp.date()).days if latest_log_1 else None
+    print(days_since_email_new,"days_since_email_new")
     # total_difference=sum(pending_orders["pending_order_difference"])
     total_difference = round(sum(item["pending_order_difference"] for item in pending_orders if "pending_order_difference" in item),2)
     total_missing_order_sum = round(sum(item["fp_expected_payout"] for item in missing_orders if "fp_expected_payout" in item ),2)
@@ -427,10 +559,13 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
         "cpc_ads" : (cpc_ads["cpc_value"] if cpc_ads and cpc_ads["cpc_value"] else 0),
         "total_difference":total_difference,
         "total_missing_order_sum":total_missing_order_sum,    
-        "total_issue_code":sorted(list(total_issue_code) )
+        "total_issue_code":sorted(list(total_issue_code) ),
+        "days_since_last_email": days_since_email,
+        "days_since_last_email_new": days_since_email_new,
         
     }
-
+    # print(report_data['days_since_last_email'],"days_since_last_email")
+    # print(report_data['missing_orders'],"missing_orders")
     # Convert Decimal values to float before saving in session
     report_data_serializable = json.loads(json.dumps(report_data, default=convert_decimal_to_float))
 
@@ -441,6 +576,9 @@ def get_payout_and_order_summary(request, client_name, aggregator, from_date, to
     # print("Session Data Stored:", json.dumps(request.session.get("report_data"), indent=2))
     print(report_data["expected_payout"],"expected_payout5555666",report_data["cpc_ads"],"cpc_ads")
     print("total_issue_code",report_data["total_issue_code"])
+
+    log = SentEmailLog.objects.last()
+    print(log.user_replies_json,"LOG_USER_RE")
 
     return report_data
 
@@ -626,8 +764,10 @@ def process_zomato_payout(file_path, client_name,zomato_restaurant_id):
         total_ads_inc_gst = df_cpc_ads.iloc[0, 0]  # First row
         total_dining_ads = df_cpc_ads.iloc[1, 0]  # Second row
         cpc_value = total_ads_inc_gst + total_dining_ads
+        print("cpc:",cpc_value)
     else:
-        total_ads_inc_gst = total_dining_ads = cpc_value = 0  # Default values
+        total_ads_inc_gst = total_dining_ads = cpc_value = 0
+        print("cpc=0")  # Default values
         
     engine = create_engine(f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}/{db_config['database']}")
 
@@ -668,7 +808,7 @@ def process_zomato_payout(file_path, client_name,zomato_restaurant_id):
             "cpc_value": float(cpc_value)
         })
         conn.commit()
-        print("Inserted or updated CPC Ads data.")
+        print("Inserted or updated CPC Ads data :",cpc_value)
         
         # Insert CPC Ads Data
         # cpc_insert_query = text("""
@@ -712,8 +852,129 @@ def process_zomato_payout(file_path, client_name,zomato_restaurant_id):
         "rejected_orders":rejected_orders,
         "ordinary_order":ordinary_order
     }
-    
-    
+
+
+
+
+# def process_zomato_payout(file_path, client_name, zomato_restaurant_id):
+#     """Process Zomato Aggregator Payout Settlement Annexure data and store it in zomato_order and clients_zomato."""
+
+#     try:
+#         # Load Excel file
+#         xls = pd.ExcelFile(file_path)
+#         df = pd.read_excel(xls, sheet_name=2, skiprows=1, header=None)
+#         df_cpc_ads = pd.read_excel(xls, sheet_name=1, skiprows=41, nrows=2, usecols=[5], header=None)
+
+#         # Define column names
+#         column_names = [
+#             "S_No", "order_id", "Order_Date", "Week_No", "Res_name", "Res_ID",
+#             "Discount_Construct", "Mode_of_payment", "Order_status", "Cancellation_policy",
+#             "Cancellation_Rejection_Reason", "Cancelled_Rejected_State", "Order_type", 
+#             "Delivery_State_code", "Subtotal", "Packaging_charge",
+#             "Delivery_charge_for_restaurants_on_self_logistics", "Restaurant_discount_Promo", 
+#             "Restaurant_Discount", "Brand_pack_subscription_fee", 
+#             "Delivery_charge_discount_Relisting_discount", "Total_GST_collected_from_customers", 
+#             "Net_order_value", "Commissionable_value", "Service_fees", "Service_fee", 
+#             "Payment_mechanism_fee", "Service_fee_payment_mechanism_fees", 
+#             "Taxes_on_service_payment_mechanism_fees", "Applicable_amount_for_TCS", 
+#             "Applicable_amount_for", "Tax_collected_at_source", "TCS_IGST_amount", 
+#             "TDS_194O_amount", "GST_paid_by_Zomato_on_behalf_of_restaurant_under_section", 
+#             "GST_to_be_paid_by_Restaurant_partner_to_Govt", "Government_charges", 
+#             "Customer_Compensation_Recoupment", "Delivery_Charges_Recovery", 
+#             "Amount_received_in_cash", "Credit_note_adjustment", "Promo_recovery_adjustment", 
+#             "Extra_Inventory_Ads_and_Misc", "Brand_loyalty_points_redemption", 
+#             "Express_Order_Fee", "Other_order_level_deductions", "Net_Deductions", 
+#             "Net_Additions", "Order_level_Payout", "Settlement_status", "Settlement_date", 
+#             "Bank_UTR", "Unsettled_Amount", "Customer_ID",
+#         ]
+
+#         df.columns = column_names
+#         df["fp_Client_Name"] = str(client_name)
+#         df["fp_restaurant_id"] = str(zomato_restaurant_id)
+
+#         df["order_id"] = pd.to_numeric(df["order_id"], errors="coerce").fillna(0).astype(int)
+#         df["Order_Date"] = pd.to_datetime(df["Order_Date"], errors="coerce")
+
+#         min_date = df["Order_Date"].min().replace(hour=0, minute=0, second=0, microsecond=0)
+#         max_date = df["Order_Date"].max().replace(hour=23, minute=59, second=59, microsecond=999999)
+
+#         # Extract CPC values
+#         if df_cpc_ads.shape[0] >= 2:
+#             total_ads_inc_gst = df_cpc_ads.iloc[0, 0]
+#             total_dining_ads = df_cpc_ads.iloc[1, 0]
+#             cpc_value = total_ads_inc_gst + total_dining_ads
+#         else:
+#             total_ads_inc_gst = total_dining_ads = cpc_value = 0
+
+#         print("CPC Value:", cpc_value)
+
+#         # Connect to DB
+#         engine = create_engine(f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}/{db_config['database']}")
+
+#         with engine.begin() as conn:
+#             # Get existing order IDs
+#             existing_order_ids = pd.read_sql("SELECT order_id FROM payout_reconciliation_zomato_order", con=conn)
+#             existing_order_ids_set = set(existing_order_ids["order_id"].astype(int))
+
+#             df_new_orders = df[~df["order_id"].isin(existing_order_ids_set)]
+
+#             if not df_new_orders.empty:
+#                 df_new_orders.to_sql("payout_reconciliation_zomato_order", con=conn, if_exists="append", index=False)
+#                 print(f"Inserted {len(df_new_orders)} new records into payout_reconciliation_zomato_order.")
+#             else:
+#                 print("No new orders to insert.")
+
+#             # Insert/Update CPC Ads Data
+#             cpc_insert_query = text("""
+#                 INSERT INTO payout_reconciliation_zomato_cpc_ads 
+#                 (from_date, to_date, fp_restaurant_id, client_name, total_ads_inc_gst, total_dining_ads, cpc_value)
+#                 VALUES (:from_date, :to_date, :fp_restaurant_id, :client_name, :total_ads_inc_gst, :total_dining_ads, :cpc_value)
+#                 ON DUPLICATE KEY UPDATE 
+#                     total_ads_inc_gst = VALUES(total_ads_inc_gst),
+#                     total_dining_ads = VALUES(total_dining_ads),
+#                     cpc_value = VALUES(cpc_value);
+#             """)
+
+#             conn.execute(cpc_insert_query, {
+#                 "from_date": min_date,
+#                 "to_date": max_date,
+#                 "fp_restaurant_id": zomato_restaurant_id,
+#                 "client_name": client_name,
+#                 "total_ads_inc_gst": float(total_ads_inc_gst),
+#                 "total_dining_ads": float(total_dining_ads),
+#                 "cpc_value": float(cpc_value)
+#             })
+
+#             print("CPC Ads data inserted or updated.")
+
+#         engine.dispose()
+
+#         # Extract orders for response
+#         cancelled_orders = df[df["Order_status"] == "CANCELLED"][["order_id", "Cancelled_Rejected_State"]].to_dict(orient="records")
+#         rejected_orders = df[df["Order_status"] == "REJECTED"][["order_id", "Cancelled_Rejected_State", "Cancellation_Rejection_Reason"]].to_dict(orient="records")
+#         ordinary_order = df[df["Order_status"] == "DELIVERED"][["order_id", "Customer_Compensation_Recoupment"]].to_dict(orient="records")
+#         print(cancelled_orders,"cancelled_orders")
+#         print(rejected_orders,"rejected_orders")        
+#         # print(rejected_orders,"rejected_orders")        
+#         return {
+#             "status": "success",
+#             "message": "File processed successfully.",
+#             "min_date": min_date,
+#             "max_date": max_date,
+#             "cancelled_orders": cancelled_orders,
+#             "rejected_orders": rejected_orders,
+#             "ordinary_order": ordinary_order
+#         }
+
+#     except Exception as e:
+#         print("Error in process_zomato_payout:", str(e))
+#         return {
+#             "status": "error",
+#             "message": str(e)
+#         }
+
+
+
     
 def process_zomato_sales(file_path, db_config, client_name, zomato_restaurant_id, min_date, max_date, cancelled_orders, rejected_orders, ordinary_order):
     """Process Zomato Merchant Sales Report and apply payout calculation based on order rejection status"""
@@ -776,14 +1037,14 @@ def process_zomato_sales(file_path, db_config, client_name, zomato_restaurant_id
                 rejection_status = cancelled_dict[order_id]
                 if rejection_status == "Order accepted":
                     df.at[idx, "Expected_Payout"] = round(row["Total_Amount"] * 0.40, 2)
-                elif rejection_status == "Order picked up by rider" or rejection_status ==  "Order ready, not picked up by rider":
+                elif rejection_status == "Order picked up by rider" or rejection_status ==  "Order ready, not picked up by rider" or rejection_status ==  "Delivery partner arrived":
                     df.at[idx, "Expected_Payout"] = round(row["Total_Amount"] * 0.80, 2)
             elif order_id in rejected_dict:
                 # rejected_stat = rejected_dict[order_id]
                 if rejected_dict[order_id]["Cancelled_Rejected_State"] == "Delivery partner arrived":
-                    df.at[idx, "Expected_Payout"] = round(-1*(row["Total_Amount"] * commission_percentage), 2)
+                    df.at[idx, "Expected_Payout"] = round(-1*(row["Total_Amount"] * 0.25), 2)
                 elif rejected_dict[order_id]["Cancelled_Rejected_State"]  == "Order accepted":
-                    df.at[idx, "Expected_Payout"] = round(-1*(row["Total_Amount"] * 0.105), 2)
+                    df.at[idx, "Expected_Payout"] = round(-1*(row["Total_Amount"] * 0.25), 2)
             elif order_id not in cancelled_dict and order_id not in rejected_dict and row["Status"] == "Cancelled":
                 df.at[idx, "Expected_Payout"] = round(row["Total_Amount"] * 0.80, 2)
             else:
@@ -840,7 +1101,7 @@ def process_zomato_sales(file_path, db_config, client_name, zomato_restaurant_id
         f"mysql+mysqlconnector://{db_config['user']}:{db_config['password']}@{db_config['host']}/{db_config['database']}"
     )
 
-    # Insert into sales_report table
+    # Insert into sales_report_zomato table
     df.to_sql("sales_report", con=engine, if_exists="append", index=False)
     print(f"Inserted {len(df)} new records into sales_report.")
 
@@ -949,7 +1210,7 @@ def process_swiggy_payout(file_path, client_name, db_config,swiggy_restaurant_id
     print("Cancelled orders count:", df[df["order_status"] == "cancelled"].shape[0])  
     print("Cancelled orders sample:\n", df[df["order_status"] == "cancelled"].head())  
     cancelled_orders = df[df["order_status"] == "cancelled"][
-    ["order_id", "cancelled_by", "mfr_accurate", "mfr_pressed","order_payment_type"]
+    ["order_id", "cancelled_by", "mfr_accurate", "mfr_pressed","order_payment_type","pick_up_status"]
                     ].to_dict(orient="records")
     ordinary_order = df[df["order_status"] == "delivered"][["order_id", "customer_complaints"]].to_dict(orient="records")
 
@@ -1118,7 +1379,8 @@ def process_swiggy_sales(file_path, client_name,min_date,max_date,swiggy_restaur
             "cancelled_by": order["cancelled_by"],
             "mfr_accurate": order["mfr_accurate"],
             "mfr_pressed": order["mfr_pressed"],
-            "order_payment_type":order["order_payment_type"]
+            "order_payment_type":order["order_payment_type"],
+            "pick_up_status":order["pick_up_status"]
         }
         for order in cancelled_orders
     }       
@@ -1133,7 +1395,7 @@ def process_swiggy_sales(file_path, client_name,min_date,max_date,swiggy_restaur
     # print(payment_mechanism_charge.payment_mechanism_fee_online,"payment_mechanism_charge")
     payment_charge_online = float(payment_mechanism_charge.payment_mechanism_fee_online)/100
     payment_charge_cod = float(payment_mechanism_charge.payment_mechanism_fee)/100
-
+    
     
     if client_tax.swiggy_tax:
         for index, row in df.iterrows():
@@ -1229,6 +1491,20 @@ def process_swiggy_sales(file_path, client_name,min_date,max_date,swiggy_restaur
                         df.at[index, "Payment_Mechanism_Fee"] + df.at[index, "Taxes_on_Service_Payment_Fees"] +
                         row["Total_Amount"] * 0.001
                         ), 2)
+                    elif order_id in cancelled_dict and cancelled_dict[order_id]["mfr_accurate"] == "Yes" and cancelled_dict[order_id]["mfr_pressed"] == "Yes" and cancelled_dict[order_id]["pick_up_status"] == "picked up":
+                        df.at[index, "Net_Bill"] = round(row["Total_Amount"] - (row["Total_Amount"] * 0.05), 2)
+                        df.at[index, "Net_Bill_GST"] = round(df.at[index, "Net_Bill"] * 0.05, 2)
+                        df.at[index, "Service_Fee"] = round(row["Total_Amount"] * commission_percentage, 2)
+                        df.at[index, "Payment_Mechanism_Fee"] = round(row["Total_Amount"] * payment_charge_online, 2)
+                        df.at[index, "Taxes_on_Service_Payment_Fees"] = round((df.at[index, "Service_Fee"] + df.at[index, "Payment_Mechanism_Fee"]) * 0.18, 2)
+
+                    # Default Expected Payout Calculation
+                        df.at[index, "Expected_Payout"] = round(row["Total_Amount"] - (
+                        df.at[index, "Net_Bill_GST"] + df.at[index, "Service_Fee"] + 
+                        df.at[index, "Payment_Mechanism_Fee"] + df.at[index, "Taxes_on_Service_Payment_Fees"] + 
+                            row["Total_Amount"] * 0.001 + customer_complaints_Charge
+                                    ), 2)
+                        
                     elif order_id in cancelled_dict and cancelled_dict[order_id]["mfr_accurate"] == "Yes" and cancelled_dict[order_id]["mfr_pressed"] == "Yes" and cancelled_dict[order_id]["order_payment_type"] == "cash":
                         print("test000",order_id in cancelled_dict and cancelled_dict[order_id]["order_payment_type"] == "cash")
 
@@ -1245,7 +1521,7 @@ def process_swiggy_sales(file_path, client_name,min_date,max_date,swiggy_restaur
                         ), 2)
             
             elif order_id not in cancelled_dict and row["Status"] == "Cancelled":
-                df.at[idx, "Expected_Payout"] = round(row["Total_Amount"] * 0.80, 2)
+                df.at[index, "Expected_Payout"] = round(row["Total_Amount"] * 0.80, 2)
                     
             else:
                 customer_complaints_Charge = ordinary_dict.get(order_id, 0)
@@ -1501,3 +1777,653 @@ def get_swiggy_restaurants_for_client(request):
 
     return JsonResponse({"restaurants": []})
 
+
+
+@csrf_exempt
+def update_reconciliation_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order_id = data.get('order_id')
+            new_status = data.get('reconciliation_status')
+            aggregator = data.get('aggregator')
+            restaurant_id = data.get('restaurant_id')
+            print(new_status,"new_statue")
+            print(order_id,"order_id")
+            print(aggregator,"aggregator")
+
+
+            # Update the correct row in sales_report
+            # Raw SQL Update
+            if aggregator == "Zomato":
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                    UPDATE sales_report
+                    SET fp_status = %s
+                    WHERE Client_Order_No = %s
+                """, [new_status, order_id])
+            if aggregator == "Swiggy":
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                    UPDATE sales_report_swiggy
+                    SET fp_status = %s
+                    WHERE Client_Order_No = %s
+                """, [new_status, order_id])
+                    
+            latest_log = SummeryLog.objects.filter(order_id=order_id, aggregator=aggregator).last()
+
+            if latest_log:
+                # Create new entry with updated fp_status
+                SummeryLog.objects.create(
+                    restaurant_id=latest_log.restaurant_id,
+                    aggregator=latest_log.aggregator,
+                    order_id=latest_log.order_id,
+                    wrong_payout_settled=latest_log.wrong_payout_settled,
+                    wrong_taxes_on_service_payment_fees=latest_log.wrong_taxes_on_service_payment_fees,
+                    wrong_payment_mechanism_fee=latest_log.wrong_payment_mechanism_fee,
+                    wrong_service_fee=latest_log.wrong_service_fee,
+                    cancelled_order_amount_deducted_wrongly=latest_log.cancelled_order_amount_deducted_wrongly,
+                    TDS_issue=latest_log.TDS_issue,
+                    Wrong_penalty=latest_log.Wrong_penalty,
+                    fp_order_date=latest_log.fp_order_date,
+                    fp_status=new_status,
+                    missing_order_with=latest_log.missing_order_with
+                )
+
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+def update_sales_status_proc(restaurant_id, start_date, end_date):
+    print("HIIIII")
+    with connection.cursor() as cursor:
+        print("HIIIII")
+        cursor.callproc("UpdateSalesStatusByRestaurant", [restaurant_id, start_date, end_date])
+def update_sales_status_proc_swiggy(restaurant_id, start_date, end_date):
+    print("HIIIII")
+    with connection.cursor() as cursor:
+        print("HIIIII")
+        cursor.callproc("UpdateSalesStatusByRestaurant_swiggy", [restaurant_id, start_date, end_date])
+
+
+def get_sent_email(request):
+    print("get_sent_email in")
+    aggregator = request.GET.get("aggregator")
+    restaurant_id = request.GET.get("restaurant_id")
+    date_range = request.GET.get("selected_date_range")
+    print(date_range,"report_data.selected_date_range")
+    print(restaurant_id,"restaurant_id")
+
+    email_log = SentEmailLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        date_range=date_range
+    ).order_by("-timestamp").first()
+
+    if email_log:
+        return JsonResponse({
+            "subject": email_log.subject,
+            "body": email_log.body,
+            "to": email_log.recipients,
+            "recipients": email_log.recipients,
+            "cc": email_log.cc,
+            "timestamp": email_log.timestamp.strftime("%d-%b-%Y %H:%M")
+        })
+    else:
+        return JsonResponse({"message": "No email found!"}, status=404)
+
+
+def add_dispute_raised(aggregator, restaurant_id, date_range):
+    start_date_str, end_date_str = date_range.split(" to ")
+    start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+    end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+
+    print(start_date,"add_dipute")
+
+    print("add_dispute_raised")
+
+    # fp_order_date__range=(start_date, end_date)
+    # Get entries with fp_status="Pending" for the given range
+    pending_entries = SummeryLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        fp_status="PENDING",
+        fp_order_date__date__range=(start_date, end_date)
+        
+    )
+    print("GOKUL",pending_entries,"GOKUL")
+
+    for pending in pending_entries:
+        # Check if Dispute Raised already exists for the same order_id
+        already_exists = SummeryLog.objects.filter(
+            order_id=pending.order_id,
+            aggregator=aggregator,
+            restaurant_id=restaurant_id,
+            fp_status="Dispute Raised"
+        ).exists()
+        already_exists_1 = SummeryLog.objects.filter(
+            order_id=pending.order_id,
+            aggregator=aggregator,
+            restaurant_id=restaurant_id,
+            fp_status="Dispute Raised"
+        )
+        # print(already_exists,"already_exists000")
+        print(already_exists_1,"already_exists111")
+
+        if not already_exists:
+            SummeryLog.objects.create(
+                order_id=pending.order_id,
+                aggregator=aggregator,
+                restaurant_id=restaurant_id,
+                fp_status="Dispute Raised",
+                fp_order_date=pending.fp_order_date,
+                wrong_payout_settled=pending.wrong_payout_settled,
+                wrong_taxes_on_service_payment_fees=pending.wrong_taxes_on_service_payment_fees,
+                wrong_payment_mechanism_fee=pending.wrong_payment_mechanism_fee,
+                wrong_service_fee=pending.wrong_service_fee,
+                cancelled_order_amount_deducted_wrongly=pending.cancelled_order_amount_deducted_wrongly,
+                TDS_issue=pending.TDS_issue,
+                Wrong_penalty=pending.Wrong_penalty,
+                missing_order_with=pending.missing_order_with,
+            )
+def add_dispute_in_clarification(aggregator, restaurant_id, date_range):
+    start_date_str, end_date_str = date_range.split(" to ")
+    start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+    end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+
+    print(start_date,"add_dipute")
+
+    print("add_dispute_raised")
+
+    # fp_order_date__range=(start_date, end_date)
+    # Get entries with fp_status="Pending" for the given range
+    pending_entries = SummeryLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        fp_status="Dispute Raised",
+        fp_order_date__date__range=(start_date, end_date)
+        
+    )
+    print("GOKUL",pending_entries,"GOKUL")
+
+    for pending in pending_entries:
+        # Check if Dispute Raised already exists for the same order_id
+        already_exists = SummeryLog.objects.filter(
+            order_id=pending.order_id,
+            aggregator=aggregator,
+            restaurant_id=restaurant_id,
+            fp_status="Dispute in Clarification"
+        ).exists()
+        already_exists_1 = SummeryLog.objects.filter(
+            order_id=pending.order_id,
+            aggregator=aggregator,
+            restaurant_id=restaurant_id,
+            fp_status="Dispute in Clarification"
+        )
+        # print(already_exists,"already_exists000")
+        print(already_exists_1,"already_exists111")
+
+        if not already_exists:
+            SummeryLog.objects.create(
+                order_id=pending.order_id,
+                aggregator=aggregator,
+                restaurant_id=restaurant_id,
+                fp_status="Dispute in Clarification",
+                fp_order_date=pending.fp_order_date,
+                wrong_payout_settled=pending.wrong_payout_settled,
+                wrong_taxes_on_service_payment_fees=pending.wrong_taxes_on_service_payment_fees,
+                wrong_payment_mechanism_fee=pending.wrong_payment_mechanism_fee,
+                wrong_service_fee=pending.wrong_service_fee,
+                cancelled_order_amount_deducted_wrongly=pending.cancelled_order_amount_deducted_wrongly,
+                TDS_issue=pending.TDS_issue,
+                Wrong_penalty=pending.Wrong_penalty,
+                missing_order_with=pending.missing_order_with,
+            )
+
+
+def log_page(request):
+    return render(request, 'log_page.html')
+
+
+
+@csrf_exempt
+def get_summery_logs(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        restaurant_id = data.get("restaurant_id")
+        aggregator = data.get("aggregator")
+        from_date = parse_date(data.get("from_date")) if data.get("from_date") else None
+        to_date = parse_date(data.get("to_date")) if data.get("to_date") else None
+        search = data.get("search", "").lower()
+        print(from_date,to_date,"Freom and To")
+
+        logs = SummeryLog.objects.all()
+
+        if restaurant_id:
+            logs = logs.filter(restaurant_id=restaurant_id)
+        if aggregator:
+            logs = logs.filter(aggregator=aggregator)
+        if from_date and to_date:
+            logs = logs.filter(fp_order_date__range=(from_date, to_date))
+        if search:
+            logs = logs.filter(
+                Q(order_id__icontains=search) |
+                Q(fp_status__icontains=search)
+            )
+
+        issue_rows = []
+        for log in logs.order_by("-fp_order_date"):
+            issues = {
+                "Wrong Payout Settled": log.wrong_payout_settled,
+                "Wrong Taxes on Service Payment Fees": log.wrong_taxes_on_service_payment_fees,
+                "Wrong Payment Mechanism Fee": log.wrong_payment_mechanism_fee,
+                "Wrong Service Fee": log.wrong_service_fee,
+                "Cancelled Order Amount Deducted Wrongly": log.cancelled_order_amount_deducted_wrongly,
+                "TDS Issue": log.TDS_issue,
+                "Wrong Penalty": log.Wrong_penalty
+            }
+            for issue_type, detail in issues.items():
+                days_since_email = (date.today() - log.created_at.date()).days if log else None
+                # print(days_since_email,"days_since_email")
+
+                if detail and detail != "-":
+                    issue_rows.append({
+                        "order_id": log.order_id,
+                        "issue_type": issue_type,
+                        "details": detail,
+                        "fp_status": log.fp_status,
+                        "fp_order_date": log.fp_order_date if log.fp_order_date else "",
+                        "reconcilation_date":log.created_at,
+                        "restaurant_id":log.restaurant_id,
+                        "Aging":days_since_email,
+
+                    })
+
+        return JsonResponse({"logs": issue_rows})
+    
+    return JsonResponse({"success": False, "error": "Invalid request method"})
+
+
+
+@csrf_exempt
+def get_dropdown_options(request):
+    if request.method == "GET":
+        restaurant_ids = SummeryLog.objects.values_list("restaurant_id", flat=True).distinct()
+        aggregators = SummeryLog.objects.values_list("aggregator", flat=True).distinct()
+
+        print(restaurant_ids,"restaurant_ids")
+
+        return JsonResponse({
+            "restaurant_ids": list(restaurant_ids),
+            "aggregators": list(aggregators)
+        })
+    
+
+
+
+# def get_email_replies(request):
+#     aggregator = request.GET.get("aggregator")
+#     restaurant_id = request.GET.get("restaurant_id")
+#     client_name = request.GET.get("client_name")
+#     selected_date_range = request.GET.get("selected_date_range")
+#     print("get_email_replies in")
+
+#     client = ClientDetails.objects.filter(
+#         Q(zomato_restaurant_id=restaurant_id) | Q(swiggy_restaurant_id=restaurant_id)
+#     ).first()
+
+#     if not client or not client.email or not client.email_password:
+#         return JsonResponse({"replies": [], "error": "No client credentials found"}, status=400)
+
+#     subject_obj = SentEmailLog.objects.filter(
+#         aggregator=aggregator,
+#         restaurant_id=restaurant_id,
+#         date_range=selected_date_range,
+#     ).order_by('-timestamp').first()
+
+#     if not subject_obj:
+#         return JsonResponse({"replies": [], "error": "No sent email found for this filter"}, status=404)
+
+#     subject_filter = subject_obj.subject.strip()
+
+#     if aggregator == "Zomato" or aggregator == "Swiggy":
+#         replies = fetch_replies_from_gmail(
+#             client.email, 
+#             client.email_password, 
+#             subject_filter=subject_filter,
+#             sender_filter="@gmail.com"
+#         )
+
+#     stored_replies = []
+
+#     for reply in replies:
+#         # date_obj = datetime.strptime(reply["date"], "%a, %d %b %Y %H:%M:%S %z")
+
+#         try:
+#             date_obj = parsedate_to_datetime(reply["date"])  # Use parsedate_to_datetime from email.utils
+#         except Exception as e:
+#             print("Failed to parse date:", reply["date"], e)
+#             continue
+
+#         EmailConversation.objects.get_or_create(
+#         sent_email=subject_obj,
+#         from_email=reply["from"],
+#         to_email=client.email,
+#         subject=reply["subject"],
+#         body=reply["body"],
+#         date=date_obj
+#     )
+
+#         # Check if already exists
+#         # reply_obj, created = EmailReplyLog.objects.get_or_create(
+#         #     sent_email=subject_obj,
+#         #     subject=reply["subject"],
+#         #     sender=reply["from"],
+#         #     date=date_obj,
+#         #     defaults={"body": reply["body"]}
+#         # )
+
+#         # stored_replies.append({
+#         #     "from": reply_obj.sender,
+#         #     "subject": reply_obj.subject,
+#         #     "date": reply_obj.date.strftime("%d-%b-%Y %H:%M"),
+#         #     "body": reply_obj.body
+#         # })
+
+#     return JsonResponse({"replies": stored_replies})
+
+
+
+
+
+def get_email_replies(request):
+    aggregator = request.GET.get("aggregator")
+    restaurant_id = request.GET.get("restaurant_id")
+    client_name = request.GET.get("client_name")
+    selected_date_range = request.GET.get("selected_date_range")
+    print("get_email_replies in")
+
+    client = ClientDetails.objects.filter(
+        Q(zomato_restaurant_id=restaurant_id) | Q(swiggy_restaurant_id=restaurant_id)
+    ).first()
+
+    if not client or not client.email or not client.email_password:
+        return JsonResponse({"replies": [], "error": "No client credentials found"}, status=400)
+    
+    
+    # Construct subject pattern to search
+    subject_obj = SentEmailLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        date_range=selected_date_range,
+    ).order_by('-timestamp').first()
+
+    print(subject_obj.subject.strip(),"subject_obj.subject.strip()")
+    latest_log = SentEmailLog.objects.filter(
+    aggregator=aggregator,
+    restaurant_id=restaurant_id,
+    date_range=selected_date_range,
+        ).order_by('-timestamp').last()
+    
+    days_since_email = (date.today() - latest_log.timestamp.date()).days if latest_log else None
+
+
+    if not subject_obj:
+        return JsonResponse({"replies": [], "error": "No sent email found for this filter"}, status=404)
+
+    subject_filter = subject_obj.subject.strip()
+    # subject_filter = f"Issue in {aggregator} Payout from {selected_date_range}-{restaurant_id } ({client_name})"
+    # print(subject_filter,"subject_filter_get")
+    if aggregator == "Zomato":
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@gmail.com",since_days=days_since_email)
+    if aggregator == "Swiggy":
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@gmail.com",since_days=days_since_email)
+    # replies = fetch_replies_from_gmail(aggregator,restaurant_id)
+    print(replies,"function_Called")
+    for reply in replies:
+#         # date_obj = datetime.strptime(reply["date"], "%a, %d %b %Y %H:%M:%S %z")
+
+        try:
+            date_obj = parsedate_to_datetime(reply["date"])  # Use parsedate_to_datetime from email.utils
+        except Exception as e:
+            print("Failed to parse date:", reply["date"], e)
+            continue
+
+        EmailConversation.objects.get_or_create(
+        sent_email=subject_obj,
+        from_email=reply["from"],
+        to_email=client.email,
+        subject=reply["subject"],
+        body=reply["body"],
+        date=date_obj
+    )
+        
+        log = SentEmailLog.objects.filter(
+            aggregator=aggregator,
+            restaurant_id=restaurant_id,
+            date_range=selected_date_range
+        ).order_by("-timestamp").first()
+
+        if replies:
+            log.replies_json = replies
+            log.save()
+            print(f"Gmail replies saved to log ID: {log.id}")
+
+    return JsonResponse({"replies": replies})
+
+def clean_email_header(text):
+    if not text:
+        return ""
+    # Keep removing prefixes like Re:, Fwd: from the start
+    while True:
+        new_subject = re.sub(r"^(re:|fwd:)\s*", "", text, flags=re.IGNORECASE)
+        if new_subject == text:
+            break
+        text = new_subject
+
+    # Collapse multiple spaces/newlines to a single space
+    cleaned = re.sub(r"\s+", " ", text)
+    print(cleaned)
+    return cleaned.strip()
+
+
+@csrf_exempt 
+def send_reply_email(request):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            to_emails = [email.strip() for email in data.get("to", "").split(",") if email.strip()]
+            subject = data.get("subject")
+            message = data.get("body")
+            aggregator = data.get("aggregator")
+            restaurant_id = data.get("restaurant_id")
+            user_email = data.get("user_email")  # 👈 Make sure this comes from frontend
+            date_range=None
+
+
+            cleaned_subject = clean_email_header(subject)
+            print(cleaned_subject,"Cleaned_subject")
+            match = re.search(r'from (\d{2}-[A-Za-z]{3}-\d{4} to \d{2}-[A-Za-z]{3}-\d{4})', cleaned_subject)
+            if match:
+                date_range = match.group(1)
+                print(date_range,"date_range")  # Output: 24-Mar-2025 to 30-Mar-2025
+            else:
+                print("Date range not found")
+
+            # Get client
+            if aggregator == "Zomato":
+                client = ClientDetails.objects.filter(zomato_restaurant_id=restaurant_id).first()
+            elif aggregator == "Swiggy":
+                client = ClientDetails.objects.filter(swiggy_restaurant_id=restaurant_id).first()
+            else:
+                return JsonResponse({"message": "Invalid aggregator"}, status=400)
+
+            if not client or not client.email or not client.email_password:
+                return JsonResponse({"message": "Client SMTP config missing"}, status=400)
+
+            # Send email
+            connection = get_connection(
+                backend="django.core.mail.backends.smtp.EmailBackend",
+                host="smtp.gmail.com",
+                port=587,
+                username=client.email,
+                password=client.email_password,
+                use_tls=True,
+            )
+
+            email = EmailMessage(
+                subject=cleaned_subject,
+                body=message,
+                from_email=client.email,
+                to=to_emails,
+                connection=connection
+            )
+            email.content_subtype = "html"
+            email.send()
+            # subject=cleaned_subject,
+            #  Save reply to SentEmailLog
+            log = SentEmailLog.objects.filter(
+                subject=cleaned_subject,
+                aggregator=aggregator,
+                restaurant_id=restaurant_id
+            ).order_by("-timestamp").first()
+            print(log,"LOG_LOG")
+            add_dispute_in_clarification(aggregator, restaurant_id, date_range)
+            if log:
+                new_user_reply = {
+                    "from": user_email,
+                    "body": message,
+                    "date": now().strftime("%d-%b-%Y %H:%M")
+                }
+                replies = log.user_replies_json or []
+                replies.append(new_user_reply)
+                log.user_replies_json = replies
+                log.save()
+                print("Saved user reply in log id:", log.id)
+            
+
+            return JsonResponse({"message": "Reply sent and stored successfully!"})
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+
+# @csrf_exempt
+# def send_reply_email(request):
+#     try:
+#         if request.method == "POST":
+#             data = json.loads(request.body)
+#             to_emails = [email.strip() for email in data.get("to", "").split(",") if email.strip()]
+#             subject = data.get("subject")
+#             message = data.get("body")
+#             aggregator = data.get("aggregator")
+#             restaurant_id = data.get("restaurant_id")
+
+#             cleaned_subject = clean_email_header(subject)
+
+#             # Get client details based on aggregator and restaurant_id
+#             if aggregator == "Zomato":
+#                 client = ClientDetails.objects.filter(zomato_restaurant_id=restaurant_id).first()
+#             elif aggregator == "Swiggy":
+#                 client = ClientDetails.objects.filter(swiggy_restaurant_id=restaurant_id).first()
+#             else:
+#                 return JsonResponse({"message": "Invalid aggregator"}, status=400)
+
+#             if not client or not client.email or not client.email_password:
+#                 return JsonResponse({"message": "Client SMTP config missing"}, status=400)
+            
+
+#             # Combine all recipients
+#             # to_emails.extend([email.strip() for email in to_emails if email.strip()]) 
+
+#             # Create SMTP connection
+#             connection = get_connection(
+#                 backend="django.core.mail.backends.smtp.EmailBackend",
+#                 host="smtp.gmail.com",
+#                 port=587,
+#                 username=client.email,
+#                 password=client.email_password,
+#                 use_tls=True,
+#             )
+
+#             # Compose and send email
+#             email = EmailMessage(
+#                 subject=cleaned_subject,
+#                 body=message,
+#                 from_email=client.email,
+#                 to=to_emails,
+#                 connection=connection
+#             )
+#             email.content_subtype = "html"
+#             email.send()
+
+#             return JsonResponse({"message": "Reply sent successfully!"})
+#         return JsonResponse({"error": "Invalid method"}, status=405)
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)
+
+
+
+@csrf_exempt
+def resend_email(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+
+            subject = data.get("subject")
+            recipients = data.get("recipients", "").split(",")
+            cc = data.get("cc", "").split(",") if data.get("cc") else []
+            body = data.get("body")
+
+            # Fetch from session
+            aggregator = request.session.get("aggregator")
+            restaurant_id = request.session.get("restaurant_id")
+
+            if not subject or not recipients or not body or not aggregator or not restaurant_id:
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            # Get the correct sender email based on aggregator
+            from_email = None
+            try:
+                client = ClientDetails.objects.get(**{
+                    f"{aggregator.lower()}_restaurant_id": restaurant_id
+                })
+                from_email = getattr(client, f"{aggregator.lower()}_finance_poc", None)
+            except ClientDetails.DoesNotExist:
+                return JsonResponse({"error": "ClientDetails not found for this aggregator and restaurant"}, status=404)
+
+            if not from_email:
+                return JsonResponse({"error": "Sender email not found in ClientDetails"}, status=404)
+
+            if client.email and client.email_password:
+                connection = get_connection(
+                    backend="django.core.mail.backends.smtp.EmailBackend",
+                    host="smtp.gmail.com",
+                    port=587,
+                    username=client.email,
+                    password=client.email_password,
+                    use_tls=True,
+                )
+            else:
+                connection = get_connection()
+
+            email = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=from_email,
+                to=recipients,
+                cc=cc,
+                connection=connection
+            )
+            email.content_subtype = "html"
+            email.send()
+
+            return JsonResponse({"message": "Email resent successfully"})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request method"}, status=405)

@@ -18,6 +18,9 @@
     <title>Demo: FlyerPay</title>
 
     <meta name="description" content="" />
+    
+    <!-- Bootstrap icon -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../static/img/favicon/favicon.ico" />
@@ -116,28 +119,35 @@
         margin: 20px auto;
         display: flex;
         justify-content: center;
-        gap: 10px;
+        gap: 20px;
+        padding:5px
+
     }
+
     #aggregator_select{
         margin-bottom:5px;
+        
         height:20px;
-        width: 50%;
+        width: 100%;
         
     }
     #client_select{
         margin-bottom:5px;
         height:20px;
-        width: 50%;
+        width: 100%;
+       
     }
     #restaurant_select{
         margin-bottom:5px;
         height:20px;
-        width: 50%;
+        width: 100%;
+       
     }
     #date_range_select{
         margin-bottom:5px;
+        
         height:20px;
-        width: 50%;
+        width: 100%;
     }
 
     select, input {
@@ -304,6 +314,12 @@
                   <div data-i18n="Page 3">Aggregator</div>
                 </a>
               </li>
+            <li class="menu-item">
+                <a href="{% url 'log_page' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Logs</div>
+                </a>
+              </li>
           </ul>
         </aside>
 
@@ -399,33 +415,33 @@
       <form method="get">
           <!-- Aggregator Dropdown -->
           <select name="aggregator" id="aggregator_select" required>
-              <option value="">Select Aggregator</option>
-              {% for agg in aggregators %}
-                  <option value="{{ agg }}" {% if aggregator == agg %}selected{% endif %}>
-                      {{ agg }}
-                  </option>
-              {% endfor %}
-          </select>
+            <option value="">Select Aggregator</option>
+            {% for agg in aggregators %}
+                <option value="{{ agg }}" {% if aggregator == agg %}selected{% endif %}>
+                    {{ agg }}
+                </option>
+            {% endfor %}
+        </select>
 
-          <!-- Client Name Dropdown -->
-          <select name="client_name" id="client_select" required>
-              <option value="">Select Client</option>
-              {% for client in clients %}
-                  <option value="{{ client }}"  {% if client_name == client %}selected{% endif %}>
-                      {{ client }}
-                  </option>
-              {% endfor %}
-          </select>
+        <!-- Client Name Dropdown -->
+        <select name="client_name" id="client_select" required>
+            <option value="">Select Client</option>
+            {% for client in clients %}
+                <option value="{{ client }}"  {% if client_name == client %}selected{% endif %}>
+                    {{ client }}
+                </option>
+            {% endfor %}
+        </select>
 
           <!-- Restaurant ID Dropdown (Initially Hidden) -->
           <select name="restaurant_id" id="restaurant_select" required style="display:none;">
-              <option value="" >Select Restaurant</option>
-          </select>
-
-          <!-- Date Range Dropdown -->
-          <select name="date_range" id="date_range_select" required>
-              <option value="" >Select Date Range</option>
-          </select>
+            <option value="" >Select Restaurant</option>
+        </select>
+        <br>
+            <!-- Date Range Dropdown -->
+        <select name="date_range" id="date_range_select" required>
+            <option value="" >Select Date Range</option>
+        </select>
 
           <br>
           <button type="submit" class="btn btn-success">Apply Filters</button>
@@ -457,7 +473,7 @@
                 <td>{{ report_data.missing_orders_count }}</td>
                 <td>{{ report_data.expected_payout }}</td>
                 <td>{{ report_data.actual_payout }}</td>
-                {% if report_data.difference <= -1 %}
+                {% if report_data.difference < 0 %}
                 <td style="color:red;">{{ report_data.difference }}</td>
                 {% else %}
                 <td>{{ report_data.difference }}</td>
@@ -542,7 +558,7 @@
 {% if report_data.aggregator == "Zomato" %}
 <table border="1">
      <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
-        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <div style="color: black; font-weight: bold;">Ledgers:</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
@@ -583,6 +599,8 @@
           <th> Wrong Deduction in Merchant Refound Approved by Client</th>
           
           <th> Wrong Amount Setteled in Bank</th>
+          <th> Status</th>
+          <th> Email Aging</th>
           {% comment %} <th> Wrong CPC Ads Cost Deducted</th> {% endcomment %}
           {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
       </tr>
@@ -593,7 +611,7 @@
         <tr id="cancelled" style="background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8));
         padding: 8px;
         border-radius: 5px;
-        color: black; font-weight: bold;">
+        color: black; font-weight: bold;"> 
             <td>{{ pending.order_id }}</td>
             <td style="white-space: nowrap;">{{ pending.fp_order_date }}</td>
             <td>{{ pending.fp_status }}</td>
@@ -627,7 +645,45 @@
             <td>{{ pending. }}-</td>
             
             <td>{{ pending. }}-</td>
-            {% comment %} <td>{{ pending. }}-</td> {% endcomment %}
+            
+            {% comment %} <td>{{ pending.Reconcilation_status }}</td> {% endcomment %}
+            <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}">
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
+
+              </tr>
             
             {% comment %} <td>{{ pending. }}</td> {% endcomment %}
             {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
@@ -669,8 +725,42 @@
             <td>{{ pending. }}-</td>
             
             <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
+            <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}">
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
+              </tr>
     {% elif pending.fp_taxes_on_service_payment_fees != "-" or pending.wrong_payment_mechanism_fee != "-" or pending.cancelled_order_amount_deducted_wrongly != "-" or pending.TDS_issue != "-" or pending.Wrong_penalty != "-" or pending.wrong_service_fee != "-" %}
         <tr id="single_issue" style="background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8));
         padding: 8px;
@@ -709,9 +799,42 @@
             <td>{{ pending. }}-</td>
             
             <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
-        </tr>
+            
+            <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}">
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td> 
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}      </tr>
         {% else %}
         <tr  style=" font-weight: bold;">
             <td>{{ pending.order_id }}</td>
@@ -747,9 +870,43 @@
             <td>{{ pending. }}-</td>
             
             <td>{{ pending. }}-</td>
-            <td>{{ pending. }}-</td>
-            {% comment %} <td>{{ pending. }}</td> {% endcomment %}
-        </tr>
+            
+            <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}">
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
+                    </tr>
         {% endif %}
     {% endfor %}
   </tbody>
@@ -759,7 +916,7 @@
 
 <table border="1">
     <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
-        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <div style="color: black; font-weight: bold;">Ledgers:</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
@@ -800,7 +957,8 @@
           <th> Wrong Packaging Charge</th>
           <th> Wrong Deduction in Merchant Refound Approved by Client</th>
           <th> Wrong Amount Setteled in Bank</th>
-          <th> Wrong CPC Ads Cost Deducted</th>
+          <th> Status</th>
+          <th> Email Aging</th>
           {% comment %} <th> Wrong Call Center Service Charge Deducted</th> {% endcomment %}
       </tr>
   </thead>
@@ -846,7 +1004,41 @@
               <td>{{ pending. }}-</td>
               
               <td>{{ pending. }}-</td>
-              <td>{{ pending.}}-</td>
+              <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}">
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
           </tr>
           {% comment %} {% elif  pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_payment_mechanism_fee != "-" or pending.fp_taxes_on_service_payment_fees != "-" and pending.wrong_service_fee != "-"  or pending.fp_taxes_on_service_payment_fees != "-" and pending.TDS_issue != "-"    or pending.fp_taxes_on_service_payment_fees != "-" and pending.Wrong_penalty != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.wrong_service_fee != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.TDS_issue != "-"  or pending.wrong_payment_mechanism_fee != "-" and pending.Wrong_penalty != "-"  or pending.wrong_service_fee != "-" and pending.TDS_issue != "-" or pending.wrong_service_fee != "-" and pending.Wrong_penalty != "-" or pending.TDS_issue != "-" and pending.Wrong_penalty != "-" %} {% endcomment %}
@@ -890,7 +1082,41 @@
               <td>{{ pending. }}-</td>
               
               <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
+              <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}" >
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
           </tr>
         
@@ -934,7 +1160,41 @@
               <td>{{ pending. }}-</td>
               
               <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
+              <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}" >
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
           </tr>
           {% else %}
@@ -974,7 +1234,41 @@
               <td>{{ pending. }}-</td>
               
               <td>{{ pending. }}-</td>
-              <td>{{ pending. }}-</td>
+              <td>
+                <div class="status-container" data-order-id="{{ pending.order_id }}" data-aggregator="{{ report_data.aggregator }}" data-restaurant-id="{{ report_data.restaurant_id }}" >
+                    <span class="status-text">{{ pending.Reconcilation_status }}</span>
+                    <select class="status-dropdown" style="display: none;">
+                      <option value="Pending" {% if pending.Reconcilation_status == "Pending" %}selected{% endif %}>Pending</option>
+                      <option value="Dispute Raised" {% if pending.Reconcilation_status == "Dispute Raised" %}selected{% endif %}>Dispute Raised</option>
+                      <option value="Dispute in Clarification" {% if pending.Reconcilation_status == "Dispute in Clarification" %}selected{% endif %}>Dispute in Clarification</option>
+                      <option value="Issue Resolved" {% if pending.Reconcilation_status == "Issue Resolved" %}selected{% endif %}>Issue Resolved</option>
+                    </select>
+                    <button class="edit-btn btn-sm btn btn-primary"> <i class="bi bi-pencil-square"></i></button>
+                    {% if pending.Reconcilation_status != "PENDING" %}
+                    <button class="view-email-btn btn btn-sm btn-info" style="padding: 2px 6px; font-size: 10px;"
+                        data-aggregator="{{ report_data.aggregator }}"
+                        data-restaurant-id="{{ report_data.restaurant_id }}"
+                        data-date-range="{{ report_data.selected_date_range }}"
+                        data-client-name="{{ report_data.client_name }}"><i class="bi bi-envelope-check"></i></button>
+                        {% comment %} <p>{{report_data.days_since_last_email}} Days</p> {% endcomment %}
+                    {% endif %}
+                    <div class="btn-group d-flex align-items-center" style="gap: 4px; display: flex;">
+                        <button class="save-btn btn  btn-success" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-check2"></i>
+                        </button>
+                        <button class="cancel-btn btn  btn-secondary" style="display: none; padding: 2px 6px; font-size: 10px; ">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                  </div>
+              </td>
+              {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
+              <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
+                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                </td>
+                {% else %}
+                <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
+                {% endif %}
               {% comment %} <td>{{ pending. }}</td> {% endcomment %}
           </tr>
           {% endif %}
@@ -1234,9 +1528,94 @@
               }
           });
 
+          //stsus_resolved_raised
 
+          document.querySelectorAll('.status-container').forEach(container => {
+            //alert("HAI")
+            const statusText = container.querySelector('.status-text');
+            const dropdown = container.querySelector('.status-dropdown');
+            const editBtn = container.querySelector('.edit-btn');
+            const saveBtn = container.querySelector('.save-btn');
+            const cancelBtn = container.querySelector('.cancel-btn');
+          
+            const orderId = container.getAttribute('data-order-id');
+            const aggregator = container.getAttribute('data-aggregator');
+            const restaurant_id = container.getAttribute('data-restaurant-id');
 
+            console.log("Order ID:", orderId);
+            console.log("Aggregator:", aggregator);
+            //alert(orderId,aggregator)
+          
+            // Handle Edit
+            editBtn.addEventListener('click', () => {
+              statusText.style.display = 'none';
+              dropdown.style.display = 'inline-block';
+              saveBtn.style.display = 'inline-block';
+              cancelBtn.style.display = 'inline-block';
+              editBtn.style.display = 'none';
+            });
 
+            console.log("after edit Order ID:", orderId);
+            console.log("after edit  Aggregator:", aggregator);
+          
+            // Handle Cancel
+            cancelBtn.addEventListener('click', () => {
+              dropdown.value = statusText.innerText;  // Reset to original
+              dropdown.style.display = 'none';
+              saveBtn.style.display = 'none';
+              cancelBtn.style.display = 'none';
+              statusText.style.display = 'inline-block';
+              editBtn.style.display = 'inline-block';
+            });
+          
+            // Handle Save
+            saveBtn.addEventListener('click', () => {
+              const newStatus = dropdown.value;
+          
+              fetch('/update-reconciliation-status/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                  order_id: orderId,
+                  reconciliation_status: newStatus,
+                  aggregator: aggregator,
+                  restaurant_id:restaurant_id
+                })
+              })
+              .then(response => response.json())
+.then(data => {
+  if (data.success) {
+    statusText.innerText = newStatus;
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Status Updated!',
+      text: `Reconciliation status changed to "${newStatus}".`,
+      timer: 2000,
+      showConfirmButton: false
+    });
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Update Failed',
+      text: data.error || 'Failed to update status.'
+    });
+  }
+
+  // Reset view
+  dropdown.style.display = 'none';
+  saveBtn.style.display = 'none';
+  cancelBtn.style.display = 'none';
+  statusText.style.display = 'inline-block';
+  editBtn.style.display = 'inline-block';
+});
+            });
+          });
+          
+          
 
             
           document.addEventListener("DOMContentLoaded", function () {
@@ -1347,7 +1726,11 @@
                         <td>{{ report_data.expected_payout }}</td>
                         <td>{{ report_data.actual_payout }}</td>
                         {% if report_data.difference %}{% endif %}
+                        {% if report_data.difference < 0 %}
                         <td style="color:red; font-weight: bold;">{{ report_data.difference }}</td>
+                        {% else %}
+                        <td style="font-weight: bold;">{{ report_data.difference }}</td>
+                        {% endif %}
                         {% if report_data.missing_orders and report_data.pending_orders  %}
                         <td>Orders Missing,Wrong Taxes on Service Payment Fees Deducted</td>
                         {% elif report_data.missing_orders  %}
@@ -1401,7 +1784,7 @@
             <h3>1. Pending Orders</h3>
             {% endif %}
             <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
-        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <div style="color: black; font-weight: bold;">Ledgers:</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
@@ -1702,7 +2085,7 @@
             <h3>1. Pending Orders</h3>
             {% endif %}
             <div style="display: flex; gap: 5px; margin-top: 10px; margin-bottom: 10px; ">
-        <div style="color: black; font-weight: bold;">Ledges:</div>
+        <div style="color: black; font-weight: bold;">Ledgers:</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(240, 205, 49, 0.85), rgba(243, 228, 88, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_cancelled()"></button><div style="color: black; font-weight: bold;">Cancelled</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(245, 154, 18, 0.85), rgba(243, 228, 88, 0.83)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_two_or_more_issues()"></button><div style="color: black; font-weight: bold;" >Two or more issues</div>
         <button style="width: 20px; height: 20px; background: linear-gradient(to right, rgba(255, 255, 204, 0.8), rgba(255, 250, 180, 0.8)); border-radius: 50%; border: none; cursor: pointer;" onclick="show_only_single_issue()"></button><div style="color: black; font-weight: bold;" >Single issue</div>
@@ -2105,6 +2488,7 @@
                 button: "OK",
             }).then(() => {
                 document.getElementById("emailContentContainer").style.display = "none"; // Hide after confirmation
+                location.reload(); 
             });
         })
         .catch(error => {
@@ -2118,8 +2502,1162 @@
         });
     }
 
+// view email
 
 
+
+
+document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.clientName;
+  
+      // Show loader
+      Swal.fire({
+        title: "Fetching email...",
+        html: "Please wait while we fetch the email and replies.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      try {
+        const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
+        const repliesData = await repliesRes.json();
+  
+        const sentRes = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+        const sentData = await sentRes.json();
+  
+        Swal.close();
+  
+        if (sentData.subject) {
+          let repliesHTML = '';
+  
+          if (repliesData.replies?.length) {
+            [...repliesData.replies].reverse().forEach((r, index) => {
+              repliesHTML += `
+                <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+                  <strong>From:</strong> ${r.from}<br>
+                  <strong>Subject:</strong> ${r.subject}<br>
+                  <strong>Date:</strong> ${r.date}<br><br>
+                  <pre>${r.body}</pre>
+                  <button class="btn btn-sm btn-primary reply-btn"
+                          data-from="${r.from}"
+                          data-subject="${r.subject}"
+                          style="margin-top:10px;">Reply</button>
+                </div>
+              `;
+            });
+          } else {
+            repliesHTML = `
+              <div style="background:#fff3cd;padding:10px;border-radius:5px;border:1px solid #ffeeba;">
+                <strong>To:</strong> ${sentData.to}<br>
+                <strong>Subject:</strong> ${sentData.subject}<br><br>
+                <pre>${sentData.body}</pre>
+              </div>
+            `;
+          }
+  
+          const fallbackReply = repliesData.replies?.[0] || { from: sentData.to, subject: sentData.subject };
+  
+          Swal.fire({
+            title: '📨 Email Thread',
+            html: `
+              <div style="text-align:left">
+                <h4>${repliesData.replies?.length ? "Replies" : "Sent Mail"}:</h4>
+                ${repliesHTML}
+              </div>
+            `,
+            width: '90%',
+            showConfirmButton: true,
+            confirmButtonText: '✉️ Reply',
+            preConfirm: () => {
+              return {
+                mode: "reply",
+                to: fallbackReply.from,
+                subject: `Re: ${fallbackReply.subject}`,
+                body: "",
+                aggregator,
+                restaurant_id
+              };
+            }
+          }).then(result => {
+            if (result.isConfirmed) {
+              showReplyModal(result.value);
+            }
+          });
+  
+          // Handle reply buttons if replies exist
+          setTimeout(() => {
+            document.querySelectorAll(".reply-btn").forEach(replyBtn => {
+              replyBtn.addEventListener("click", () => {
+                const replyTo = replyBtn.dataset.from;
+                const replySubject = replyBtn.dataset.subject;
+  
+                showReplyModal({
+                  mode: "reply",
+                  to: replyTo,
+                  subject: `Re: ${replySubject}`,
+                  body: "",
+                  aggregator,
+                  restaurant_id
+                });
+              });
+            });
+          }, 200);
+  
+        } else {
+          Swal.fire("Not found", "No email was sent for this combination.", "info");
+        }
+  
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Something went wrong while fetching data.", "error");
+      }
+    });
+  });
+  
+  // Function to show reply modal
+  function showReplyModal(payload) {
+    Swal.fire({
+      title: "✉️ Reply",
+      html: `
+        <label>To</label>
+        <input id="reply-to" class="swal2-input" value="${payload.to}">
+        <label>Subject</label>
+        <input id="reply-subject" class="swal2-input" value="${payload.subject}">
+        <label>Message</label>
+        <div id="reply-body" contenteditable="true"
+             style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;"></div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Send Reply",
+      preConfirm: () => {
+        return {
+          to: document.getElementById("reply-to").value,
+          subject: document.getElementById("reply-subject").value,
+          body: document.getElementById("reply-body").innerHTML,
+          mode: "reply",
+          aggregator: payload.aggregator,
+          restaurant_id: payload.restaurant_id
+        };
+      }
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch("/send_reply_email/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          body: JSON.stringify(result.value)
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.message) {
+            Swal.fire("✅ Reply Sent", response.message, "success");
+          } else {
+            Swal.fire("Error", response.error || "Failed to send", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Request failed", "error");
+        });
+      }
+    });
+  }
+  
+  // CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+  
+
+
+
+
+
+
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.clientName;
+  
+      // Show loader
+      Swal.fire({
+        title: "Fetching email...",
+        html: "Please wait while we fetch the email and replies.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      try {
+        const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
+        const repliesData = await repliesRes.json();
+  
+        const sentRes = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+        const sentData = await sentRes.json();
+  
+        Swal.close();
+  
+        if (sentData.subject) {
+          let repliesHTML = '';
+          repliesData.replies?.forEach((r, index) => {
+            repliesHTML += `
+              <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+                <strong>From:</strong> ${r.from}<br>
+                <strong>Subject:</strong> ${r.subject}<br>
+                <strong>Date:</strong> ${r.date}<br><br>
+                <pre>${r.body}</pre>
+                <button class="btn btn-sm btn-primary reply-btn"
+                        data-from="${r.from}"
+                        data-subject="${r.subject}"
+                        style="margin-top:10px;">Reply</button>
+              </div>
+            `;
+          });
+  
+          const lastReply = repliesData.replies?.[0];
+  
+          Swal.fire({
+            title: '📨 Email Thread',
+            html: `
+              <div style="text-align:left">
+                <h4>Replies:</h4>
+                ${repliesHTML || '<p>No replies yet.</p>'}
+              </div>
+            `,
+            width: '90%',
+            showConfirmButton: !!lastReply,
+            confirmButtonText: '✉️ Reply to Last Mail',
+            preConfirm: () => {
+              return {
+                mode: "reply",
+                to: lastReply?.from,
+                subject: `Re: ${lastReply?.subject || sentData.subject}`,
+                body: "",
+                aggregator,
+                restaurant_id
+              };
+            }
+          }).then(result => {
+            if (result.isConfirmed) {
+              showReplyModal(result.value);
+            }
+          });
+  
+          // Handle specific reply button clicks
+          setTimeout(() => {
+            document.querySelectorAll(".reply-btn").forEach(replyBtn => {
+              replyBtn.addEventListener("click", () => {
+                const replyTo = replyBtn.dataset.from;
+                const replySubject = replyBtn.dataset.subject;
+  
+                showReplyModal({
+                  mode: "reply",
+                  to: replyTo,
+                  subject: `Re: ${replySubject}`,
+                  body: "",
+                  aggregator,
+                  restaurant_id
+                });
+              });
+            });
+          }, 200);
+  
+        } else {
+          Swal.fire("Not found", "No email was sent for this combination.", "info");
+        }
+  
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Something went wrong while fetching data.", "error");
+      }
+    });
+  });
+  
+  // Function to show reply modal
+  function showReplyModal(payload) {
+    Swal.fire({
+      title: "✉️ Reply",
+      html: `
+        <label>To</label>
+        <input id="reply-to" class="swal2-input" value="${payload.to}">
+        <label>Subject</label>
+        <input id="reply-subject" class="swal2-input" value="${payload.subject}">
+        <label>Message</label>
+        <div id="reply-body" contenteditable="true"
+             style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;"></div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Send Reply",
+      preConfirm: () => {
+        return {
+          to: document.getElementById("reply-to").value,
+          subject: document.getElementById("reply-subject").value,
+          body: document.getElementById("reply-body").innerHTML,
+          mode: "reply",
+          aggregator: payload.aggregator,
+          restaurant_id: payload.restaurant_id
+        };
+      }
+    }).then(result => {
+      if (result.isConfirmed) {
+        fetch("/send_reply_email/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+          },
+          body: JSON.stringify(result.value)
+        })
+        .then(res => res.json())
+        .then(response => {
+          if (response.message) {
+            Swal.fire("✅ Reply Sent", response.message, "success");
+          } else {
+            Swal.fire("Error", response.error || "Failed to send", "error");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          Swal.fire("Error", "Request failed", "error");
+        });
+      }
+    });
+  }
+  
+  // CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  } {% endcomment %}
+  
+
+
+
+
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.clientName;
+  
+      // Show loading while fetching emails
+      Swal.fire({
+        title: "Fetching email...",
+        html: "Please wait while we fetch the email and replies.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      try {
+        // Fetch replies
+        const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
+        const repliesData = await repliesRes.json();
+  
+        // Fetch sent email
+        const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+        const data = await res.json();
+  
+        Swal.close(); // Hide loading
+  
+        if (data.subject) {
+          let repliesHTML = '';
+          repliesData.replies?.forEach((r, index) => {
+            repliesHTML += `
+              <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+                <strong>From:</strong> ${r.from}<br>
+                <strong>Subject:</strong> ${r.subject}<br>
+                <strong>Date:</strong> ${r.date}<br><br>
+                <pre>${r.body}</pre>
+                <button class="btn btn-sm btn-primary reply-btn" 
+                        data-from="${r.from}" 
+                        data-subject="${r.subject}" 
+                        style="margin-top:10px;">Reply</button>
+              </div>
+            `;
+          });
+  
+          const lastReply = repliesData.replies?.[0];
+  
+          Swal.fire({
+            title: '📧 Edit & Resend or Reply',
+            html: `
+              <div style="text-align:left">
+                <h4>Replies:</h4>
+                ${repliesHTML || '<p>No replies yet.</p>'}
+                <hr>
+                <label>Subject</label>
+                <input id="swal-subject" class="swal2-input" value="${data.subject}">
+                <label>Recipients</label>
+                <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
+                <label>CC</label>
+                <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
+                <label>Email Body</label>
+                <div id="swal-body" contenteditable="true"
+                     style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
+                  ${data.body}
+                </div>
+              </div>
+            `,
+            width: '90%',
+            showDenyButton: !!lastReply,
+            confirmButtonText: '📨 Resend Email',
+            denyButtonText: '✉️ Reply to Last Mail',
+            preConfirm: () => {
+              return {
+                mode: "resend",
+                subject: document.getElementById('swal-subject').value,
+                recipients: document.getElementById('swal-recipients').value,
+                cc: document.getElementById('swal-cc').value,
+                body: document.getElementById('swal-body').innerHTML
+              };
+            },
+            preDeny: () => {
+              return {
+                mode: "reply",
+                to: lastReply?.from,
+                subject: `${lastReply?.subject || data.subject}`,
+                body: document.getElementById('swal-body').innerHTML,
+                aggregator,
+                restaurant_id
+              };
+            }
+          }).then(result => {
+            if (result.isConfirmed || result.isDenied) {
+              const payload = result.value;
+              const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/resend_email/";
+  
+              fetch(endpoint, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify(payload)
+              })
+                .then(res => res.json())
+                .then(response => {
+                  if (response.message) {
+                    Swal.fire(" Success", response.message, "success");
+                  } else {
+                    Swal.fire("Error", response.error || "Unknown error", "error");
+                  }
+                })
+                .catch(err => {
+                  console.error(err);
+                  Swal.fire("Error", "Failed to send email", "error");
+                });
+            }
+          });
+  
+          // Attach reply event listeners after DOM is ready
+          setTimeout(() => {
+            document.querySelectorAll(".reply-btn").forEach(replyBtn => {
+              replyBtn.addEventListener("click", () => {
+                const replyTo = replyBtn.dataset.from;
+                const replySubject = replyBtn.dataset.subject;
+  
+                Swal.fire({
+                  title: "✉️ Reply to This Email",
+                  html: `
+                    <label>To</label>
+                    <input id="reply-to" class="swal2-input" value="${replyTo}">
+                    <label>Subject</label>
+                    <input id="reply-subject" class="swal2-input" value="Re: ${replySubject}">
+                    <label>Message</label>
+                    <div id="reply-body" contenteditable="true"
+                         style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;"></div>
+                  `,
+                  showCancelButton: true,
+                  confirmButtonText: "Send Reply",
+                  preConfirm: () => {
+                    return {
+                      to: document.getElementById("reply-to").value,
+                      subject: document.getElementById("reply-subject").value,
+                      body: document.getElementById("reply-body").innerHTML,
+                      mode: "reply",
+                      aggregator,
+                      restaurant_id
+                    };
+                  }
+                }).then(result => {
+                  if (result.isConfirmed) {
+                    const payload = result.value;
+  
+                    fetch("/send_reply_email/", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                      },
+                      body: JSON.stringify(payload)
+                    })
+                      .then(res => res.json())
+                      .then(response => {
+                        if (response.message) {
+                          Swal.fire("✅ Reply Sent", response.message, "success");
+                        } else {
+                          Swal.fire("Error", response.error || "Failed to send", "error");
+                        }
+                      })
+                      .catch(err => {
+                        console.error(err);
+                        Swal.fire("Error", "Request failed", "error");
+                      });
+                  }
+                });
+              });
+            });
+          }, 200);
+  
+        } else {
+          Swal.fire("Not found", "No email was sent for this combination.", "info");
+        }
+  
+      } catch (err) {
+        console.error(err);
+        Swal.fire("Error", "Something went wrong while fetching data.", "error");
+      }
+    });
+  });
+  
+  // CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+   {% endcomment %}
+
+
+
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.clientName;
+      alert(client_name)
+  
+      // Fetch replies
+      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
+      const repliesData = await repliesRes.json();
+  
+      // Fetch sent email
+      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+      const data = await res.json();
+  
+      if (data.subject) {
+        let repliesHTML = '';
+        repliesData.replies?.forEach(r => {
+          repliesHTML += `
+            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+              <strong>From:</strong> ${r.from}<br>
+              <strong>Subject:</strong> ${r.subject}<br>
+              <strong>Date:</strong> ${r.date}<br><br>
+              <pre>${r.body}</pre>
+            </div>
+          `;
+        });
+  
+        // Get last reply (for replying directly)
+        const lastReply = repliesData.replies?.[0]; // Assuming replies are sorted latest first
+  
+        Swal.fire({
+          title: '📧 Edit & Resend or Reply',
+          html: `
+            <div style="text-align:left">
+              <h4>Replies:</h4>
+              ${repliesHTML || '<p>No replies yet.</p>'}
+              <hr>
+              <label>Subject</label>
+              <input id="swal-subject" class="swal2-input" value="${data.subject}">
+              <label>Recipients</label>
+              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
+              <label>CC</label>
+              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
+              <label>Email Body</label>
+              <div id="swal-body" contenteditable="true"
+                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
+                ${data.body}
+              </div>
+            </div>
+          `,
+          width: '90%',
+          showDenyButton: !!lastReply,
+          confirmButtonText: '📨 Resend Email',
+          denyButtonText: '✉️ Reply to Last Mail',
+          preConfirm: () => {
+            return {
+              mode: "resend",
+              subject: document.getElementById('swal-subject').value,
+              recipients: document.getElementById('swal-recipients').value,
+              cc: document.getElementById('swal-cc').value,
+              body: document.getElementById('swal-body').innerHTML
+            };
+          },
+          preDeny: () => {
+            return {
+              mode: "reply",
+              to: lastReply?.from,
+              subject: `${lastReply?.subject || data.subject}`,
+              body: document.getElementById('swal-body').innerHTML,
+              aggregator,
+              restaurant_id
+            };
+          }
+        }).then(result => {
+          if (result.isConfirmed || result.isDenied) {
+            const payload = result.value;
+  
+            // Set correct endpoint
+            const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/resend_email/";
+  
+            fetch(endpoint, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+              },
+              body: JSON.stringify(payload)
+            })
+              .then(res => res.json())
+              .then(response => {
+                if (response.message) {
+                  Swal.fire("✅ Success", response.message, "success");
+                } else {
+                  Swal.fire(" Error", response.error || "Unknown error occurred", "error");
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                Swal.fire(" Error", "Failed to send email", "error");
+              });
+          }
+        });
+      } else {
+        Swal.fire("Not found", "No email was sent for this combination.", "info");
+      }
+    });
+  });
+  
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  } {% endcomment %}
+  
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    
+    button.addEventListener("click", async function () {
+        //alert("Hai")
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.client_name;
+  
+      // Fetch replies
+      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}`);
+      const repliesData = await repliesRes.json();
+        //alert("repliesData")
+      // Fetch sent email
+      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+      const data = await res.json();
+
+      //alert(data)
+
+  
+      if (data.subject) {
+        let repliesHTML = '';
+        repliesData.replies?.forEach(r => {
+          repliesHTML += `
+            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+              <strong>From:</strong> ${r.from}<br>
+              <strong>Subject:</strong> ${r.subject}<br>
+              <strong>Date:</strong> ${r.date}<br><br>
+              <pre>${r.body}</pre>
+            </div>
+          `;
+        });
+  
+        // Get last reply (for replying directly)
+        const lastReply = repliesData.replies?.[0]; // Assuming replies are sorted latest first
+  
+        Swal.fire({
+          title: '📧 Edit & Resend or Reply',
+          html: `
+            <div style="text-align:left">
+              <h4>Replies:</h4>
+              ${repliesHTML || '<p>No replies yet.</p>'}
+              <hr>
+              <label>Subject</label>
+              <input id="swal-subject" class="swal2-input" value="${data.subject}">
+              <label>Recipients</label>
+              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
+              <label>CC</label>
+              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
+              <label>Email Body</label>
+              <div id="swal-body" contenteditable="true"
+                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
+                ${data.body}
+              </div>
+            </div>
+          `,
+          width: '90%',
+          showDenyButton: !!lastReply,
+          confirmButtonText: '📨 Resend Email',
+          denyButtonText: '✉️ Reply to Last Mail',
+          preConfirm: () => {
+            return {
+              mode: "resend",
+              subject: document.getElementById('swal-subject').value,
+              recipients: document.getElementById('swal-recipients').value,
+              cc: document.getElementById('swal-cc').value,
+              body: document.getElementById('swal-body').innerHTML,
+              
+
+
+            };
+          },
+          preDeny: () => {
+            return {
+              mode: "reply",
+              to: lastReply?.from,
+              subject: `Re: ${lastReply?.subject || data.subject}`,
+              body: document.getElementById('swal-body').innerHTML,
+              aggregator,
+              restaurant_id
+            };
+          }
+        }).then(result => {
+          if (result.isConfirmed || result.isDenied) {
+            const payload = result.value;
+  
+            // Set correct endpoint
+            const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/send-reconciliation-email/";
+  
+            fetch(endpoint, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+              },
+              body: JSON.stringify(payload)
+            })
+              .then(res => res.json())
+              .then(response => {
+                if (response.message) {
+                  Swal.fire(" Success", response.message, "success");
+                } else {
+                  Swal.fire(" Error", response.error || "Unknown error occurred", "error");
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                Swal.fire(" Error", "Failed to send email", "error");
+              });
+          }
+        });
+      } else {
+        Swal.fire("Not found", "No email was sent for this combination.", "info");
+      }
+    });
+  });
+  
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+   {% endcomment %}
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", async function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.client_name;
+  
+      // Fetch replies first
+      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}`);
+      const repliesData = await repliesRes.json();
+  
+      // Then fetch sent email
+      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
+      const data = await res.json();
+  
+      if (data.subject) {
+        let repliesHTML = '';
+        repliesData.replies?.forEach(r => {
+          repliesHTML += `
+            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
+              <strong>From:</strong> ${r.from}<br>
+              <strong>Subject:</strong> ${r.subject}<br>
+              <strong>Date:</strong> ${r.date}<br><br>
+              <pre>${r.body}</pre>
+            </div>
+          `;
+        });
+  
+        Swal.fire({
+          title: '📧 Edit & Resend Email',
+          html: `
+            <div style="text-align:left">
+              <h4>Reply(s):</h4>
+              ${repliesHTML || '<p>No replies yet.</p>'}
+              <hr>
+              <!-- Your existing email form -->
+              <label>Subject</label>
+              <input id="swal-subject" class="swal2-input" value="${data.subject}">
+              <label>Recipients</label>
+              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
+              <label>CC</label>
+              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
+              <label>Email Body</label>
+              <div id="swal-body" contenteditable="true"
+                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
+                ${data.body}
+              </div>
+            </div>
+          `,
+          width: '90%',
+          confirmButtonText: 'Send Email Again',
+          preConfirm: () => {
+            return {
+              subject: document.getElementById('swal-subject').value,
+              recipients: document.getElementById('swal-recipients').value,
+              cc: document.getElementById('swal-cc').value,
+              body: document.getElementById('swal-body').innerHTML
+            };
+          }
+        }).then(result => {
+          if (result.isConfirmed) {
+            // Resend email logic (same as before)
+          }
+        });
+      } else {
+        Swal.fire("Not found", "No email was sent for this combination.", "info");
+      }
+    });
+  }); {% endcomment %}
+  
+
+
+{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.client_name;
+  
+      fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.subject) {
+            Swal.fire({
+              title: '📧 Edit & Resend Email',
+              html: `
+                <div style="width: 100%; text-align: left; font-size: 14px;">
+                  <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Subject:</label>
+                    <input id="swal-subject" class="swal2-input" style="width: 100%;" value="${data.subject}">
+                  </div>
+  
+                  <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Recipients:</label>
+                    <input id="swal-recipients" class="swal2-input" style="width: 100%;" value="${data.recipients}">
+                  </div>
+  
+                  <div style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">CC:</label>
+                    <input id="swal-cc" class="swal2-input" style="width: 100%;" value="${data.cc || ''}">
+                  </div>
+  
+                  <div>
+                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Email Body:</label>
+                    <div id="swal-body" contenteditable="true"
+                                style="
+                                width: 1800px;
+                                border: 1px solid #ccc;
+                                padding: 15px;
+                                min-height: 300px;
+                                max-height: 500px;
+                                overflow-x: auto;
+                                overflow-y: auto;
+                                border-radius: 6px;
+                                background-color: #fff;
+                                font-family: 'Segoe UI', sans-serif;
+                                white-space: normal;
+                                ">
+                      ${data.body}
+                    </div>
+                  </div>
+                </div>
+              `,
+              width: '90%',
+              showCancelButton: true,
+              confirmButtonText: ' Send Email Again',
+              preConfirm: () => {
+                return {
+                  subject: document.getElementById('swal-subject').value,
+                  recipients: document.getElementById('swal-recipients').value,
+                  cc: document.getElementById('swal-cc').value,
+                  body: document.getElementById('swal-body').innerHTML
+                };
+              }
+            }).then(result => {
+              if (result.isConfirmed) {
+                const formData = result.value;
+  
+                fetch('/send-reconciliation-email/', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                  },
+                  body: JSON.stringify({
+                    aggregator: aggregator,
+                    restaurant_id: restaurant_id,
+                    selected_date_range: selected_date_range,
+                    client_name: client_name,
+                    email_subject: formData.subject,
+                    email_body: formData.body,
+                    cc_emails: formData.cc,
+                    additional_emails: formData.recipients
+                  })
+                })
+                .then(res => res.json())
+                .then(response => {
+                  Swal.fire(" Success", "Email sent successfully!", "success");
+                })
+                .catch(err => {
+                  console.error(err);
+                  Swal.fire(" Error", "Failed to resend email", "error");
+                });
+              }
+            });
+          } else {
+            Swal.fire("Not found", "No email was sent for this combination.", "info");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching email:", error);
+          Swal.fire("Error", "Something went wrong while fetching the email.", "error");
+        });
+    });
+  });
+  
+  // CSRF helper for Django
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+
+
+
+
+   {% endcomment %}
+
+  {% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
+    button.addEventListener("click", function () {
+      const aggregator = this.dataset.aggregator;
+      const restaurant_id = this.dataset.restaurantId;
+      const selected_date_range = this.dataset.dateRange;
+      const client_name = this.dataset.client_name;
+  
+      fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.subject) {
+            Swal.fire({
+              title: 'Edit & Resend Email',
+              html: `
+                <div style="text-align: left; width: 100%;">
+                  <div style="margin-bottom: 10px;">
+                    <label style="font-weight: bold;">Subject:</label>
+                    <input id="swal-subject" class="swal2-input" style="width: 100%;" value="${data.subject}">
+                  </div>
+  
+                  <div style="margin-bottom: 10px;">
+                    <label style="font-weight: bold;">Recipients:</label>
+                    <input id="swal-recipients" class="swal2-input" style="width: 100%;" value="${data.recipients}">
+                  </div>
+  
+                  <div style="margin-bottom: 10px;">
+                    <label style="font-weight: bold;">CC:</label>
+                    <input id="swal-cc" class="swal2-input" style="width: 100%;" value="${data.cc || ''}">
+                  </div>
+  
+                  <div>
+                    <label style="font-weight: bold;">Body:</label>
+                    <div id="swal-body" contenteditable="true"
+                         style="
+                           width: 100%;
+                           border: 1px solid #ccc;
+                           padding: 10px;
+                           min-height: 250px;
+                           overflow-y: auto;
+                           border-radius: 4px;
+                           background: #fff;
+                           margin-top: 5px;
+                         ">
+                      ${data.body}
+                    </div>
+                  </div>
+                </div>
+              `,
+              width: '90%',
+              showCancelButton: true,
+              confirmButtonText: 'Send Email Again',
+              preConfirm: () => {
+                return {
+                  subject: document.getElementById('swal-subject').value,
+                  recipients: document.getElementById('swal-recipients').value,
+                  cc: document.getElementById('swal-cc').value,
+                  body: document.getElementById('swal-body').innerHTML
+                };
+              }
+            }).then(result => {
+              if (result.isConfirmed) {
+                const formData = result.value;
+  
+                fetch('/send-reconciliation-email/', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // Make sure you have this helper!
+                  },
+                  body: JSON.stringify({
+                    aggregator: aggregator,
+                    restaurant_id: restaurant_id,
+                    selected_date_range: selected_date_range,
+                    client_name: client_name,  // Replace with actual client name if dynamic
+                    email_subject: formData.subject,
+                    email_body: formData.body,
+                    cc_emails: formData.cc,
+                    additional_emails: formData.recipients
+                  })
+                })
+                .then(res => res.json())
+                .then(response => {
+                  Swal.fire("Success", "Email sent successfully!", "success");
+                })
+                .catch(err => {
+                  console.error(err);
+                  Swal.fire("Error", "Failed to resend email", "error");
+                });
+              }
+            });
+          } else {
+            Swal.fire("Not found", "No email was sent for this combination.", "info");
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching email:", error);
+          Swal.fire("Error", "Something went wrong while fetching the email.", "error");
+        });
+    });
+  });
+  
+  // CSRF token helper if you're using Django
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+   {% endcomment %}
+  
         
   </script>
 

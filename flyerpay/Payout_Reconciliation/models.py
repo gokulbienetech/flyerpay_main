@@ -57,7 +57,7 @@ class zomato_order(models.Model):
     Unsettled_Amount = models.FloatField(null=True, blank=True)  # Changed to FloatField
     Customer_ID = models.CharField(max_length=255, null=True, blank=True)
     fp_Client_Name = models.CharField(max_length=255, null=False, blank=False)
-    fp_Dispute_Status = models.CharField(max_length=25, null=True, blank=True)  # Made optional
+    # fp_Dispute_Status = models.CharField(max_length=25, null=True, blank=True)  # Made optional
     fp_restaurant_id = models.CharField(max_length=255)     
 
     def __str__(self):
@@ -82,13 +82,14 @@ class sales_report(models.Model):
     Total_Amount = models.FloatField()
     Invoice_No = models.CharField(max_length=255)
     Cancellation_By = models.CharField(max_length=255, null=True, blank=True)
-    fp_Client_Name = models.CharField(max_length=255)
+    Client_Name = models.CharField(max_length=255)
     fp_restaurant_id = models.CharField(max_length=255)
-    fp_Service_Fee =  models.FloatField()
-    fp_Payment_Mechanism_Fee = models.FloatField()
-    fp_Taxes_on_Service_Payment_Fees = models.FloatField()
-    fp_Expected_Payout = models.FloatField()
+    Service_Fee =  models.FloatField()
+    Payment_Mechanism_Fee = models.FloatField()
+    Taxes_on_Service_Payment_Fees = models.FloatField()
+    Expected_Payout = models.FloatField()
     fp_status = models.CharField(max_length=255)
+    # fp_restaurant_id = models.CharField(max_length=255)
     def __str__(self):
         return f"{self.Client_Order_No} - {self.fp_Client_Name}"
 
@@ -362,3 +363,61 @@ class zomato_cpc_ads(models.Model):
         unique_together = ('from_date', 'to_date', 'fp_restaurant_id', 'client_name','total_ads_inc_gst','total_dining_ads', 'cpc_value')
     
     
+
+
+class SentEmailLog(models.Model):
+    subject = models.CharField(max_length=255)         # Email subject
+    body = models.TextField()                          # Email content (HTML/text)
+    sender = models.EmailField()                       # Who sent the email
+    recipients = models.TextField()                    # Comma-separated TO recipients
+    cc = models.TextField(blank=True, null=True)       # Comma-separated CC list
+    bcc = models.TextField(blank=True, null=True)      # Comma-separated BCC list
+    timestamp = models.DateTimeField(auto_now_add=True)  # Auto timestamp when saved
+    aggregator = models.CharField(max_length=255)
+    restaurant_id = models.CharField(max_length=255)
+    date_range = models.CharField(max_length=100)  # NEW
+    client_name = models.CharField(max_length=255)
+    replies_json = models.JSONField(default=list, blank=True)         # Gmail replies
+    user_replies_json = models.JSONField(default=list, blank=True) 
+    # order_ids = models.TextField(blank=True, null=True)
+    
+
+
+class SummeryLog(models.Model):
+    restaurant_id = models.CharField(max_length=255)
+    aggregator = models.CharField(max_length=255)
+    order_id = models.CharField(max_length=255)
+    
+    wrong_payout_settled = models.CharField(max_length=10, default="-")
+    wrong_taxes_on_service_payment_fees = models.TextField(default="-")
+    wrong_payment_mechanism_fee = models.TextField(default="-")
+    wrong_service_fee = models.TextField(default="-")
+    cancelled_order_amount_deducted_wrongly = models.TextField(default="-")
+    TDS_issue = models.TextField(default="-")
+    Wrong_penalty = models.TextField(default="-")
+    
+    fp_order_date = models.DateTimeField(null=True, blank=True)
+    fp_status = models.CharField(max_length=255, default="-")
+    
+
+    missing_order_with = models.CharField(max_length=255, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+# class EmailReplyLog(models.Model):
+#     sent_email = models.ForeignKey(SentEmailLog, on_delete=models.CASCADE, related_name="replies")
+#     subject = models.CharField(max_length=255)
+#     body = models.TextField()
+#     sender = models.EmailField()
+#     date = models.DateTimeField()
+
+
+class EmailConversation(models.Model):
+    sent_email = models.ForeignKey(SentEmailLog, on_delete=models.CASCADE, related_name='replies')
+    from_email = models.EmailField()
+    to_email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    date = models.DateTimeField()
