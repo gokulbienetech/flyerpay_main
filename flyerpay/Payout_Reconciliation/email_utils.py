@@ -8,23 +8,78 @@ from django.conf import settings
 from .models import SentEmailLog
 
 
+# def clean_subject(raw_subject):
+#     """
+#     Cleans the subject line by:
+#     - Removing reply/forward prefixes (Re:, Fwd:, etc.)
+#     - Trimming spaces
+#     - Removing any leading text before 'issues with' (case-insensitive)
+#     - Collapsing multiple spaces/newlines
+#     """
+#     if not raw_subject:
+#         return ""
+
+#     # Step 1: Remove 'Re:', 'Fwd:', etc. (case-insensitive)
+#     while True:
+#         new_subject = re.sub(r"^(re:|fwd:)\s*", "", raw_subject, flags=re.IGNORECASE)
+#         if new_subject == raw_subject:
+#             break
+#         raw_subject = new_subject
+
+#     # Step 2: Remove any prefix before 'issues with'
+#     match = re.search(r"\bissues with\b", raw_subject, flags=re.IGNORECASE)
+#     if match:
+#         raw_subject = raw_subject[match.start():]
+
+#     # Step 3: Collapse multiple spaces/newlines
+#     cleaned = re.sub(r"\s+", " ", raw_subject)
+
+#     print(cleaned)
+#     return cleaned.strip().lower()
+
+
 def clean_subject(raw_subject):
     """
-    Removes common reply/forward prefixes like 'Re:', 'Fwd:' etc. and trims spaces.
+    Cleans the subject line by:
+    - Removing reply/forward prefixes (Re:, FW:, Fwd:)
+    - Removing spam flags like ***SPAM***, [SPAM], etc.
+    - Removing emojis or special characters (optional)
+    - Removing leading ticket numbers or tags (e.g., [#12345], TKT-101)
+    - Trimming spaces
+    - Keeping only the part from 'issues with'
+    - Collapsing multiple spaces/newlines
     """
     if not raw_subject:
         return ""
-    # Keep removing prefixes like Re:, Fwd: from the start
-    while True:
-        new_subject = re.sub(r"^(re:|fwd:)\s*", "", raw_subject, flags=re.IGNORECASE)
-        if new_subject == raw_subject:
-            break
-        raw_subject = new_subject
 
-    # Collapse multiple spaces/newlines to a single space
-    cleaned = re.sub(r"\s+", " ", raw_subject)
-    print(cleaned)
-    return cleaned.strip().lower()
+    subject = raw_subject
+
+    # Step 1: Remove Re:, Fwd:, FW:
+    while True:
+        new_subject = re.sub(r"^(re:|fw:|fwd:)\s*", "", subject, flags=re.IGNORECASE)
+        if new_subject == subject:
+            break
+        subject = new_subject
+
+    # Step 2: Remove SPAM tags
+    subject = re.sub(r"(\[?[*]*\s*spam\s*[*]*\]?)", "", subject, flags=re.IGNORECASE)
+
+    # Step 3: Remove emojis / special symbols (optional)
+    subject = re.sub(r"[^\w\s\-:/()]", "", subject)
+
+    # Step 4: Remove ticket numbers or tags like [#123], (#123), or ABC-123
+    subject = re.sub(r"[\[\(]?#?\w{2,10}[-]?\d{2,10}[\]\)]?", "", subject)
+
+    # Step 5: Find the first occurrence of 'issues with'
+    match = re.search(r"\bissues with\b", subject, flags=re.IGNORECASE)
+    if match:
+        subject = subject[match.start():]
+
+    # Step 6: Collapse multiple spaces
+    subject = re.sub(r"\s+", " ", subject)
+
+    return subject.strip().lower()
+
 
 
 def fetch_replies_from_gmail(username, password, subject_filter=None, sender_filter=None, since_days=None):

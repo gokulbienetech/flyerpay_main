@@ -1,3 +1,4 @@
+import json
 from django.db import models
 from django.utils import timezone
 
@@ -198,6 +199,7 @@ class ClientDetails(models.Model):
         ("Fruit Shop", "Fruit Shop"),
         ("Vegetable Shop", "Vegetable Shop"),
         ("E-commerce Seller", "E-commerce Seller"),
+        ("Quick-commerce Seller", "Quick-commerce Seller"),
     ]
     MEMBERSHIP_TYPES = [
         ("Monthly", "Monthly"),

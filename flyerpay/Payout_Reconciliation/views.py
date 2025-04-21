@@ -1,4 +1,5 @@
 from email.utils import parsedate_to_datetime
+from itertools import count
 import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.timezone import now
@@ -7,9 +8,9 @@ from django.core.files.storage import default_storage
 from django.contrib import messages
 from sqlalchemy import create_engine, text
 from .models import  EmailConversation, SentEmailLog, SummeryLog, zomato_order,sales_report,sales_report_swiggy,SwiggyOrder,ReconciliationSummary, ClientDetails,Aggregator,Membership,clients_zomato,clients_swiggy,swiggy_CPC_Ads,zomato_cpc_ads
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from .forms import ClientDetailsForm ,UploadExcelForm_Zomato,AggregatorForm,UploadExcelForm_Swiggy,UploadExcelForm_FlyerEats,MembershipForm
-from datetime import datetime,date
+from datetime import datetime,date, timedelta
 from django.db.models import Sum, F
 from django.utils.timezone import make_aware        
 from django.db import connection,transaction
@@ -25,15 +26,19 @@ from sqlalchemy.types import String
 import decimal
 from django.db.models.functions import TruncDate
 from .email_utils import fetch_replies_from_gmail
-
+from collections import Counter
+from django.db.models import Count, F, Window
+from django.db.models.functions import RowNumber
+from django.utils import timezone
 
 
 
 
 logger = logging.getLogger(__name__)
 
-def home_page(request):
-    return render(request, "index.html")
+# def home_page(request):
+#     return render(request, "index.html")
+    # return HttpResponse("Hello from index view!")
 
 
 
@@ -1847,6 +1852,20 @@ def update_sales_status_proc_swiggy(restaurant_id, start_date, end_date):
         print("HIIIII")
         cursor.callproc("UpdateSalesStatusByRestaurant_swiggy", [restaurant_id, start_date, end_date])
 
+def update_sales_status_proc_dispute_in_clar(restaurant_id, start_date, end_date):
+    print("DISPUTE IN CLar in zo")
+    # print("HIIIII")
+    with connection.cursor() as cursor:
+        # print("HIIIII")
+        print("DISPUTE IN CLar in zo")
+        cursor.callproc("update_sales_status_proc_dispute_in_clar", [restaurant_id, start_date, end_date])
+def update_sales_status_proc_dispute_in_clar_swiggy(restaurant_id, start_date, end_date):
+    # print("HIIIII")
+    with connection.cursor() as cursor:
+        # print("HIIIII")
+        print("DISPUTE IN CLar in zo")
+        cursor.callproc("update_sales_status_proc_dispute_in_clar_swiggy", [restaurant_id, start_date, end_date])
+
 
 def get_sent_email(request):
     print("get_sent_email in")
@@ -2177,9 +2196,9 @@ def get_email_replies(request):
     # subject_filter = f"Issue in {aggregator} Payout from {selected_date_range}-{restaurant_id } ({client_name})"
     # print(subject_filter,"subject_filter_get")
     if aggregator == "Zomato":
-        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@gmail.com",since_days=days_since_email)
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@bienetech.com",since_days=days_since_email)
     if aggregator == "Swiggy":
-        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@gmail.com",since_days=days_since_email)
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@bienetech.com",since_days=days_since_email)
     # replies = fetch_replies_from_gmail(aggregator,restaurant_id)
     print(replies,"function_Called")
     for reply in replies:
@@ -2290,6 +2309,29 @@ def send_reply_email(request):
                 restaurant_id=restaurant_id
             ).order_by("-timestamp").first()
             print(log,"LOG_LOG")
+            if aggregator == "Zomato":
+                print("DISPUTE IN CLar in zo")
+                print(clients_zomato.objects.count())
+                print(sales_report.objects.all())
+                print("start_processing_update_fp_status")
+                date_range = date_range # e.g., "10-Mar-2025 to 16-Mar-2025"
+                start_date_str, end_date_str = date_range.split(" to ")
+                start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+                end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+                print(type(restaurant_id),type(start_date), end_date,)
+                update_sales_status_proc_dispute_in_clar(restaurant_id, start_date, end_date)
+            elif aggregator == "Swiggy":
+                print("DISPUTE IN CLar in sw")
+                print(clients_zomato.objects.count())
+                print(sales_report.objects.all())
+                print("start_processing_update_fp_status")
+                date_range = date_range  # e.g., "10-Mar-2025 to 16-Mar-2025"
+                start_date_str, end_date_str = date_range.split(" to ")
+                start_date = datetime.strptime(start_date_str.strip(), "%d-%b-%Y").date()
+                end_date = datetime.strptime(end_date_str.strip(), "%d-%b-%Y").date()
+                print(type(restaurant_id),type(start_date), end_date,)
+                update_sales_status_proc_dispute_in_clar_swiggy(restaurant_id, start_date, end_date)
+
             add_dispute_in_clarification(aggregator, restaurant_id, date_range)
             if log:
                 new_user_reply = {
@@ -2302,6 +2344,7 @@ def send_reply_email(request):
                 log.user_replies_json = replies
                 log.save()
                 print("Saved user reply in log id:", log.id)
+            
             
 
             return JsonResponse({"message": "Reply sent and stored successfully!"})
@@ -2427,3 +2470,458 @@ def resend_email(request):
             return JsonResponse({"error": str(e)}, status=500)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def business_type_summary(request):
+    business_types = list(ClientDetails.objects.filter(delflag=1).values_list('business_type', flat=True))
+    total = len(business_types)
+    count = Counter(business_types)
+
+    summary = [
+        {
+            "category": category,
+            "count": count.get(category, 0),
+            "percentage": round((count.get(category, 0) / total) * 100, 2) if total > 0 else 0
+        }
+        for category, _ in ClientDetails.BUSINESS_TYPES
+    ]
+
+    return JsonResponse({"data": summary})
+
+
+
+# def clients_by_business_type(request):
+#     business_type = request.GET.get('type')
+#     clients = ClientDetails.objects.filter(delflag=1, business_type=business_type)
+
+#     data = [
+#         {
+#             "client_name": c.client_name,
+#             "location": c.location,
+#             "email": c.email,
+#             "contact_number": c.contact_number,
+#             "membership_type": str(c.membership_type) if c.membership_type else "N/A"
+#         }
+#         for c in clients
+#     ]
+
+#     return JsonResponse({"clients": data})
+
+def get_filter_options(request):
+    locations = ClientDetails.objects.filter(delflag=1).values_list('location', flat=True).distinct()
+    clients = ClientDetails.objects.filter(delflag=1).values_list('client_name', flat=True).distinct()
+
+    return JsonResponse({
+        "locations": list(locations),
+        "clients": list(clients),
+    })
+
+# def clients_by_filters(request):
+#     business_type = request.GET.get('business_type')
+#     location = request.GET.get('location')
+#     client_name = request.GET.get('client_name')
+
+#     # Filter based on the provided query parameters
+#     clients = ClientDetails.objects.filter(delflag=1)
+
+#     if business_type:
+#         clients = clients.filter(business_type=business_type)
+#     if location:
+#         clients = clients.filter(location__icontains=location)  # Case insensitive match
+#     if client_name:
+#         clients = clients.filter(client_name__icontains=client_name)  # Case insensitive match
+
+#     data = [
+#         {
+#             "client_id":c.id,
+#             "client_name": c.client_name,
+#             "location": c.location,
+#             "email": c.email,
+#             "contact_number": c.contact_number,
+#             "membership_type": str(c.membership_type) if c.membership_type else "N/A"
+            
+#         }
+#         for c in clients
+        
+#     ]
+#     for i in data:
+#         print(i)
+#     # for i in clients:
+#     #     print("client_ids",i.id)
+
+#     return JsonResponse({"clients": data})
+
+
+def clients_by_filters(request):
+    business_type = request.GET.get('business_type')
+    location = request.GET.get('location')  # Comma-separated
+    client_name = request.GET.get('client_name')  # Comma-separated
+
+    clients = ClientDetails.objects.filter(delflag=1)
+
+    if business_type:
+        clients = clients.filter(business_type=business_type)
+    if location:
+        loc_list = location.split(',')
+        clients = clients.filter(location__in=loc_list)
+    if client_name:
+        name_list = client_name.split(',')
+        clients = clients.filter(client_name__in=name_list)
+
+    client_data = [{
+        "client_id": c.id,
+        "client_name": c.client_name,
+        "location": c.location,
+        "email": c.email,
+        "contact_number": c.contact_number,
+        "membership_type": str(c.membership_type) if c.membership_type else "N/A"
+    } for c in clients]
+
+    return JsonResponse({"clients": client_data})
+
+
+
+def home_page(request):
+    print("form_business")
+    business_types = [bt[0] for bt in ClientDetails.BUSINESS_TYPES]
+    aggregators = Aggregator.objects.filter(delflag=1) 
+    print("Business types:", business_types)
+    return render(request, 'index.html', {'business_types': business_types,'aggregators': aggregators})
+
+
+def get_restaurant_id(request):
+    client_id = request.GET.get('client_id')
+    aggregator = request.GET.get('aggregator')
+    if not client_id or not client_id.isdigit():
+        return JsonResponse({"error": "Invalid client ID"}, status=400)
+
+    client_id = int(client_id)
+    client = ClientDetails.objects.get(id=client_id)
+    # print(client,"Client")
+    # print(client_id,"client_id")
+    
+    restaurant_id = None
+    if aggregator == 'Zomato':
+        restaurant_id = client.zomato_restaurant_id
+    elif aggregator == 'Swiggy':
+        restaurant_id = client.swiggy_restaurant_id
+
+    return JsonResponse({"restaurant_id": restaurant_id})
+
+# def get_summary_by_date_range(request):
+#     aggregator = request.GET.get('aggregator')
+#     restaurant_id = request.GET.get('restaurant_id')
+#     start = request.GET.get('start_date')
+#     end = request.GET.get('end_date')
+
+#     logs = SummeryLog.objects.filter(
+#         aggregator=aggregator,
+#         restaurant_id=restaurant_id,
+#         date__range=[start, end]
+#     )
+
+#     summary = Counter(log.fp_status for log in logs)
+
+#     return JsonResponse({
+#         "summary": summary,
+#         "total": sum(summary.values())
+#     })
+
+
+# def get_summary(request):
+#     aggregator = request.GET.get('aggregator')
+#     restaurant_id = request.GET.get('restaurant_id')
+#     start_date = request.GET.get('start_date')
+#     end_date = request.GET.get('end_date')
+#     # print(start_date,end_date,"start_date")
+
+#     model_map = {
+#         "zomato": "clients_zomato",
+#         "swiggy": "clients_swiggy"
+#     }
+
+#     try:
+#         start = datetime.strptime(start_date, "%d-%b-%Y").date()
+#         end = datetime.strptime(end_date, "%d-%b-%Y").date()
+#         print(start_date,end_date,"start_date")
+#     except Exception:
+#         return JsonResponse({"summary": {}})
+
+#     summary_qs = SummeryLog.objects.filter(
+#         aggregator=aggregator,
+#         restaurant_id=restaurant_id,
+#         fp_order_date__date__range=(start, end)
+#     ).values('fp_status').annotate(count=Count('fp_status'))
+#     print(start_date,end_date,"start_date")
+
+#     summary = {entry['fp_status']: entry['count'] for entry in summary_qs}
+
+#     print(summary,"summery")
+
+#     return JsonResponse({"summary": summary})
+
+
+def get_summary_all(request):
+    aggregator = request.GET.get('aggregator')
+    restaurant_id = request.GET.get('restaurant_id')
+
+    if not aggregator or not restaurant_id:
+        return JsonResponse({"summary": {}})
+
+    # Step 1: Filter all records for given aggregator and restaurant (no date filter)
+    base_qs = SummeryLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+    )
+
+    # Step 2: Annotate with row number (latest per order_id)
+    annotated_qs = base_qs.annotate(
+        row_num=Window(
+            expression=RowNumber(),
+            partition_by=[F('order_id')],
+            order_by=F('created_at').desc()
+        )
+    ).filter(row_num=1)
+
+    # Step 3: Count fp_status manually
+    status_list = annotated_qs.values_list('fp_status', flat=True)
+    summary = dict(Counter(status_list))
+
+    return JsonResponse({"summary": summary})
+
+
+def get_summary(request):
+    aggregator = request.GET.get('aggregator')
+    restaurant_id = request.GET.get('restaurant_id')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    print(start_date,"start_date",end_date)
+
+
+    try:
+
+
+        start = datetime.strptime(start_date, "%d-%b-%Y").date()
+        end = datetime.strptime(end_date, "%d-%b-%Y").date()
+        
+    except Exception:
+        print("except")
+        return JsonResponse({"summary": {}})
+
+    print(start,"start","end",end)
+    # Step 1: Filter relevant records
+    base_qs = SummeryLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        fp_order_date__date__range=(start, end)
+    )
+
+    # Step 2: Annotate with row number
+    annotated_qs = base_qs.annotate(
+        row_num=Window(
+            expression=RowNumber(),
+            partition_by=[F('order_id')],
+            order_by=F('created_at').desc()
+        )
+    ).filter(row_num=1)
+
+    # Step 3: Count fp_status manually
+    status_list = annotated_qs.values_list('fp_status', flat=True)
+    summary = dict(Counter(status_list))
+
+    return JsonResponse({"summary": summary})
+
+
+
+def get_dates_for_restaurant_admin(request):
+    restaurant_id = request.GET.get("restaurant_id")
+    aggregator = request.GET.get("aggregator")
+
+    if restaurant_id and aggregator:
+        if aggregator == "Zomato":
+            date_ranges = clients_zomato.objects.filter(fp_restaurant_id=restaurant_id).values_list("from_date", "to_date")
+        elif aggregator == "Swiggy":
+            date_ranges = clients_swiggy.objects.filter(fp_restaurant_id=restaurant_id).values_list("from_date", "to_date")
+        else:
+            return JsonResponse({"dates": []})
+
+        formatted_dates = [
+            f"{from_date.strftime('%d-%b-%Y')} to {to_date.strftime('%d-%b-%Y')}"
+            for from_date, to_date in date_ranges
+        ]
+
+        return JsonResponse({"dates": formatted_dates})
+
+    return JsonResponse({"dates": []})
+
+
+
+
+def get_multi_summary(request):
+    aggregator = request.GET.get('aggregator')
+    restaurant_id = request.GET.get('restaurant_id')
+    mode = request.GET.get('mode')  # this_month, last_month, q1, q2, q3, q4, this_year
+
+    # Choose the correct model based on aggregator
+    if aggregator.lower() == 'zomato':
+        model = clients_zomato
+    elif aggregator.lower() == 'swiggy' :
+        model = clients_swiggy
+
+    # Determine the date ranges based on the mode
+    if mode == 'this_month':
+        print(mode,"mode")
+        start_date, end_date = get_this_month_range()
+    elif mode == 'last_month':
+        print(mode,"mode")
+        start_date, end_date = get_last_month_range()
+    elif mode == 'this_year':
+        print(mode,"mode")
+        start_date, end_date = get_this_year_range()
+    elif mode in ['q1', 'q2', 'q3', 'q4']:
+        print(mode,"mode")
+        start_date, end_date = get_quarter_range(mode)
+    else:
+        return JsonResponse({"error": "Invalid mode"})
+
+    # Step 1: Filter clients for matching restaurant_id and date ranges
+    print(start_date,end_date,"start_date")
+    client_qs = model.objects.filter(
+        fp_restaurant_id=restaurant_id,
+        from_date__lte=end_date,
+        to_date__gte=start_date
+    )
+
+    bars = []
+
+    # Step 2: Loop through each matching date range and get summary
+    for client in client_qs:
+        # Fetch the summary for the specific date range
+        summary = get_summary_for_date_range(client.from_date, client.to_date, aggregator, restaurant_id)
+        bars.append({
+            'label': f'{client.from_date.strftime("%d-%b-%Y")} to {client.to_date.strftime("%d-%b-%Y")}',
+            'summary': summary
+        })
+        print(bars,"bars")
+
+    return JsonResponse({"bars": bars})
+
+def get_summary_for_date_range(from_date, to_date, aggregator, restaurant_id):
+    # Convert date range to start and end dates
+    start = from_date.date()
+    end = to_date.date()
+
+    # Step 1: Filter SummeryLog entries for the date range
+    base_qs = SummeryLog.objects.filter(
+        aggregator=aggregator,
+        restaurant_id=restaurant_id,
+        fp_order_date__date__range=(start, end)
+    )
+
+    # Step 2: Annotate with RowNumber to get latest entry per order_id
+    annotated_qs = base_qs.annotate(
+        row_num=Window(
+            expression=RowNumber(),
+            partition_by=[F('order_id')],
+            order_by=F('created_at').desc()
+        )
+    ).filter(row_num=1)
+
+    # Step 3: Count latest fp_status values only
+    status_list = annotated_qs.values_list('fp_status', flat=True)
+    return dict(Counter(status_list))
+
+
+
+# def get_summary_for_date_range(from_date, to_date, aggregator, restaurant_id):
+#     # Convert date range to start and end dates
+#     start = from_date.date()
+#     end = to_date.date()
+
+#     # Step 1: Filter SummeryLog entries for the date range
+#     base_qs = SummeryLog.objects.filter(
+#         aggregator=aggregator,
+#         restaurant_id=restaurant_id,
+#         fp_order_date__date__range=(start, end)
+#     )
+
+#     # Step 2: Count fp_status for each log
+#     status_list = base_qs.values_list('fp_status', flat=True)
+#     return dict(Counter(status_list))
+
+
+# Helper functions for date ranges
+def get_this_month_range():
+    today = datetime.today()
+    start_date = today.replace(day=1)
+    end_date = today.replace(day=28) + timedelta(days=4)  # Go to next month, then subtract days
+    end_date = end_date.replace(day=1) - timedelta(days=1)  # Get last day of the month
+    return start_date, end_date
+
+def get_last_month_range():
+    now = timezone.now()
+    first_day_current_month = now.replace(day=1)
+
+    # Last day of last month = day before first day of this month
+    last_day_last_month = first_day_current_month - timedelta(days=1)
+
+    # First day of last month
+    first_day_last_month = last_day_last_month.replace(day=1)
+
+    # Now you have correct order
+    start_date = first_day_last_month
+    end_date = last_day_last_month
+    return start_date, last_day_last_month
+
+def get_this_year_range():
+    today = datetime.today()
+    start_date = today.replace(month=1, day=1)
+    end_date = today.replace(month=12, day=31)
+    return start_date, end_date
+
+def get_quarter_range(quarter):
+    today = datetime.today()
+    if quarter == 'q1':
+        start_date = today.replace(month=1, day=1)
+        end_date = today.replace(month=3, day=31)
+    elif quarter == 'q2':
+        start_date = today.replace(month=4, day=1)
+        end_date = today.replace(month=6, day=30)
+    elif quarter == 'q3':
+        start_date = today.replace(month=7, day=1)
+        end_date = today.replace(month=9, day=30)
+    elif quarter == 'q4':
+        start_date = today.replace(month=10, day=1)
+        end_date = today.replace(month=12, day=31)
+    return start_date, end_date
+
+
+
+
+
+#For Flutter App 
+
+@csrf_exempt
+def client_login(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        try:
+            client = ClientDetails.objects.get(fp_username=username, fp_password=password, delflag=1)
+            response = {
+                "status": "success",
+                "message": "Login successful",
+                "client_id": client.id,
+                "client_name": client.client_name,
+                "email": client.email,
+                "business_type": client.business_type,
+            }
+        except ClientDetails.DoesNotExist:
+            response = {
+                "status": "error",
+                "message": "Invalid username or password"
+            }
+
+        return JsonResponse(response)

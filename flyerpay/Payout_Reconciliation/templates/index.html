@@ -1,266 +1,1039 @@
-{% load static %}
-<!doctype html>
+{% extends "base.html" %}
 
-<html
-  lang="en"
-  class="layout-navbar-fixed layout-menu-fixed layout-compact"
-  dir="ltr"
-  data-skin="default"
-  data-static-path="../../static/"
-  data-template="vertical-menu-template-starter"
-  data-bs-theme="light">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+{% block content %}
 
-    <title>Demo: FlyerPay</title>
+{% comment %} <div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="mt-4">
+        <label for="businessTypeFilter" class="form-label">Filter by Business Type</label>
+        <select id="businessTypeFilter" class="form-select" style="max-width: 300px;">
+          <option value="">-- Select Business Type --</option>
+          {% for bt in business_types %}
+            <option value="{{ bt }}">{{ bt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
 
-    <meta name="description" content="" />
+  </div>
+</div>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../../static/img/favicon/favicon.ico" />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
-      rel="stylesheet" />
 
-    <link rel="stylesheet" href="../../static/vendor/fonts/iconify-icons.css" />
 
-    <!-- Core CSS -->
-    <!-- build:css static/vendor/css/theme.css  -->
+  <div class="row mt-3" id="additionalFilters" style="display: none;">
+    <div class="col-md-4 col-4">
+      <div class="mt-4" style="max-width: 300px;">
+        <label for="locationFilter" class="form-label">Filter by Location</label>
+        <select id="locationFilter" placeholder="Select or type a location..." autocomplete="off"></select>
+      </div>
+    </div>
+    <div class="col-md-4 col-4">
+      <div class="mt-4" style="max-width: 300px;">
+        <label for="clientNameFilter" class="form-label">Filter by Client Name</label>
+        <select id="clientNameFilter" placeholder="Select or type a client name..." autocomplete="off"></select>
+      </div>
+    </div>
 
-    <link rel="stylesheet" href="../../static/vendor/libs/node-waves/node-waves.css" />
+  </div> {% endcomment %}
 
-    <link rel="stylesheet" href="../../static/vendor/libs/pickr/pickr-themes.css" />
 
-    <link rel="stylesheet" href="../../static/vendor/css/core.css" />
-    <link rel="stylesheet" href="../../static/css/demo.css" />
 
-    <!-- Vendors CSS -->
-
-    <link rel="stylesheet" href="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-
-    <!-- endbuild -->
-
-    <!-- Page CSS -->
-
-    <!-- Helpers -->
-    <script src="../../static/vendor/js/helpers.js"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-
-    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
-    <script src="../../static/vendor/js/template-customizer.js"></script>
-
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-
-    <script src="../../static/js/config.js"></script>
-  </head>
-
-  <body>
-    <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
-
-        <aside id="layout-menu" class="layout-menu menu-vertical menu">
-          <div class="app-brand demo">
-            <a href="{% url 'home_page' %}" class="app-brand-link">
-              <span class="app-brand-logo demo">
-                <span class="text-primary">
-                  {% comment %} <svg width="32" height="22" viewBox="0 0 32 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M0.00172773 0V6.85398C0.00172773 6.85398 -0.133178 9.01207 1.98092 10.8388L13.6912 21.9964L19.7809 21.9181L18.8042 9.88248L16.4951 7.17289L9.23799 0H0.00172773Z"
-                      fill="currentColor" />
-                    <path
-                      opacity="0.06"
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M7.69824 16.4364L12.5199 3.23696L16.5541 7.25596L7.69824 16.4364Z"
-                      fill="#161616" />
-                    <path
-                      opacity="0.06"
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M8.07751 15.9175L13.9419 4.63989L16.5849 7.28475L8.07751 15.9175Z"
-                      fill="#161616" />
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M7.77295 16.3566L23.6563 0H32V6.88383C32 6.88383 31.8262 9.17836 30.6591 10.4057L19.7824 22H13.6938L7.77295 16.3566Z"
-                      fill="currentColor" />
-                  </svg> {% endcomment %}
-                </span>
-              </span>
-              <span class="app-brand-text demo menu-text fw-bold ms-3"><img src="{% static 'img/logo/logo.png' %}" alt="Logo" style="height: 70px; width:70px; margin-top:10px;  margin-right: 10px;"></span>
-            </a>
-
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
-              <i class="icon-base ti menu-toggle-icon d-none d-xl-block"></i>
-              <i class="icon-base ti tabler-x d-block d-xl-none"></i>
-            </a>
+<div class="container-xxl flex-grow-1 container-p-y">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-3" style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <h5 class="mb-3">Business Type</h5>
+        <canvas id="businessTypeChart" width="200" height="200"></canvas>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card p-3" style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <div class="container-xxl flex-grow-1 container-p-y">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mt-4">
+                <label for="businessTypeFilter" class="form-label">Filter by Business Type</label>
+                <select id="businessTypeFilter" class="form-select" style="max-width: 300px;">
+                  <option value="">-- Select Business Type --</option>
+                  {% for bt in business_types %}
+                    <option value="{{ bt }}">{{ bt }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+        
           </div>
-
-          <div class="menu-inner-shadow"></div>
-
-          <ul class="menu-inner py-1">
-            <!-- Page -->
-            <li class="menu-item active">
-              <a href="{% url 'home_page' %}" class="menu-link">
-                <i class="menu-icon icon-base ti tabler-smart-home"></i>
-                <div data-i18n="Page 1">Home</div>
-              </a>
-            </li>
-            <li class="menu-item">
-              <a href="{% url 'client_details_view' %}" class="menu-link">
-                <i class="menu-icon icon-base ti tabler-app-window"></i>
-                <div data-i18n="Page 2">Merchant Onboarding</div>
-              </a>
-            </li>
-            <li class="menu-item">
-                <a href="{% url 'upload_excel' %}" class="menu-link">
-                  <i class="menu-icon icon-base ti tabler-app-window"></i>
-                  <div data-i18n="Page 3">Payout Reconciliation Process</div>
-                </a>
-              </li>
-            <li class="menu-item">
-                <a href="{% url 'membership_list' %}" class="menu-link">
-                  <i class="menu-icon icon-base ti tabler-app-window"></i>
-                  <div data-i18n="Page 3">Membership</div>
-                </a>
-              </li>
-            <li class="menu-item">
-                <a href="{% url 'aggregator_list' %}" class="menu-link">
-                  <i class="menu-icon icon-base ti tabler-app-window"></i>
-                  <div data-i18n="Page 3">Aggregator</div>
-                </a>
-              </li>
-            <li class="menu-item">
-                <a href="{% url 'log_page' %}" class="menu-link">
-                  <i class="menu-icon icon-base ti tabler-app-window"></i>
-                  <div data-i18n="Page 3">Logs</div>
-                </a>
-              </li>
-          </ul>
-        </aside>
-
-        <div class="menu-mobile-toggler d-xl-none rounded-1">
-          <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large text-bg-secondary p-2 rounded-1">
-            <i class="ti tabler-menu icon-base"></i>
-            <i class="ti tabler-chevron-right icon-base"></i>
-          </a>
         </div>
-        <!-- / Menu -->
-
-        <!-- Layout container -->
-        <div class="layout-page">
-          <!-- Navbar -->
-
-          <nav
-            class="layout-navbar container-xxl  navbar navbar-expand-xl align-items-center "
-            id="layout-navbar">
-            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-              <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
-                <i class="icon-base ti tabler-menu-2 icon-md"></i>
-              </a>
+        
+          <div class="container-xxl flex-grow-1 container-p-y" id="additionalFilters" style="display: none;">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mt-4" style="max-width: 300px;">
+                  <label for="locationFilter" class="form-label">Filter by Location</label>
+                  <select id="locationFilter" placeholder="Select or type a location..." autocomplete="off"></select>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mt-4" style="max-width: 300px;">
+                  <label for="clientNameFilter" class="form-label">Filter by Client Name</label>
+                  <select id="clientNameFilter" placeholder="Select or type a client name..." autocomplete="off"></select>
+                </div>
+              </div>
             </div>
 
             
-          </nav>
 
-          <!-- / Navbar -->
-
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-            <!-- Content -->
-            <div class="container-xxl flex-grow-1 container-p-y">
-              <h4 class="py-4 mb-6">Page 1</h4>
-              <p>
-                Sample page.<br />For more layout options use
-
-                <a
-                  href="https://demos.pixinvent.com/vuexy-html-admin-template/documentation//layouts.html"
-                  target="_blank"
-                  class="fw-medium"
-                  >Layout docs</a
-                >.
-              </p>
-            </div>
-            <!-- / Content -->
-
-            <!-- Footer -->
-            <footer class="content-footer footer bg-footer-theme">
-              <div class="container-xxl">
-                <div
-                  class="footer-container d-flex align-items-center justify-content-between py-4 flex-md-row flex-column">
-                  <div class="text-body">
-                    ©
-                    <script>
-                      document.write(new Date().getFullYear());
-                    </script>
-                    <!-- , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="footer-link">Pixinvent</a> -->
-                  </div>
-                  <div class="d-none d-lg-inline-block">
-                    <!-- <a
-                      href="https://demos.pixinvent.com/vuexy-html-admin-template/documentation/"
-                      target="_blank"
-                      class="footer-link me-4"
-                      >Documentation</a
-                    > -->
-                  </div>
-                </div>
-              </div>
-            </footer>
-            <!-- / Footer -->
-
-            <div class="content-backdrop fade"></div>
           </div>
-          <!-- Content wrapper -->
-        </div>
-        <!-- / Layout page -->
+
       </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
-
-      <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-      <div class="drag-target"></div>
     </div>
-    <!-- / Layout wrapper -->
+ 
+  </div>
+</div>
 
-    <!-- Core JS -->
-    <!-- build:js static/vendor/js/theme.js -->
 
-    <script src="../../static/vendor/libs/jquery/jquery.js"></script>
 
-    <script src="../../static/vendor/libs/popper/popper.js"></script>
-    <script src="../../static/vendor/js/bootstrap.js"></script>
-    <script src="../../static/vendor/libs/node-waves/node-waves.js"></script>
+<div class="mt-4">
+  <h6>Client List</h6>
+  <table class="table table-bordered" id="clientTable" style="display: none;">
+    <thead>
+      <tr>
+        <th>Client Name</th>
+        <th>Location</th>
+        <th>Email</th>
+        <th>Contact Number</th>
+        <th>Membership</th>
+        <th>View</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="5">Please select a business type to load clients.</td></tr>
+    </tbody>
+  </table>
+</div>
 
-    <script src="../../static/vendor/libs/@algolia/autocomplete-js.js"></script>
+<!-- Aggregator & Date Range Section -->
+<div id="aggregatorSection" style="display:none" class="mt-4" data-client-id="">
+  <label>Select Aggregator</label>
+  <select id="aggregatorSelect" class="form-select mt-1 mb-3">
+    <option value="">-- Select --</option>
+    {% for aggregator in aggregators %}
+      <option value="{{ aggregator.name }}">{{ aggregator.name }}</option>
+    {% endfor %}
+  </select>
+</div>
 
-    <script src="../../static/vendor/libs/pickr/pickr.js"></script>
 
-    <script src="../../static/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+<div style="display:none" class="mt-3" id="dateRangeSection" >
 
-    <script src="../../static/vendor/libs/hammer/hammer.js"></script>
+  <select name="date_range" id="date_range_select" class="form-control mb-2" required>
+    <option value="">Select Date Range</option>
+    <option value="this_month">This Month</option>
+    <option value="last_month">Last Month</option>
+    <option value="this_year">This Year</option>
+    <option value="q1">Q1</option>
+    <option value="q2">Q2</option>
+    <option value="q3">Q3</option>
+    <option value="q4">Q4</option>
+    <option value="custom">Custom Range</option>
+    <input type="hidden" id="restaurantId">
+  </select>
+  
+  <div id="customDatePickers" style="display:none;" class="d-flex gap-2 mt-2">
+    <input type="date" id="customStartDate" class="form-control" placeholder="Start Date">
+    <input type="date" id="customEndDate" class="form-control" placeholder="End Date">
+  </div>
+  {% comment %} <br> {% endcomment %}
+  <button class="btn btn-primary mt-1" id="fetchSummary">Get Summary</button>
+</div>
 
-    <script src="../../static/vendor/js/menu.js"></script>
+{% comment %} <div class="container-xxl flex-grow-1 container-p-y" style="display:none" id="status_Chart">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card p-3" style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+        <h5 class="mb-3"></h5>
+        <canvas id="statusChart" width="200" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div> {% endcomment %}
 
-    <!-- endbuild -->
+<!-- Hidden Chart and Table Section -->
+<div id="summaryContainer" class="row mt-4" style="display: none; ">
+  <div style="display: flex; justify-content: space-between;">
 
-    <!-- Vendors JS -->
+  
+  <!-- Left: Summary Table -->
+  <div class="col-md-6">
+    <div class="card p-3 " style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <h5>Status Summary</h5>
+      <table class="table  text-center">
+        <thead>
+          <tr>
+            <th>Total Disputes</th>
+            <th>Dispute Raised</th>
+            <th>Dispute in Clarification</th>
+            <th>Issue Resolved</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="statusSummaryRow">
+            <td id="totalDisputes">0</td>
+            <td id="raisedCount">0</td>
+            <td id="clarificationCount">0</td>
+            <td id="resolvedCount">0</td>
+            
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <!-- Main JS -->
+  <!-- Right: Doughnut Chart -->
+  <div class="col-md-6">
+    <div class="card " >
+      {% comment %} <h5>Status Breakdown</h5> {% endcomment %}
+      <div id="status_Chart">
+        <h5 id="summaryTitle" style="display:none; text-align:center; margin-bottom:1rem;"></h5>
+        <canvas id="statusChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+{% comment %} <canvas id="statusChart" style="display:none" width="400" height="400"></canvas> {% endcomment %}
 
-    <script src="../../static/js/main.js"></script>
 
-    <!-- Page JS -->
-  </body>
-</html>
+{% endblock  %}
+
+{% block scripts %}
+
+
+<!-- jQuery (needed before Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  fetch("/api/business-type-summary/")
+    .then(res => res.json())
+    .then(data => {
+      const labels = data.data.map(item => item.category);
+      const values = data.data.map(item => item.count);
+      const percentages = data.data.map(item => item.percentage);
+  
+      new Chart(document.getElementById('businessTypeChart'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Clients',
+            data: values,
+            backgroundColor: [
+              '#ff6384', '#36a2eb', '#ffce56',
+              '#4bc0c0', '#9966ff', '#ff9f40', '#66bb6a'
+            ],
+            hoverOffset: 10
+          }]
+        },
+        options: {
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const count = context.raw;
+                  const percentage = percentages[context.dataIndex];
+                  return `${label}: ${count} clients (${percentage}%)`;
+                }
+              }
+            },
+            legend: {
+              position: 'bottom',
+              labels: {
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            }
+          }
+        }
+      });
+    });
+
+
+    
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const filterBusinessType = document.getElementById('businessTypeFilter');
+      const additionalFilters = document.getElementById('additionalFilters');
+      const tbody = document.querySelector('#clientTable tbody');
+      const clientTable = document.getElementById('clientTable');
+    
+      // Placeholder for TomSelect instances
+      let locationSelect, clientNameSelect;
+   
+    
+      // Fetch and populate dropdown options, then init Tom Select
+      fetch('/api/filter-options/')
+        .then(res => res.json())
+        .then(data => {
+          const locationFilter = document.getElementById('locationFilter');
+          const clientNameFilter = document.getElementById('clientNameFilter');
+          
+    
+          // Populate options
+          data.locations.forEach(loc => {
+            locationFilter.append(new Option(loc, loc));
+          });
+          data.clients.forEach(cli => {
+            clientNameFilter.append(new Option(cli, cli));
+          });
+    
+          // Init Tom Select
+          locationSelect = new TomSelect('#locationFilter', {
+            create: true,
+            allowEmptyOption: true,
+            placeholder: "Select or type a location",
+            onChange: fetchFilteredData
+          });
+    
+          clientNameSelect = new TomSelect('#clientNameFilter', {
+            create: true,
+            allowEmptyOption: true,
+            placeholder: "Select or type a client name",
+            onChange: fetchFilteredData
+          });
+        });
+    
+      function fetchFilteredData() {
+        const businessType = filterBusinessType.value;
+        const location = locationSelect ? locationSelect.getValue() : '';
+        const clientName = clientNameSelect ? clientNameSelect.getValue() : '';
+    
+        let url = `/api/clients-by-filters/?`;
+    
+        if (businessType) url += `business_type=${encodeURIComponent(businessType)}&`;
+        if (location) url += `location=${encodeURIComponent(location)}&`;
+        if (clientName) url += `client_name=${encodeURIComponent(clientName)}&`;
+    
+        if (url.endsWith('&')) url = url.slice(0, -1);
+    
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            tbody.innerHTML = '';
+    
+            if (data.clients.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="6">No clients found with selected filters.</td></tr>`;
+            } else {
+              data.clients.forEach(client => {
+                const row = `
+                  <tr>
+                    <td>${client.client_name}</td>
+                    <td>${client.location}</td>
+                    <td>${client.email}</td>
+                    <td>${client.contact_number}</td>
+                    <td>${client.membership_type}</td>
+                    <td><button class="btn btn-sm btn-info view-btn" data-client-id="${client.client_id}">View</button></td>
+                  </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+              });
+            }
+    
+            clientTable.style.display = data.clients.length > 0 ? 'table' : 'none';
+          })
+          .catch(err => {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="6">Error loading data.</td></tr>`;
+            clientTable.style.display = 'none';
+          });
+      }
+    
+      filterBusinessType.addEventListener('change', function () {
+        const selected = this.value;
+        if (selected) {
+          additionalFilters.style.display = 'block';
+          clientTable.style.display = 'table';
+          fetchFilteredData();
+        } else {
+          additionalFilters.style.display = 'none';
+          clientTable.style.display = 'none';
+        }
+      });
+    });
+
+   
+
+
+
+
+// View Button Click
+
+
+  // View Button Click using event delegation
+
+
+
+
+
+  let chart;
+
+document.getElementById('clientTable').addEventListener('click', function (event) {
+  if (event.target && event.target.classList.contains('view-btn')) {
+    const clientId = event.target.dataset.clientId;
+    document.getElementById('aggregatorSection').style.display = 'block';
+    document.getElementById('aggregatorSection').dataset.clientId = clientId;
+    document.getElementById('dateRangeSection').style.display = 'none';
+    document.getElementById('restaurantId').value = '';
+  }
+});
+
+document.getElementById('aggregatorSelect').addEventListener('change', function () {
+  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
+  const aggregator = this.value;
+  if (!aggregator) return;
+
+  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.restaurant_id) {
+        document.getElementById('restaurantId').value = data.restaurant_id;
+        document.getElementById('dateRangeSection').style.display = 'block';
+        loadDateRanges();
+      }
+    });
+});
+
+function loadDateRanges() {
+  const dateSelect = document.getElementById('date_range_select');
+  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
+
+  const staticOptions = [
+    { value: 'this_month', text: 'This Month' },
+    { value: 'last_month', text: 'Last Month' },
+    { value: 'this_year', text: 'This Year' },
+    { value: 'q1', text: 'Q1 (Jan–Mar)' },
+    { value: 'q2', text: 'Q2 (Apr–Jun)' },
+    { value: 'q3', text: 'Q3 (Jul–Sep)' },
+    { value: 'q4', text: 'Q4 (Oct–Dec)' },
+    { value: 'custom', text: 'Custom Range' },
+    { value: 'all', text: 'All' }
+  ];
+
+  staticOptions.forEach(opt => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.value;
+    optionEl.text = opt.text;
+    dateSelect.appendChild(optionEl);
+  });
+}
+
+document.getElementById('date_range_select').addEventListener('change', function () {
+  const customPicker = document.getElementById('customDatePickers');
+  if (this.value === 'custom') {
+    customPicker.style.display = 'flex';
+  } else {
+    customPicker.style.display = 'none';
+  }
+});
+
+document.getElementById('fetchSummary').addEventListener('click', () => {
+  const aggregator = document.getElementById('aggregatorSelect').value;
+  const restaurantId = document.getElementById('restaurantId').value;
+  const dateRange = document.getElementById('date_range_select').value;
+
+  if (!dateRange) {
+    alert('Please select a date range');
+    return;
+  }
+
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  let url = '';
+  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
+
+  if (isMultiSummary) {
+    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
+  } else if (dateRange === 'all') {
+    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
+  } else if (dateRange === 'custom') {
+    const start = document.getElementById('customStartDate').value;
+    const end = document.getElementById('customEndDate').value;
+
+    if (!start || !end) {
+      alert("Please pick both start and end dates.");
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate > endDate) {
+      alert("Start date must be before or equal to end date.");
+      return;
+    }
+
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log('Received Data:', data);
+      document.getElementById("summaryContainer").style.display = "block";
+
+      const summaryTitle = document.getElementById("summaryTitle");
+
+      if (isMultiSummary && data.bars) {
+        const labels = data.bars.map(bar => bar.label);
+        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
+        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
+        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
+
+        const totalDisputes = raisedData.reduce((sum, value) => sum + value, 0) +
+                              clarificationData.reduce((sum, value) => sum + value, 0) +
+                              resolvedData.reduce((sum, value) => sum + value, 0);
+
+        document.getElementById("raisedCount").textContent = raisedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("clarificationCount").textContent = clarificationData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("resolvedCount").textContent = resolvedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("totalDisputes").textContent = totalDisputes;
+
+        // 👇 Dynamic Title from Date Labels
+        const yearSet = new Set();
+        data.bars.forEach(bar => {
+          const match = bar.label.match(/\d{2}-[A-Za-z]{3}-(\d{4})/g);
+          if (match) {
+            match.forEach(dateStr => {
+              const parts = dateStr.split('-');
+              const year = parts[2];
+              yearSet.add(year);
+            });
+          }
+        });
+
+        if (yearSet.size > 0) {
+          summaryTitle.textContent = `Summary for ${[...yearSet].sort().join(', ')}`;
+          summaryTitle.style.display = "block";
+        } else {
+          summaryTitle.style.display = "none";
+        }
+
+        // Chart population
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('statusChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
+              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
+              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: { stacked: true, title: { display: true, text: 'Date Range' } },
+              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+            }
+          }
+        });
+        return;
+      }
+
+      // Custom or single date range summary
+      summaryTitle.style.display = "none"; // Hide title for single summary
+
+      const raised = data.summary["Dispute Raised"] || 0;
+      const clarification = data.summary["Dispute in Clarification"] || 0;
+      const resolved = data.summary["Issue Resolved"] || 0;
+      const totalDisputes = raised + clarification + resolved;
+
+      document.getElementById("raisedCount").textContent = raised;
+      document.getElementById("clarificationCount").textContent = clarification;
+      document.getElementById("resolvedCount").textContent = resolved;
+      document.getElementById("totalDisputes").textContent = totalDisputes;
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Selected Date Range'],
+          datasets: [
+            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
+            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
+            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+          }
+        }
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching summary:', err);
+    });
+});
+
+
+
+
+
+
+
+  {% comment %} let chart;
+
+document.getElementById('clientTable').addEventListener('click', function (event) {
+  if (event.target && event.target.classList.contains('view-btn')) {
+    const clientId = event.target.dataset.clientId;
+    document.getElementById('aggregatorSection').style.display = 'block';
+    document.getElementById('aggregatorSection').dataset.clientId = clientId;
+    document.getElementById('dateRangeSection').style.display = 'none';
+    document.getElementById('restaurantId').value = '';
+  }
+});
+
+document.getElementById('aggregatorSelect').addEventListener('change', function () {
+  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
+  const aggregator = this.value;
+  if (!aggregator) return;
+
+  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.restaurant_id) {
+        document.getElementById('restaurantId').value = data.restaurant_id;
+        document.getElementById('dateRangeSection').style.display = 'block';
+        loadDateRanges();
+      }
+    });
+});
+
+function loadDateRanges() {
+  const dateSelect = document.getElementById('date_range_select');
+  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
+
+  const staticOptions = [
+    { value: 'this_month', text: 'This Month' },
+    { value: 'last_month', text: 'Last Month' },
+    { value: 'this_year', text: 'This Year' },
+    { value: 'q1', text: 'Q1 (Jan–Mar)' },
+    { value: 'q2', text: 'Q2 (Apr–Jun)' },
+    { value: 'q3', text: 'Q3 (Jul–Sep)' },
+    { value: 'q4', text: 'Q4 (Oct–Dec)' },
+    { value: 'custom', text: 'Custom Range' },
+    { value: 'all', text: 'All' }
+  ];
+
+  staticOptions.forEach(opt => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.value;
+    optionEl.text = opt.text;
+    dateSelect.appendChild(optionEl);
+  });
+}
+
+document.getElementById('date_range_select').addEventListener('change', function () {
+  const customPicker = document.getElementById('customDatePickers');
+  if (this.value === 'custom') {
+    customPicker.style.display = 'flex';
+  } else {
+    customPicker.style.display = 'none';
+  }
+});
+
+document.getElementById('fetchSummary').addEventListener('click', () => {
+  const aggregator = document.getElementById('aggregatorSelect').value;
+  const restaurantId = document.getElementById('restaurantId').value;
+  const dateRange = document.getElementById('date_range_select').value;
+
+  if (!dateRange) {
+    alert('Please select a date range');
+    return;
+  }
+
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  let url = '';
+  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
+
+  if (isMultiSummary) {
+    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
+  } else if (dateRange === 'all') {
+    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
+  } else if (dateRange === 'custom') {
+    const start = document.getElementById('customStartDate').value;
+    const end = document.getElementById('customEndDate').value;
+
+    if (!start || !end) {
+      alert("Please pick both start and end dates.");
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate > endDate) {
+      alert("Start date must be before or equal to end date.");
+      return;
+    }
+
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log('Received Data:', data);
+      document.getElementById("summaryContainer").style.display = "block";
+
+      // For multi-summary, ensure data.bars is present and populate table
+      if (isMultiSummary && data.bars) {
+        const labels = data.bars.map(bar => bar.label);
+        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
+        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
+        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
+
+        // Update the table with summary counts for the multi-summary response
+        const totalDisputes = raisedData.reduce((sum, value) => sum + value, 0) +
+                              clarificationData.reduce((sum, value) => sum + value, 0) +
+                              resolvedData.reduce((sum, value) => sum + value, 0);
+
+        document.getElementById("raisedCount").textContent = raisedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("clarificationCount").textContent = clarificationData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("resolvedCount").textContent = resolvedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("totalDisputes").textContent = totalDisputes;
+
+        // Chart population
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('statusChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
+              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
+              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: { stacked: true, title: { display: true, text: 'Date Range' } },
+              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+            }
+          }
+        });
+        return;
+      }
+
+      // Custom date range handling (if no multi-summary)
+      const raised = data.summary["Dispute Raised"] || 0;
+      const clarification = data.summary["Dispute in Clarification"] || 0;
+      const resolved = data.summary["Issue Resolved"] || 0;
+      const totalDisputes = raised + clarification + resolved;
+
+      document.getElementById("raisedCount").textContent = raised;
+      document.getElementById("clarificationCount").textContent = clarification;
+      document.getElementById("resolvedCount").textContent = resolved;
+      document.getElementById("totalDisputes").textContent = totalDisputes;
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Selected Date Range'],
+          datasets: [
+            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
+            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
+            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+          }
+        }
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching summary:', err);
+    });
+}); {% endcomment %}
+
+
+
+
+
+
+
+
+  {% comment %} let chart;
+
+document.getElementById('clientTable').addEventListener('click', function (event) {
+  if (event.target && event.target.classList.contains('view-btn')) {
+    const clientId = event.target.dataset.clientId;
+    document.getElementById('aggregatorSection').style.display = 'block';
+    document.getElementById('aggregatorSection').dataset.clientId = clientId;
+    document.getElementById('dateRangeSection').style.display = 'none';
+    document.getElementById('restaurantId').value = '';
+  }
+});
+
+document.getElementById('aggregatorSelect').addEventListener('change', function () {
+  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
+  const aggregator = this.value;
+  if (!aggregator) return;
+
+  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.restaurant_id) {
+        document.getElementById('restaurantId').value = data.restaurant_id;
+        document.getElementById('dateRangeSection').style.display = 'block';
+        loadDateRanges();
+      }
+    });
+});
+
+function loadDateRanges() {
+  const dateSelect = document.getElementById('date_range_select');
+  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
+
+  const staticOptions = [
+    { value: 'this_month', text: 'This Month' },
+    { value: 'last_month', text: 'Last Month' },
+    { value: 'this_year', text: 'This Year' },
+    { value: 'q1', text: 'Q1 (Jan–Mar)' },
+    { value: 'q2', text: 'Q2 (Apr–Jun)' },
+    { value: 'q3', text: 'Q3 (Jul–Sep)' },
+    { value: 'q4', text: 'Q4 (Oct–Dec)' },
+    { value: 'custom', text: 'Custom Range' },
+    { value: 'all', text: 'All' }
+  ];
+
+  staticOptions.forEach(opt => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.value;
+    optionEl.text = opt.text;
+    dateSelect.appendChild(optionEl);
+  });
+}
+
+document.getElementById('date_range_select').addEventListener('change', function () {
+  const customPicker = document.getElementById('customDatePickers');
+  if (this.value === 'custom') {
+    customPicker.style.display = 'flex';
+  } else {
+    customPicker.style.display = 'none';
+  }
+});
+
+document.getElementById('fetchSummary').addEventListener('click', () => {
+  const aggregator = document.getElementById('aggregatorSelect').value;
+  const restaurantId = document.getElementById('restaurantId').value;
+  const dateRange = document.getElementById('date_range_select').value;
+
+  if (!dateRange) {
+    alert('Please select a date range');
+    return;
+  }
+
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  let url = '';
+  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
+
+  if (isMultiSummary) {
+    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
+  } else if (dateRange === 'all') {
+    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
+  } else if (dateRange === 'custom') {
+    const start = document.getElementById('customStartDate').value;
+    const end = document.getElementById('customEndDate').value;
+
+    if (!start || !end) {
+      alert("Please pick both start and end dates.");
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate > endDate) {
+      alert("Start date must be before or equal to end date.");
+      return;
+    }
+
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
+  } else {
+    const [startDateStr, endDateStr] = dateRange.split(' to ');
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${startDateStr}&end_date=${endDateStr}`;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log('Received Data:', data); 
+      document.getElementById("summaryContainer").style.display = "block";
+
+      if (isMultiSummary && data.bars) {
+        const labels = data.bars.map(bar => bar.label);
+        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
+        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
+        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('statusChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
+              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
+              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+              x: {
+                stacked: true,
+                title: { display: true, text: 'Date Range' }
+              },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                title: { display: true, text: 'Count' }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      const raised = data.summary["Dispute Raised"] || 0;
+      const clarification = data.summary["Dispute in Clarification"] || 0;
+      const resolved = data.summary["Issue Resolved"] || 0;
+      const totalDisputes = raised + clarification + resolved;
+
+      document.getElementById("raisedCount").textContent = raised;
+      document.getElementById("clarificationCount").textContent = clarification;
+      document.getElementById("resolvedCount").textContent = resolved;
+      document.getElementById("totalDisputes").textContent = totalDisputes;
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Selected Date Range'],
+          datasets: [
+            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
+            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
+            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { mode: 'index', intersect: false }
+          },
+          scales: {
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              title: { display: true, text: 'Count' }
+            }
+          }
+        }
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching summary:', err);
+    });
+}); {% endcomment %}
+
+
+
+</script>
+
+  <style>
+
+    #clientTable th{
+      text-align: center; /* Center the column header */
+    }
+
+    
+    #clientTable td {
+        text-align: center; /* Align data properly */
+        padding: 5px 10px; /* Adjust padding for better readability */
+    }
+
+  </style>
+
+{% endblock  %}

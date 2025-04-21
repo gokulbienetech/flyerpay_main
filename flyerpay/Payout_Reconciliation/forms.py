@@ -150,3 +150,5 @@ class MembershipForm(forms.ModelForm):
             'membership_type': forms.Select(attrs={'class': 'form-select'}),
             'total_amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter Total Amount in Rs.'}),
         }
+
+

@@ -280,7 +280,7 @@
             </a>
           </div>
 
-          <div class="menu-inner-shadow"></div>
+          {% comment %} <div class="menu-inner-shadow"></div> {% endcomment %}
 
           <ul class="menu-inner py-1">
             <!-- Page -->
@@ -334,8 +334,9 @@
         <!-- Layout container -->
         <div class="layout-page">
           <!-- Navbar -->
+          {% comment %} layout-navbar {% endcomment %}
           <nav
-          class="layout-navbar container-xxl  navbar navbar-expand-xl align-items-center "
+          class=" container-xxl navbar-expand-xl  navbar align-items-center "
           id="layout-navbar">
           <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
             <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
@@ -434,7 +435,7 @@
         </select>
 
           <!-- Restaurant ID Dropdown (Initially Hidden) -->
-          <select name="restaurant_id" id="restaurant_select" required style="display:none;">
+          <select name="restaurant_id" id="restaurant_select" >
             <option value="" >Select Restaurant</option>
         </select>
         <br>
@@ -677,7 +678,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -755,7 +756,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -830,7 +831,7 @@
               </td> 
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -901,7 +902,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -1034,7 +1035,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -1112,7 +1113,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -1190,7 +1191,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -1264,7 +1265,7 @@
               </td>
               {% if report_data.days_since_last_email != report_data.days_since_last_email_new %}
               <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p>
-                <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p>
+                {% comment %} <p>Last mail sent {{report_data.days_since_last_email_new}} Days ago</p> {% endcomment %}
                 </td>
                 {% else %}
                 <td><p>First mail sent {{report_data.days_since_last_email}} Days ago</p></td>
@@ -1317,25 +1318,6 @@
 
 </div> 
 
-
-
-{% comment %} <label for="ccEmails">CC Emails (comma-separated):</label>
-<input type="text" id="ccEmails" style="width: 100%;" placeholder="Enter CC emails">
-
-
-<label for="additionalEmails">Additional Emails (comma-separated):</label>
-<input type="text" id="additionalEmails" style="width: 100%;" placeholder="Enter additional emails">
-
-<br><br>
-<div contenteditable="true" id="emailContent" style="border: 1px solid #ddd; padding: 10px; min-height: 200px; background: #f9f9f9;"></div>
-<br>
-<button onclick="sendReconciliationEmail(this)" 
-        data-aggregator="{{ report_data.aggregator }}" 
-        data-restaurant-id="{{ report_data.restaurant_id }}" 
-        data-date-range="{{ report_data.selected_date_range }}" 
-        data-client-name="{{ report_data.client_name }}" 
-        class="btn btn-primary">Send Report via Email</button>
-<button onclick="closeDisputeSection()" class="btn btn-secondary">Cancel</button> {% endcomment %}
 
 
 
@@ -1440,7 +1422,7 @@
               let clientName = $("#client_select").val();
           
               if (aggregator === "Zomato" && clientName) {
-                  $("#restaurant_select").show();
+                  //$("#restaurant_select").show();
                   // Fetch restaurant IDs for the selected client (Zomato)
                   $.ajax({
                       url: "{% url 'get_restaurants_for_client' %}",
@@ -1455,7 +1437,8 @@
                                   restaurantDropdown.append(`<option value="${restaurant.id}">${restaurant.name}</option>`);
                               });
                           } else {
-                              restaurantDropdown.hide();
+                              //restaurantDropdown.hide();
+                              pass
                           }
                       },
                       error: function(xhr, status, error) {
@@ -1465,7 +1448,7 @@
               } 
               else if (aggregator === "Swiggy" && clientName) {
                 //alert(aggregator)
-                  $("#restaurant_select").show();
+                  //$("#restaurant_select").show();
                   // Fetch restaurant IDs for the selected client (Swiggy)
                   $.ajax({
                       url: "{% url 'get_swiggy_restaurants_for_client' %}",
@@ -1480,7 +1463,7 @@
                                   restaurantDropdown.append(`<option value="${restaurant.id}">${restaurant.name}</option>`);
                               });
                           } else {
-                              restaurantDropdown.hide();
+                              //restaurantDropdown.hide();
                           }
                       },
                       error: function(xhr, status, error) {
@@ -1489,7 +1472,7 @@
                   });
               } 
               else {
-                  $("#restaurant_select").hide().empty().append('<option value="">Select Restaurant</option>');
+                  $("#restaurant_select").empty().append('<option value="">Select Restaurant</option>');
               }
           });
           
@@ -1528,6 +1511,92 @@
               }
           });
 
+// Save selections when any filter is changed
+$("#aggregator_select, #client_select, #restaurant_select, #date_range_select").change(function () {
+  sessionStorage.setItem("aggregator", $("#aggregator_select").val());
+  sessionStorage.setItem("client_name", $("#client_select").val());
+  sessionStorage.setItem("restaurant_id", $("#restaurant_select").val());
+  sessionStorage.setItem("date_range", $("#date_range_select").val());
+});
+
+// Load selections after everything is ready
+window.onload = function () {
+  // If no URL query params, clear sessionStorage (form was likely reset manually)
+  if (!window.location.search) {
+    sessionStorage.removeItem("aggregator");
+    sessionStorage.removeItem("client_name");
+    sessionStorage.removeItem("restaurant_id");
+    sessionStorage.removeItem("date_range");
+    return;
+  }
+
+  const selectedAggregator = sessionStorage.getItem("aggregator");
+  const selectedClient = sessionStorage.getItem("client_name");
+  const selectedRestaurantId = sessionStorage.getItem("restaurant_id");
+  const selectedDateRange = sessionStorage.getItem("date_range");
+
+  if (selectedAggregator) $("#aggregator_select").val(selectedAggregator);
+  if (selectedClient) $("#client_select").val(selectedClient);
+
+  if (selectedAggregator && selectedClient) {
+    loadRestaurants(selectedAggregator, selectedClient, selectedRestaurantId, selectedDateRange);
+  }
+};
+
+// Load restaurants then dates
+function loadRestaurants(aggregator, clientName, restaurantIdToSelect = null, dateToSelect = null) {
+  const restaurantDropdown = $("#restaurant_select");
+  restaurantDropdown.empty().append('<option value="">Select Restaurant</option>');
+
+  const url = aggregator === "Zomato"
+    ? "{% url 'get_restaurants_for_client' %}"
+    : "{% url 'get_swiggy_restaurants_for_client' %}";
+
+  $.ajax({
+    url: url,
+    data: { client_name: clientName },
+    success: function (data) {
+      data.restaurants.forEach(function (restaurant) {
+        restaurantDropdown.append(`<option value="${restaurant.id}">${restaurant.name}</option>`);
+      });
+
+      if (restaurantIdToSelect) {
+        restaurantDropdown.val(restaurantIdToSelect);
+        loadDates(aggregator, restaurantIdToSelect, dateToSelect);
+      }
+    },
+    error: function () {
+      console.log("Error fetching restaurants");
+    }
+  });
+}
+
+function loadDates(aggregator, restaurantId, dateToSelect = null) {
+  const dateDropdown = $("#date_range_select");
+  dateDropdown.empty().append('<option value="">Select Date Range</option>');
+
+  const url = aggregator === "Zomato"
+    ? "{% url 'get_dates_for_restaurant' %}"
+    : "{% url 'get_swiggy_dates_for_restaurant' %}";
+
+  $.ajax({
+    url: url,
+    data: { restaurant_id: restaurantId },
+    success: function (data) {
+      data.dates.forEach(function (date) {
+        dateDropdown.append(`<option value="${date}">${date}</option>`);
+      });
+
+      if (dateToSelect) {
+        dateDropdown.val(dateToSelect);
+      }
+    },
+    error: function () {
+      console.log("Error fetching dates");
+    }
+  });
+}
+
           //stsus_resolved_raised
 
           document.querySelectorAll('.status-container').forEach(container => {
@@ -1542,8 +1611,8 @@
             const aggregator = container.getAttribute('data-aggregator');
             const restaurant_id = container.getAttribute('data-restaurant-id');
 
-            console.log("Order ID:", orderId);
-            console.log("Aggregator:", aggregator);
+            //console.log("Order ID:", orderId);
+            //console.log("Aggregator:", aggregator);
             //alert(orderId,aggregator)
           
             // Handle Edit
@@ -1555,8 +1624,8 @@
               editBtn.style.display = 'none';
             });
 
-            console.log("after edit Order ID:", orderId);
-            console.log("after edit  Aggregator:", aggregator);
+            //console.log("after edit Order ID:", orderId);
+            //console.log("after edit  Aggregator:", aggregator);
           
             // Handle Cancel
             cancelBtn.addEventListener('click', () => {
@@ -2460,7 +2529,7 @@
         let ccEmails = document.getElementById("ccEmails").value.trim();
         let additionalEmails = document.getElementById("additionalEmails").value.trim();
         
-        console.log(emailSubject,"emailSubject")
+        //console.log(emailSubject,"emailSubject")
     
         fetch("{% url 'send_reconciliation_email' %}", {
             method: "POST",
@@ -2687,976 +2756,6 @@ document.querySelectorAll(".view-email-btn").forEach(button => {
     return cookieValue;
   }
   
-
-
-
-
-
-
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", async function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.clientName;
-  
-      // Show loader
-      Swal.fire({
-        title: "Fetching email...",
-        html: "Please wait while we fetch the email and replies.",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-  
-      try {
-        const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
-        const repliesData = await repliesRes.json();
-  
-        const sentRes = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
-        const sentData = await sentRes.json();
-  
-        Swal.close();
-  
-        if (sentData.subject) {
-          let repliesHTML = '';
-          repliesData.replies?.forEach((r, index) => {
-            repliesHTML += `
-              <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
-                <strong>From:</strong> ${r.from}<br>
-                <strong>Subject:</strong> ${r.subject}<br>
-                <strong>Date:</strong> ${r.date}<br><br>
-                <pre>${r.body}</pre>
-                <button class="btn btn-sm btn-primary reply-btn"
-                        data-from="${r.from}"
-                        data-subject="${r.subject}"
-                        style="margin-top:10px;">Reply</button>
-              </div>
-            `;
-          });
-  
-          const lastReply = repliesData.replies?.[0];
-  
-          Swal.fire({
-            title: '📨 Email Thread',
-            html: `
-              <div style="text-align:left">
-                <h4>Replies:</h4>
-                ${repliesHTML || '<p>No replies yet.</p>'}
-              </div>
-            `,
-            width: '90%',
-            showConfirmButton: !!lastReply,
-            confirmButtonText: '✉️ Reply to Last Mail',
-            preConfirm: () => {
-              return {
-                mode: "reply",
-                to: lastReply?.from,
-                subject: `Re: ${lastReply?.subject || sentData.subject}`,
-                body: "",
-                aggregator,
-                restaurant_id
-              };
-            }
-          }).then(result => {
-            if (result.isConfirmed) {
-              showReplyModal(result.value);
-            }
-          });
-  
-          // Handle specific reply button clicks
-          setTimeout(() => {
-            document.querySelectorAll(".reply-btn").forEach(replyBtn => {
-              replyBtn.addEventListener("click", () => {
-                const replyTo = replyBtn.dataset.from;
-                const replySubject = replyBtn.dataset.subject;
-  
-                showReplyModal({
-                  mode: "reply",
-                  to: replyTo,
-                  subject: `Re: ${replySubject}`,
-                  body: "",
-                  aggregator,
-                  restaurant_id
-                });
-              });
-            });
-          }, 200);
-  
-        } else {
-          Swal.fire("Not found", "No email was sent for this combination.", "info");
-        }
-  
-      } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "Something went wrong while fetching data.", "error");
-      }
-    });
-  });
-  
-  // Function to show reply modal
-  function showReplyModal(payload) {
-    Swal.fire({
-      title: "✉️ Reply",
-      html: `
-        <label>To</label>
-        <input id="reply-to" class="swal2-input" value="${payload.to}">
-        <label>Subject</label>
-        <input id="reply-subject" class="swal2-input" value="${payload.subject}">
-        <label>Message</label>
-        <div id="reply-body" contenteditable="true"
-             style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;"></div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Send Reply",
-      preConfirm: () => {
-        return {
-          to: document.getElementById("reply-to").value,
-          subject: document.getElementById("reply-subject").value,
-          body: document.getElementById("reply-body").innerHTML,
-          mode: "reply",
-          aggregator: payload.aggregator,
-          restaurant_id: payload.restaurant_id
-        };
-      }
-    }).then(result => {
-      if (result.isConfirmed) {
-        fetch("/send_reply_email/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": getCookie("csrftoken")
-          },
-          body: JSON.stringify(result.value)
-        })
-        .then(res => res.json())
-        .then(response => {
-          if (response.message) {
-            Swal.fire("✅ Reply Sent", response.message, "success");
-          } else {
-            Swal.fire("Error", response.error || "Failed to send", "error");
-          }
-        })
-        .catch(err => {
-          console.error(err);
-          Swal.fire("Error", "Request failed", "error");
-        });
-      }
-    });
-  }
-  
-  // CSRF helper
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  } {% endcomment %}
-  
-
-
-
-
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", async function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.clientName;
-  
-      // Show loading while fetching emails
-      Swal.fire({
-        title: "Fetching email...",
-        html: "Please wait while we fetch the email and replies.",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
-      });
-  
-      try {
-        // Fetch replies
-        const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
-        const repliesData = await repliesRes.json();
-  
-        // Fetch sent email
-        const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
-        const data = await res.json();
-  
-        Swal.close(); // Hide loading
-  
-        if (data.subject) {
-          let repliesHTML = '';
-          repliesData.replies?.forEach((r, index) => {
-            repliesHTML += `
-              <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
-                <strong>From:</strong> ${r.from}<br>
-                <strong>Subject:</strong> ${r.subject}<br>
-                <strong>Date:</strong> ${r.date}<br><br>
-                <pre>${r.body}</pre>
-                <button class="btn btn-sm btn-primary reply-btn" 
-                        data-from="${r.from}" 
-                        data-subject="${r.subject}" 
-                        style="margin-top:10px;">Reply</button>
-              </div>
-            `;
-          });
-  
-          const lastReply = repliesData.replies?.[0];
-  
-          Swal.fire({
-            title: '📧 Edit & Resend or Reply',
-            html: `
-              <div style="text-align:left">
-                <h4>Replies:</h4>
-                ${repliesHTML || '<p>No replies yet.</p>'}
-                <hr>
-                <label>Subject</label>
-                <input id="swal-subject" class="swal2-input" value="${data.subject}">
-                <label>Recipients</label>
-                <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
-                <label>CC</label>
-                <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
-                <label>Email Body</label>
-                <div id="swal-body" contenteditable="true"
-                     style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
-                  ${data.body}
-                </div>
-              </div>
-            `,
-            width: '90%',
-            showDenyButton: !!lastReply,
-            confirmButtonText: '📨 Resend Email',
-            denyButtonText: '✉️ Reply to Last Mail',
-            preConfirm: () => {
-              return {
-                mode: "resend",
-                subject: document.getElementById('swal-subject').value,
-                recipients: document.getElementById('swal-recipients').value,
-                cc: document.getElementById('swal-cc').value,
-                body: document.getElementById('swal-body').innerHTML
-              };
-            },
-            preDeny: () => {
-              return {
-                mode: "reply",
-                to: lastReply?.from,
-                subject: `${lastReply?.subject || data.subject}`,
-                body: document.getElementById('swal-body').innerHTML,
-                aggregator,
-                restaurant_id
-              };
-            }
-          }).then(result => {
-            if (result.isConfirmed || result.isDenied) {
-              const payload = result.value;
-              const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/resend_email/";
-  
-              fetch(endpoint, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-CSRFToken": getCookie("csrftoken")
-                },
-                body: JSON.stringify(payload)
-              })
-                .then(res => res.json())
-                .then(response => {
-                  if (response.message) {
-                    Swal.fire(" Success", response.message, "success");
-                  } else {
-                    Swal.fire("Error", response.error || "Unknown error", "error");
-                  }
-                })
-                .catch(err => {
-                  console.error(err);
-                  Swal.fire("Error", "Failed to send email", "error");
-                });
-            }
-          });
-  
-          // Attach reply event listeners after DOM is ready
-          setTimeout(() => {
-            document.querySelectorAll(".reply-btn").forEach(replyBtn => {
-              replyBtn.addEventListener("click", () => {
-                const replyTo = replyBtn.dataset.from;
-                const replySubject = replyBtn.dataset.subject;
-  
-                Swal.fire({
-                  title: "✉️ Reply to This Email",
-                  html: `
-                    <label>To</label>
-                    <input id="reply-to" class="swal2-input" value="${replyTo}">
-                    <label>Subject</label>
-                    <input id="reply-subject" class="swal2-input" value="Re: ${replySubject}">
-                    <label>Message</label>
-                    <div id="reply-body" contenteditable="true"
-                         style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;"></div>
-                  `,
-                  showCancelButton: true,
-                  confirmButtonText: "Send Reply",
-                  preConfirm: () => {
-                    return {
-                      to: document.getElementById("reply-to").value,
-                      subject: document.getElementById("reply-subject").value,
-                      body: document.getElementById("reply-body").innerHTML,
-                      mode: "reply",
-                      aggregator,
-                      restaurant_id
-                    };
-                  }
-                }).then(result => {
-                  if (result.isConfirmed) {
-                    const payload = result.value;
-  
-                    fetch("/send_reply_email/", {
-                      method: "POST",
-                      headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCookie("csrftoken")
-                      },
-                      body: JSON.stringify(payload)
-                    })
-                      .then(res => res.json())
-                      .then(response => {
-                        if (response.message) {
-                          Swal.fire("✅ Reply Sent", response.message, "success");
-                        } else {
-                          Swal.fire("Error", response.error || "Failed to send", "error");
-                        }
-                      })
-                      .catch(err => {
-                        console.error(err);
-                        Swal.fire("Error", "Request failed", "error");
-                      });
-                  }
-                });
-              });
-            });
-          }, 200);
-  
-        } else {
-          Swal.fire("Not found", "No email was sent for this combination.", "info");
-        }
-  
-      } catch (err) {
-        console.error(err);
-        Swal.fire("Error", "Something went wrong while fetching data.", "error");
-      }
-    });
-  });
-  
-  // CSRF helper
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-   {% endcomment %}
-
-
-
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", async function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.clientName;
-      alert(client_name)
-  
-      // Fetch replies
-      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`);
-      const repliesData = await repliesRes.json();
-  
-      // Fetch sent email
-      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
-      const data = await res.json();
-  
-      if (data.subject) {
-        let repliesHTML = '';
-        repliesData.replies?.forEach(r => {
-          repliesHTML += `
-            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
-              <strong>From:</strong> ${r.from}<br>
-              <strong>Subject:</strong> ${r.subject}<br>
-              <strong>Date:</strong> ${r.date}<br><br>
-              <pre>${r.body}</pre>
-            </div>
-          `;
-        });
-  
-        // Get last reply (for replying directly)
-        const lastReply = repliesData.replies?.[0]; // Assuming replies are sorted latest first
-  
-        Swal.fire({
-          title: '📧 Edit & Resend or Reply',
-          html: `
-            <div style="text-align:left">
-              <h4>Replies:</h4>
-              ${repliesHTML || '<p>No replies yet.</p>'}
-              <hr>
-              <label>Subject</label>
-              <input id="swal-subject" class="swal2-input" value="${data.subject}">
-              <label>Recipients</label>
-              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
-              <label>CC</label>
-              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
-              <label>Email Body</label>
-              <div id="swal-body" contenteditable="true"
-                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
-                ${data.body}
-              </div>
-            </div>
-          `,
-          width: '90%',
-          showDenyButton: !!lastReply,
-          confirmButtonText: '📨 Resend Email',
-          denyButtonText: '✉️ Reply to Last Mail',
-          preConfirm: () => {
-            return {
-              mode: "resend",
-              subject: document.getElementById('swal-subject').value,
-              recipients: document.getElementById('swal-recipients').value,
-              cc: document.getElementById('swal-cc').value,
-              body: document.getElementById('swal-body').innerHTML
-            };
-          },
-          preDeny: () => {
-            return {
-              mode: "reply",
-              to: lastReply?.from,
-              subject: `${lastReply?.subject || data.subject}`,
-              body: document.getElementById('swal-body').innerHTML,
-              aggregator,
-              restaurant_id
-            };
-          }
-        }).then(result => {
-          if (result.isConfirmed || result.isDenied) {
-            const payload = result.value;
-  
-            // Set correct endpoint
-            const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/resend_email/";
-  
-            fetch(endpoint, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-              },
-              body: JSON.stringify(payload)
-            })
-              .then(res => res.json())
-              .then(response => {
-                if (response.message) {
-                  Swal.fire("✅ Success", response.message, "success");
-                } else {
-                  Swal.fire(" Error", response.error || "Unknown error occurred", "error");
-                }
-              })
-              .catch(err => {
-                console.error(err);
-                Swal.fire(" Error", "Failed to send email", "error");
-              });
-          }
-        });
-      } else {
-        Swal.fire("Not found", "No email was sent for this combination.", "info");
-      }
-    });
-  });
-  
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  } {% endcomment %}
-  
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    
-    button.addEventListener("click", async function () {
-        //alert("Hai")
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.client_name;
-  
-      // Fetch replies
-      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}`);
-      const repliesData = await repliesRes.json();
-        //alert("repliesData")
-      // Fetch sent email
-      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
-      const data = await res.json();
-
-      //alert(data)
-
-  
-      if (data.subject) {
-        let repliesHTML = '';
-        repliesData.replies?.forEach(r => {
-          repliesHTML += `
-            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
-              <strong>From:</strong> ${r.from}<br>
-              <strong>Subject:</strong> ${r.subject}<br>
-              <strong>Date:</strong> ${r.date}<br><br>
-              <pre>${r.body}</pre>
-            </div>
-          `;
-        });
-  
-        // Get last reply (for replying directly)
-        const lastReply = repliesData.replies?.[0]; // Assuming replies are sorted latest first
-  
-        Swal.fire({
-          title: '📧 Edit & Resend or Reply',
-          html: `
-            <div style="text-align:left">
-              <h4>Replies:</h4>
-              ${repliesHTML || '<p>No replies yet.</p>'}
-              <hr>
-              <label>Subject</label>
-              <input id="swal-subject" class="swal2-input" value="${data.subject}">
-              <label>Recipients</label>
-              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
-              <label>CC</label>
-              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
-              <label>Email Body</label>
-              <div id="swal-body" contenteditable="true"
-                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
-                ${data.body}
-              </div>
-            </div>
-          `,
-          width: '90%',
-          showDenyButton: !!lastReply,
-          confirmButtonText: '📨 Resend Email',
-          denyButtonText: '✉️ Reply to Last Mail',
-          preConfirm: () => {
-            return {
-              mode: "resend",
-              subject: document.getElementById('swal-subject').value,
-              recipients: document.getElementById('swal-recipients').value,
-              cc: document.getElementById('swal-cc').value,
-              body: document.getElementById('swal-body').innerHTML,
-              
-
-
-            };
-          },
-          preDeny: () => {
-            return {
-              mode: "reply",
-              to: lastReply?.from,
-              subject: `Re: ${lastReply?.subject || data.subject}`,
-              body: document.getElementById('swal-body').innerHTML,
-              aggregator,
-              restaurant_id
-            };
-          }
-        }).then(result => {
-          if (result.isConfirmed || result.isDenied) {
-            const payload = result.value;
-  
-            // Set correct endpoint
-            const endpoint = payload.mode === "reply" ? "/send_reply_email/" : "/send-reconciliation-email/";
-  
-            fetch(endpoint, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": getCookie("csrftoken")
-              },
-              body: JSON.stringify(payload)
-            })
-              .then(res => res.json())
-              .then(response => {
-                if (response.message) {
-                  Swal.fire(" Success", response.message, "success");
-                } else {
-                  Swal.fire(" Error", response.error || "Unknown error occurred", "error");
-                }
-              })
-              .catch(err => {
-                console.error(err);
-                Swal.fire(" Error", "Failed to send email", "error");
-              });
-          }
-        });
-      } else {
-        Swal.fire("Not found", "No email was sent for this combination.", "info");
-      }
-    });
-  });
-  
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-   {% endcomment %}
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", async function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.client_name;
-  
-      // Fetch replies first
-      const repliesRes = await fetch(`/get_email_replies/?aggregator=${aggregator}&restaurant_id=${restaurant_id}`);
-      const repliesData = await repliesRes.json();
-  
-      // Then fetch sent email
-      const res = await fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}`);
-      const data = await res.json();
-  
-      if (data.subject) {
-        let repliesHTML = '';
-        repliesData.replies?.forEach(r => {
-          repliesHTML += `
-            <div style="background:#f1f1f1;padding:10px;margin-bottom:10px;border-radius:5px;">
-              <strong>From:</strong> ${r.from}<br>
-              <strong>Subject:</strong> ${r.subject}<br>
-              <strong>Date:</strong> ${r.date}<br><br>
-              <pre>${r.body}</pre>
-            </div>
-          `;
-        });
-  
-        Swal.fire({
-          title: '📧 Edit & Resend Email',
-          html: `
-            <div style="text-align:left">
-              <h4>Reply(s):</h4>
-              ${repliesHTML || '<p>No replies yet.</p>'}
-              <hr>
-              <!-- Your existing email form -->
-              <label>Subject</label>
-              <input id="swal-subject" class="swal2-input" value="${data.subject}">
-              <label>Recipients</label>
-              <input id="swal-recipients" class="swal2-input" value="${data.recipients}">
-              <label>CC</label>
-              <input id="swal-cc" class="swal2-input" value="${data.cc || ''}">
-              <label>Email Body</label>
-              <div id="swal-body" contenteditable="true"
-                   style="width:100%;height:300px;overflow:auto;padding:10px;border:1px solid #ccc;">
-                ${data.body}
-              </div>
-            </div>
-          `,
-          width: '90%',
-          confirmButtonText: 'Send Email Again',
-          preConfirm: () => {
-            return {
-              subject: document.getElementById('swal-subject').value,
-              recipients: document.getElementById('swal-recipients').value,
-              cc: document.getElementById('swal-cc').value,
-              body: document.getElementById('swal-body').innerHTML
-            };
-          }
-        }).then(result => {
-          if (result.isConfirmed) {
-            // Resend email logic (same as before)
-          }
-        });
-      } else {
-        Swal.fire("Not found", "No email was sent for this combination.", "info");
-      }
-    });
-  }); {% endcomment %}
-  
-
-
-{% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.client_name;
-  
-      fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.subject) {
-            Swal.fire({
-              title: '📧 Edit & Resend Email',
-              html: `
-                <div style="width: 100%; text-align: left; font-size: 14px;">
-                  <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Subject:</label>
-                    <input id="swal-subject" class="swal2-input" style="width: 100%;" value="${data.subject}">
-                  </div>
-  
-                  <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Recipients:</label>
-                    <input id="swal-recipients" class="swal2-input" style="width: 100%;" value="${data.recipients}">
-                  </div>
-  
-                  <div style="margin-bottom: 15px;">
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">CC:</label>
-                    <input id="swal-cc" class="swal2-input" style="width: 100%;" value="${data.cc || ''}">
-                  </div>
-  
-                  <div>
-                    <label style="font-weight: bold; display: block; margin-bottom: 5px;">Email Body:</label>
-                    <div id="swal-body" contenteditable="true"
-                                style="
-                                width: 1800px;
-                                border: 1px solid #ccc;
-                                padding: 15px;
-                                min-height: 300px;
-                                max-height: 500px;
-                                overflow-x: auto;
-                                overflow-y: auto;
-                                border-radius: 6px;
-                                background-color: #fff;
-                                font-family: 'Segoe UI', sans-serif;
-                                white-space: normal;
-                                ">
-                      ${data.body}
-                    </div>
-                  </div>
-                </div>
-              `,
-              width: '90%',
-              showCancelButton: true,
-              confirmButtonText: ' Send Email Again',
-              preConfirm: () => {
-                return {
-                  subject: document.getElementById('swal-subject').value,
-                  recipients: document.getElementById('swal-recipients').value,
-                  cc: document.getElementById('swal-cc').value,
-                  body: document.getElementById('swal-body').innerHTML
-                };
-              }
-            }).then(result => {
-              if (result.isConfirmed) {
-                const formData = result.value;
-  
-                fetch('/send-reconciliation-email/', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                  },
-                  body: JSON.stringify({
-                    aggregator: aggregator,
-                    restaurant_id: restaurant_id,
-                    selected_date_range: selected_date_range,
-                    client_name: client_name,
-                    email_subject: formData.subject,
-                    email_body: formData.body,
-                    cc_emails: formData.cc,
-                    additional_emails: formData.recipients
-                  })
-                })
-                .then(res => res.json())
-                .then(response => {
-                  Swal.fire(" Success", "Email sent successfully!", "success");
-                })
-                .catch(err => {
-                  console.error(err);
-                  Swal.fire(" Error", "Failed to resend email", "error");
-                });
-              }
-            });
-          } else {
-            Swal.fire("Not found", "No email was sent for this combination.", "info");
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching email:", error);
-          Swal.fire("Error", "Something went wrong while fetching the email.", "error");
-        });
-    });
-  });
-  
-  // CSRF helper for Django
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-
-
-
-
-   {% endcomment %}
-
-  {% comment %} document.querySelectorAll(".view-email-btn").forEach(button => {
-    button.addEventListener("click", function () {
-      const aggregator = this.dataset.aggregator;
-      const restaurant_id = this.dataset.restaurantId;
-      const selected_date_range = this.dataset.dateRange;
-      const client_name = this.dataset.client_name;
-  
-      fetch(`/get_sent_email/?aggregator=${aggregator}&restaurant_id=${restaurant_id}&selected_date_range=${selected_date_range}&client_name=${client_name}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.subject) {
-            Swal.fire({
-              title: 'Edit & Resend Email',
-              html: `
-                <div style="text-align: left; width: 100%;">
-                  <div style="margin-bottom: 10px;">
-                    <label style="font-weight: bold;">Subject:</label>
-                    <input id="swal-subject" class="swal2-input" style="width: 100%;" value="${data.subject}">
-                  </div>
-  
-                  <div style="margin-bottom: 10px;">
-                    <label style="font-weight: bold;">Recipients:</label>
-                    <input id="swal-recipients" class="swal2-input" style="width: 100%;" value="${data.recipients}">
-                  </div>
-  
-                  <div style="margin-bottom: 10px;">
-                    <label style="font-weight: bold;">CC:</label>
-                    <input id="swal-cc" class="swal2-input" style="width: 100%;" value="${data.cc || ''}">
-                  </div>
-  
-                  <div>
-                    <label style="font-weight: bold;">Body:</label>
-                    <div id="swal-body" contenteditable="true"
-                         style="
-                           width: 100%;
-                           border: 1px solid #ccc;
-                           padding: 10px;
-                           min-height: 250px;
-                           overflow-y: auto;
-                           border-radius: 4px;
-                           background: #fff;
-                           margin-top: 5px;
-                         ">
-                      ${data.body}
-                    </div>
-                  </div>
-                </div>
-              `,
-              width: '90%',
-              showCancelButton: true,
-              confirmButtonText: 'Send Email Again',
-              preConfirm: () => {
-                return {
-                  subject: document.getElementById('swal-subject').value,
-                  recipients: document.getElementById('swal-recipients').value,
-                  cc: document.getElementById('swal-cc').value,
-                  body: document.getElementById('swal-body').innerHTML
-                };
-              }
-            }).then(result => {
-              if (result.isConfirmed) {
-                const formData = result.value;
-  
-                fetch('/send-reconciliation-email/', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')  // Make sure you have this helper!
-                  },
-                  body: JSON.stringify({
-                    aggregator: aggregator,
-                    restaurant_id: restaurant_id,
-                    selected_date_range: selected_date_range,
-                    client_name: client_name,  // Replace with actual client name if dynamic
-                    email_subject: formData.subject,
-                    email_body: formData.body,
-                    cc_emails: formData.cc,
-                    additional_emails: formData.recipients
-                  })
-                })
-                .then(res => res.json())
-                .then(response => {
-                  Swal.fire("Success", "Email sent successfully!", "success");
-                })
-                .catch(err => {
-                  console.error(err);
-                  Swal.fire("Error", "Failed to resend email", "error");
-                });
-              }
-            });
-          } else {
-            Swal.fire("Not found", "No email was sent for this combination.", "info");
-          }
-        })
-        .catch(error => {
-          console.error("Error fetching email:", error);
-          Swal.fire("Error", "Something went wrong while fetching the email.", "error");
-        });
-    });
-  });
-  
-  // CSRF token helper if you're using Django
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-   {% endcomment %}
   
         
   </script>

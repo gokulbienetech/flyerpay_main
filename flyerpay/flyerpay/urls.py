@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from Payout_Reconciliation.views import get_dropdown_options, get_email_replies, get_sent_email, get_summery_logs, log_page, resend_email, send_reply_email, update_reconciliation_status, upload_excel,home_page,get_payout_and_order_summary,aggregator_list, aggregator_edit, aggregator_delete,client_details_view, client_edit, client_delete,aggregator_add,membership_list,membership_add,membership_edit,membership_delete,get_restaurant_ids,get_dates_for_restaurant,get_restaurants_for_client,send_reconciliation_email,get_swiggy_restaurant_id,get_swiggy_dates_for_restaurant,get_swiggy_restaurants_for_client
+from Payout_Reconciliation.views import business_type_summary, client_login, clients_by_filters, get_dates_for_restaurant_admin, get_dropdown_options, get_email_replies, get_filter_options, get_multi_summary, get_restaurant_id, get_sent_email, get_summary, get_summary_all, get_summery_logs, log_page, resend_email, send_reply_email, update_reconciliation_status, upload_excel,home_page,get_payout_and_order_summary,aggregator_list, aggregator_edit, aggregator_delete,client_details_view, client_edit, client_delete,aggregator_add,membership_list,membership_add,membership_edit,membership_delete,get_restaurant_ids,get_dates_for_restaurant,get_restaurants_for_client,send_reconciliation_email,get_swiggy_restaurant_id,get_swiggy_dates_for_restaurant,get_swiggy_restaurants_for_client
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", home_page, name="home_page"),
@@ -50,6 +50,22 @@ urlpatterns = [
     path("get_email_replies/", get_email_replies, name="get_email_replies"),
     path("send_reply_email/", send_reply_email, name="send_reply_email"),
     path("resend_email/", resend_email, name="resend_email"),
+    path('api/business-type-summary/',business_type_summary, name='business_type_summary'),
+    path('api/clients-by-filters/', clients_by_filters, name='clients_by_filters'),
+    path('api/get-restaurant-id/', get_restaurant_id, name='get_restaurant_id'),
+    path('api/get-summary/', get_summary, name='get_summary'),
+    path('api/get_dates_for_restaurant_admin/', get_dates_for_restaurant_admin, name='get_dates_for_restaurant_admin'),
+    path('api/filter-options/', get_filter_options, name='get_filter_options'),
+    path('api/get-summary-all/', get_summary_all, name='get_summary_all'), 
+    # path('api/get-restaurant-id/', get_restaurant_id, name='get_restaurant_id'),
+    # path('api/get_dates_for_restaurant_admin/', get_dates_for_restaurant_admin, name='get_dates_for_restaurant_admin'),
+    # path('api/get-summary/',get_summary, name='get_summary'),
+    # path('api/get-summary-all/', get_summary_all, name='get_summary_all'),
+    path('api/get-multi-summary/', get_multi_summary, name='get_multi_summary'),
+
+    # path('api/clients-by-business-type/', clients_by_business_type, name='clients_by_business_type'),
+
     # path('get_restaurants_for_client_file/', get_restaurants_for_client_file, name='get_restaurants_for_client_file'),
+    path('api/client-login/', client_login, name='client_login'),
 
 ]
