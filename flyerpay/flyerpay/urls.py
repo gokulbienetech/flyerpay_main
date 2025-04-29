@@ -16,7 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from Payout_Reconciliation.views import business_type_summary, client_login, clients_by_filters, get_dates_for_restaurant_admin, get_dropdown_options, get_email_replies, get_filter_options, get_multi_summary, get_restaurant_id, get_sent_email, get_summary, get_summary_all, get_summery_logs, log_page, resend_email, send_reply_email, update_reconciliation_status, upload_excel,home_page,get_payout_and_order_summary,aggregator_list, aggregator_edit, aggregator_delete,client_details_view, client_edit, client_delete,aggregator_add,membership_list,membership_add,membership_edit,membership_delete,get_restaurant_ids,get_dates_for_restaurant,get_restaurants_for_client,send_reconciliation_email,get_swiggy_restaurant_id,get_swiggy_dates_for_restaurant,get_swiggy_restaurants_for_client
+from Payout_Reconciliation.views import  business_type_summary, client_login, clients_by_filters, get_dates_for_restaurant_admin, get_dropdown_options, get_email_replies, get_filter_options, get_multi_summary, get_restaurant_id, get_sent_email, get_summary, get_summary_all, get_summery_logs, log_page, request_demo, resend_email, send_reply_email, submit_popup_form, update_reconciliation_status, upload_excel,home_page,get_payout_and_order_summary,aggregator_list, aggregator_edit, aggregator_delete,client_details_view, client_edit, client_delete,aggregator_add,membership_list,membership_add,membership_edit,membership_delete,get_restaurant_ids,get_dates_for_restaurant,get_restaurants_for_client,send_reconciliation_email,get_swiggy_restaurant_id,get_swiggy_dates_for_restaurant,get_swiggy_restaurants_for_client, usertype_add, usertype_delete, usertype_edit, usertype_list
+# from flyerpay.Payout_Reconciliation import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("", home_page, name="home_page"),
@@ -67,5 +68,19 @@ urlpatterns = [
 
     # path('get_restaurants_for_client_file/', get_restaurants_for_client_file, name='get_restaurants_for_client_file'),
     path('api/client-login/', client_login, name='client_login'),
+    
+    path('api/request-demo/', request_demo, name='request_demo'),
+    path('submit-popup-form/', submit_popup_form, name='submit_popup_form'),
+    
+    path('usertype_list/', usertype_list, name='usertype_list'),          # List + Create
+    path('usertype/add/', usertype_add, name='usertype_add'),
+    path('usertype/edit/<int:pk>/', usertype_edit, name='usertype_edit'),  # Edit
+    path('usertype/delete/<int:pk>/',usertype_delete, name='usertype_delete'),  # Delete
+    
+    # path("ajax/add-user-type/", add_user_type_ajax, name="user_type_add_ajax"),
+    # path('users/', user_list, name='users'),
+    # path('users/get/<int:user_id>/', get_user),
+    # path('users/save/', save_user),
+    # path('users/delete/<int:user_id>/', delete_user),
 
 ]

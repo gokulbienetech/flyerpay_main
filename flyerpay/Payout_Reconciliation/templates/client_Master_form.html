@@ -223,6 +223,12 @@
                   <div data-i18n="Page 3">Logs</div>
                 </a>
               </li>
+              <li class="menu-item">
+                <a href="{% url 'usertype_list' %}" class="menu-link">
+                  <i class="menu-icon icon-base ti tabler-app-window"></i>
+                  <div data-i18n="Page 3">Add User</div>
+                </a>
+              </li>
           </ul>
         </aside>
 
@@ -425,7 +431,7 @@
                         </div>
                     </div>
                 <br>
-                    <div class="row">
+                    {% comment %} <div class="row">
                         <div class="col-md-6">
                             {{ form.fp_username.label_tag }}
                             {{ form.fp_username }}
@@ -434,7 +440,7 @@
                             {{ form.fp_password.label_tag }}
                             {{ form.fp_password }}
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                 
                     <br>
                     <button type="submit" class="btn btn-primary" id="submitBtn" onclick="console.log('Inline click works!')">Add Client</button>
@@ -472,7 +478,6 @@ $(document).ready(function () {
         const requiredFields = [
             "client_name", "location", "postal_address", "postel_code",
             "email", "business_type", "membership_type",
-            "fp_username", "fp_password"
         ];
 
         requiredFields.forEach(function (field) {
@@ -603,8 +608,8 @@ $(document).ready(function () {
                 $("#swiggy_escalation_manager").val(data.client.swiggy_escalation_manager);
                 $("#fe_finance_poc").val(data.client.fe_finance_poc);
                 $("#fe_escalation_manager").val(data.client.fe_escalation_manager);
-                $("#fp_username").val(data.client.fp_username);
-                $("#fp_password").val(data.client.fp_password);
+                //$("#fp_username").val(data.client.fp_username);
+                //$("#fp_password").val(data.client.fp_password);
                 $("#zomato_res_id").val(data.client.zomato_restaurant_id);
                 $("#swiggy_res_id").val(data.client.swiggy_restaurant_id);
                 $("#flyereats_res_id").val(data.client.flyereats_restaurant_id);

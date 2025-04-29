@@ -1,5 +1,5 @@
 from django import forms
-from .models import ClientDetails,Aggregator,Membership
+from .models import ClientDetails,Aggregator, DemoRequest,Membership, UserType
 
 class ClientDetailsForm(forms.ModelForm):
 
@@ -30,8 +30,8 @@ class ClientDetailsForm(forms.ModelForm):
             "swiggy_escalation_manager": forms.EmailInput(attrs={"class": "form-control", "id": "swiggy_escalation_manager","placeholder": "Enter Escalation Manager Mail"}),
             "fe_finance_poc": forms.EmailInput(attrs={"class": "form-control", "id": "fe_finance_poc","placeholder": "Enter Finance Poc Mail "}),
             "fe_escalation_manager": forms.EmailInput(attrs={"class": "form-control", "id": "fe_escalation_manager","placeholder": "Enter Escalation Manager Mail"}),
-            "fp_username": forms.TextInput(attrs={"class": "form-control", "id": "fp_username","placeholder": "Enter Username*"}),
-            "fp_password": forms.PasswordInput(attrs={"class": "form-control", "id": "fp_password","placeholder": "Enter Password*"}),
+            # "fp_username": forms.TextInput(attrs={"class": "form-control", "id": "fp_username","placeholder": "Enter Username*"}),
+            # "fp_password": forms.PasswordInput(attrs={"class": "form-control", "id": "fp_password","placeholder": "Enter Password*"}),
             "postel_code": forms.TextInput(attrs={"class": "form-control", "id": "postel_code","placeholder": "Enter Postal Code*"}),
             "zomato_restaurant_id": forms.TextInput(attrs={"class": "form-control", "id": "zomato_res_id","placeholder": "Enter restaurant Id*"}),
             "swiggy_restaurant_id": forms.TextInput(attrs={"class": "form-control", "id": "swiggy_res_id","placeholder": "Enter restaurant Id*"}),
@@ -152,3 +152,17 @@ class MembershipForm(forms.ModelForm):
         }
 
 
+class UserTypeForm(forms.ModelForm):
+    class Meta:
+        model = UserType
+        fields = ['user_type']
+
+# class DemoRequestForm(forms.ModelForm):
+#     class Meta:
+#         model = DemoRequest
+#         fields = ['full_name', 'email', 'phone_number', 'user_type', 'message']
+
+class DemoRequestForm(forms.ModelForm):
+    class Meta:
+        model = DemoRequest
+        fields = ['full_name', 'email', 'phone_number', 'reason', 'message']

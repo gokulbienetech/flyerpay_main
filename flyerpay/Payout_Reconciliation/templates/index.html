@@ -2,41 +2,6 @@
 
 {% block content %}
 
-{% comment %} <div class="container-xxl flex-grow-1 container-p-y">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="mt-4">
-        <label for="businessTypeFilter" class="form-label">Filter by Business Type</label>
-        <select id="businessTypeFilter" class="form-select" style="max-width: 300px;">
-          <option value="">-- Select Business Type --</option>
-          {% for bt in business_types %}
-            <option value="{{ bt }}">{{ bt }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-
-
-  <div class="row mt-3" id="additionalFilters" style="display: none;">
-    <div class="col-md-4 col-4">
-      <div class="mt-4" style="max-width: 300px;">
-        <label for="locationFilter" class="form-label">Filter by Location</label>
-        <select id="locationFilter" placeholder="Select or type a location..." autocomplete="off"></select>
-      </div>
-    </div>
-    <div class="col-md-4 col-4">
-      <div class="mt-4" style="max-width: 300px;">
-        <label for="clientNameFilter" class="form-label">Filter by Client Name</label>
-        <select id="clientNameFilter" placeholder="Select or type a client name..." autocomplete="off"></select>
-      </div>
-    </div>
-
-  </div> {% endcomment %}
 
 
 
@@ -96,7 +61,7 @@
 
 
 <div class="mt-4">
-  <h6>Client List</h6>
+  {% comment %} <h6>Client List</h6> {% endcomment %}
   <table class="table table-bordered" id="clientTable" style="display: none;">
     <thead>
       <tr>
@@ -167,12 +132,13 @@
   
   <!-- Left: Summary Table -->
   <div class="col-md-6">
-    <div class="card p-3 " style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+    <div class="card p-2 " style="border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
       <h5>Status Summary</h5>
       <table class="table  text-center">
         <thead>
           <tr>
             <th>Total Disputes</th>
+            <th>In Pending</th>
             <th>Dispute Raised</th>
             <th>Dispute in Clarification</th>
             <th>Issue Resolved</th>
@@ -182,6 +148,7 @@
         <tbody>
           <tr id="statusSummaryRow">
             <td id="totalDisputes">0</td>
+            <td id="pendingCount">0</td>
             <td id="raisedCount">0</td>
             <td id="clarificationCount">0</td>
             <td id="resolvedCount">0</td>
@@ -193,8 +160,8 @@
   </div>
 
   <!-- Right: Doughnut Chart -->
-  <div class="col-md-6">
-    <div class="card " >
+  <div class="col-md-5 ">
+    <div class="card p-3" >
       {% comment %} <h5>Status Breakdown</h5> {% endcomment %}
       <div id="status_Chart">
         <h5 id="summaryTitle" style="display:none; text-align:center; margin-bottom:1rem;"></h5>
@@ -221,6 +188,8 @@
 <!-- Load Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
 <script>
   fetch("/api/business-type-summary/")
     .then(res => res.json())
@@ -384,8 +353,515 @@
 
 
 
-
   let chart;
+
+document.getElementById('clientTable').addEventListener('click', function (event) {
+  if (event.target && event.target.classList.contains('view-btn')) {
+    const clientId = event.target.dataset.clientId;
+    document.getElementById('aggregatorSection').style.display = 'block';
+    document.getElementById('aggregatorSection').dataset.clientId = clientId;
+    document.getElementById('dateRangeSection').style.display = 'none';
+    document.getElementById('restaurantId').value = '';
+  }
+});
+
+document.getElementById('aggregatorSelect').addEventListener('change', function () {
+  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
+  const aggregator = this.value;
+  if (!aggregator) return;
+
+  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.restaurant_id) {
+        document.getElementById('restaurantId').value = data.restaurant_id;
+        document.getElementById('dateRangeSection').style.display = 'block';
+        loadDateRanges();
+      }
+    });
+});
+
+function loadDateRanges() {
+  const dateSelect = document.getElementById('date_range_select');
+  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
+
+  const staticOptions = [
+    { value: 'this_month', text: 'This Month' },
+    { value: 'last_month', text: 'Last Month' },
+    { value: 'this_year', text: 'This Year' },
+    { value: 'q1', text: 'Q1 (Jan–Mar)' },
+    { value: 'q2', text: 'Q2 (Apr–Jun)' },
+    { value: 'q3', text: 'Q3 (Jul–Sep)' },
+    { value: 'q4', text: 'Q4 (Oct–Dec)' },
+    { value: 'custom', text: 'Custom Range' },
+    { value: 'all', text: 'All' }
+  ];
+
+  staticOptions.forEach(opt => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.value;
+    optionEl.text = opt.text;
+    dateSelect.appendChild(optionEl);
+  });
+}
+
+document.getElementById('date_range_select').addEventListener('change', function () {
+  const customPicker = document.getElementById('customDatePickers');
+  if (this.value === 'custom') {
+    customPicker.style.display = 'flex';
+  } else {
+    customPicker.style.display = 'none';
+  }
+});
+
+document.getElementById('fetchSummary').addEventListener('click', () => {
+  const aggregator = document.getElementById('aggregatorSelect').value;
+  const restaurantId = document.getElementById('restaurantId').value;
+  const dateRange = document.getElementById('date_range_select').value;
+
+  if (!dateRange) {
+    alert('Please select a date range');
+    return;
+  }
+
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  let url = '';
+  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
+
+  if (isMultiSummary) {
+    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
+  } else if (dateRange === 'all') {
+    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
+  } else if (dateRange === 'custom') {
+    const start = document.getElementById('customStartDate').value;
+    const end = document.getElementById('customEndDate').value;
+
+    if (!start || !end) {
+      alert("Please pick both start and end dates.");
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate > endDate) {
+      alert("Start date must be before or equal to end date.");
+      return;
+    }
+
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log('Received Data:', data);
+
+      // Ensure the bars property exists before proceeding
+      if (data.bars) {
+        document.getElementById("summaryContainer").style.display = "block";
+        const summaryTitle = document.getElementById("summaryTitle");
+
+        if (isMultiSummary && data.bars) {
+
+           // Sort the bars based on start date (from date)
+        data.bars.sort((a, b) => {
+          const dateA = new Date(a.label.split(' to ')[0]);
+          const dateB = new Date(b.label.split(' to ')[0]);
+          return dateA - dateB;
+        });
+          const labels = data.bars.map(bar => {
+            const [from, to] = bar.label.split(' to ');
+            const fromDay = from.split('-')[0];
+            const toDay = to.split('-')[0];
+            const month = from.split('-')[1];
+            const month_to = to.split('-')[1];
+        
+            // Return formatted label depending on whether months match
+            return (month === month_to) 
+              ? `${fromDay}–${toDay} ${month}` 
+              : `${fromDay}–${month}-${toDay}-${month_to}`;
+          });
+
+          
+          // Sort labels by date
+        
+        
+          // Now map the summary data accordingly
+          const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
+          const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
+          const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
+          const pendingData = data.bars.map(bar => bar.summary['PENDING'] || 0);
+        
+          // Handle total disputes and other chart-related data
+          const totalDisputes = raisedData.reduce((sum, value) => sum + value, 0) +
+                                clarificationData.reduce((sum, value) => sum + value, 0) +
+                                resolvedData.reduce((sum, value) => sum + value, 0) +
+                                pendingData.reduce((sum, value) => sum + value, 0);
+        
+          document.getElementById("raisedCount").textContent = raisedData.reduce((sum, value) => sum + value, 0);
+          document.getElementById("pendingCount").textContent = pendingData.reduce((sum, value) => sum + value, 0);
+          document.getElementById("clarificationCount").textContent = clarificationData.reduce((sum, value) => sum + value, 0);
+          document.getElementById("resolvedCount").textContent = resolvedData.reduce((sum, value) => sum + value, 0);
+          document.getElementById("totalDisputes").textContent = totalDisputes;
+        
+          
+          // Proceed with the chart creation after sorting
+          if (chart) chart.destroy();
+        
+          chart = new Chart(document.getElementById('statusChart'), {
+            type: 'bar',
+            data: {
+              labels: labels,  // Sorted labels
+              datasets: [
+                { label: 'PENDING', data: pendingData, backgroundColor: '#FFA500' },
+                { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
+                { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
+                { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: { mode: 'index', intersect: false },
+                datalabels: {
+                  color: 'white',
+                  font: {
+                    weight: 'bold',
+                    size: 12
+                  },
+                  formatter: (value, context) => value !== 0 ? value : ''
+                }
+              },
+              scales: {
+                x: { stacked: true, title: { display: true, text: 'Date Range' } },
+                y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+              }
+            },
+            plugins: [ChartDataLabels] // Use the plugin for colored x-axis
+          });
+          return;
+        }
+      }
+
+      // Handle custom date range summary
+      if (data.summary) {
+        const raised = data.summary["Dispute Raised"] || 0;
+        const clarification = data.summary["Dispute in Clarification"] || 0;
+        const resolved = data.summary["Issue Resolved"] || 0;
+        const pending = data.summary["PENDING"] || 0;
+        const totalDisputes = raised + clarification + resolved + pending;
+
+        document.getElementById("raisedCount").textContent = raised;
+        document.getElementById("clarificationCount").textContent = clarification;
+        document.getElementById("resolvedCount").textContent = resolved;
+        document.getElementById("totalDisputes").textContent = totalDisputes;
+        document.getElementById("pendingCount").textContent = pending;
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('statusChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Selected Date Range'],
+            datasets: [
+              { label: 'Dispute Raised', data: [pending], backgroundColor: '#FFA500' },
+              { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
+              { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
+              { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { mode: 'index', intersect: false },
+              datalabels: {
+                color: 'white',
+                font: {
+                  weight: 'bold',
+                  size: 12
+                },
+                formatter: (value, context) => {
+                  return value !== 0 ? value : '';
+                }
+              }
+            },
+            scales: {
+              x: { stacked: true, title: { display: true, text: 'Date Range' } },
+              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Error fetching summary:', err);
+    });
+});
+
+
+
+
+
+
+{% comment %} document.getElementById('fetchSummary').addEventListener('click', () => {
+  const aggregator = document.getElementById('aggregatorSelect').value;
+  const restaurantId = document.getElementById('restaurantId').value;
+  const dateRange = document.getElementById('date_range_select').value;
+
+
+// Define colors for each month
+          const monthColors = {
+            Jan: '#FF6384',
+            Feb: '#36A2EB',
+            Mar: '#FFCE56',
+            Apr: '#4BC0C0',
+            May: '#9966FF',
+            Jun: '#FF9F40',
+            Jul: '#C9CBCF',
+            Aug: '#00A36C',
+            Sep: '#FF6F61',
+            Oct: '#6A5ACD',
+            Nov: '#20B2AA',
+            Dec: '#DC143C'
+          };
+        
+          // Custom plugin to color X-axis labels
+          const coloredTicksPlugin = {
+            id: 'coloredTicksPlugin',
+            beforeDraw(chart) {
+              const { ctx, chartArea: { bottom }, scales: { x } } = chart;
+        
+              ctx.save();
+              x.ticks.forEach((tick, index) => {
+                const label = tick.label;
+                const match = label.match(/[A-Za-z]{3}/);
+                const month = match ? match[0] : null;
+                const color = monthColors[month] || '#666';
+        
+                const xPos = x.getPixelForTick(index);
+                ctx.font = '12px sans-serif';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.fillText(label, xPos, bottom + 20); // Adjust Y offset if needed
+              });
+              ctx.restore();
+        
+              // Hide default ticks so only custom colored ones show
+              x.options.ticks.display = false;
+            }
+          };
+        
+        
+
+
+  if (!dateRange) {
+    alert('Please select a date range');
+    return;
+  }
+
+  function formatDate(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
+
+  let url = '';
+  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
+
+  if (isMultiSummary) {
+    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
+  } else if (dateRange === 'all') {
+    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
+  } else if (dateRange === 'custom') {
+    const start = document.getElementById('customStartDate').value;
+    const end = document.getElementById('customEndDate').value;
+
+    if (!start || !end) {
+      alert("Please pick both start and end dates.");
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+
+    if (startDate > endDate) {
+      alert("Start date must be before or equal to end date.");
+      return;
+    }
+
+    const formattedStart = formatDate(startDate);
+    const formattedEnd = formatDate(endDate);
+    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
+  }
+
+  fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      console.log('Received Data:', data);
+      console.log('Received Bars:', data.bars[0].client_name);
+      document.getElementById("summaryContainer").style.display = "block";
+
+      const summaryTitle = document.getElementById("summaryTitle");
+
+      if (isMultiSummary && data.bars) {
+        // Simplify x-axis labels
+        const labels = data.bars.map(bar => {
+          const [from, to] = bar.label.split(' to ');
+          const fromDay = from.split('-')[0];
+          const toDay = to.split('-')[0];
+          const month = from.split('-')[1];
+          const month_to = to.split('-')[1];
+
+          if (month === month_to) {
+            return `${fromDay}–${toDay} ${month}`;
+          } else {
+            return `${fromDay}–${month}-${toDay}-${month_to}`;
+          }
+        });
+        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
+        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
+        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
+
+        const totalDisputes = raisedData.reduce((sum, value) => sum + value, 0) +
+                              clarificationData.reduce((sum, value) => sum + value, 0) +
+                              resolvedData.reduce((sum, value) => sum + value, 0);
+
+        document.getElementById("raisedCount").textContent = raisedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("clarificationCount").textContent = clarificationData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("resolvedCount").textContent = resolvedData.reduce((sum, value) => sum + value, 0);
+        document.getElementById("totalDisputes").textContent = totalDisputes;
+
+        // 👇 Dynamic Title from Date Labels
+        const yearSet = new Set();
+        data.bars.forEach(bar => {
+          const match = bar.label.match(/\d{2}-[A-Za-z]{3}-(\d{4})/g);
+          if (match) {
+            match.forEach(dateStr => {
+              const parts = dateStr.split('-');
+              const year = parts[2];
+              yearSet.add(year);
+            });
+          }
+        });
+
+        if (yearSet.size > 0) {
+          summaryTitle.textContent = `Summary for ${[...yearSet].sort().join(', ')}`;
+          summaryTitle.style.display = "block";
+        } else {
+          summaryTitle.style.display = "none";
+        }
+
+        // Chart population
+        if (chart) chart.destroy();
+
+        chart = new Chart(document.getElementById('statusChart'), {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
+              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
+              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              tooltip: { mode: 'index', intersect: false },
+              datalabels: {
+                color: 'white',
+                font: {
+                  weight: 'bold',
+                  size: 12
+                },
+                formatter: (value, context) => {
+                  return value !== 0 ? value : '';
+                }
+              }
+            },
+            scales: {
+              x: { stacked: true, title: { display: true, text: 'Date Range' } },
+              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+            }
+          },
+          plugins: [ChartDataLabels]
+        });
+        return;
+      }
+      
+      // Custom or single date range summary
+      summaryTitle.style.display = "none"; // Hide title for single summary
+
+      const raised = data.summary["Dispute Raised"] || 0;
+      const clarification = data.summary["Dispute in Clarification"] || 0;
+      const resolved = data.summary["Issue Resolved"] || 0;
+      const totalDisputes = raised + clarification + resolved;
+
+      document.getElementById("raisedCount").textContent = raised;
+      document.getElementById("clarificationCount").textContent = clarification;
+      document.getElementById("resolvedCount").textContent = resolved;
+      document.getElementById("totalDisputes").textContent = totalDisputes;
+
+      if (chart) chart.destroy();
+
+      chart = new Chart(document.getElementById('statusChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Selected Date Range'],
+          datasets: [
+            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
+            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
+            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { mode: 'index', intersect: false },
+            datalabels: {
+              color: 'white',
+              font: {
+                weight: 'bold',
+                size: 12
+              },
+              formatter: (value, context) => {
+                return value !== 0 ? value : '';
+              }
+            }
+          },
+          scales: {
+            x: { stacked: true },
+            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
+    })
+    .catch(err => {
+      console.error('Error fetching summary:', err);
+    });
+}); {% endcomment %}
+
+
+
+
+
+  {% comment %} let chart;
 
 document.getElementById('clientTable').addEventListener('click', function (event) {
   if (event.target && event.target.classList.contains('view-btn')) {
@@ -501,7 +977,32 @@ document.getElementById('fetchSummary').addEventListener('click', () => {
       const summaryTitle = document.getElementById("summaryTitle");
 
       if (isMultiSummary && data.bars) {
-        const labels = data.bars.map(bar => bar.label);
+
+        // Sort the bars based on start date (from date)
+        data.bars.sort((a, b) => {
+          const dateA = new Date(a.label.split(' to ')[0]);
+          const dateB = new Date(b.label.split(' to ')[0]);
+          return dateA - dateB;
+        });
+
+        // Simplify x-axis labels
+        const labels = data.bars.map(bar => {
+          const [from, to] = bar.label.split(' to ');
+          if (!from || !to) return bar.label;
+          const fromDay = from.split('-')[0];
+          const toDay = to.split('-')[0];
+          const month = from.split('-')[1];
+          const month_to = to.split('-')[1];
+
+          if (month === month_to){
+            return `${fromDay}–${toDay} ${month}`;
+          }
+          else{
+            return `${fromDay} ${month}-${toDay} ${month_to}`;
+          }
+          
+        });
+        //const labels = data.bars.map(bar => bar.label);
         const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
         const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
         const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
@@ -604,419 +1105,12 @@ document.getElementById('fetchSummary').addEventListener('click', () => {
     .catch(err => {
       console.error('Error fetching summary:', err);
     });
-});
-
-
-
-
-
-
-
-  {% comment %} let chart;
-
-document.getElementById('clientTable').addEventListener('click', function (event) {
-  if (event.target && event.target.classList.contains('view-btn')) {
-    const clientId = event.target.dataset.clientId;
-    document.getElementById('aggregatorSection').style.display = 'block';
-    document.getElementById('aggregatorSection').dataset.clientId = clientId;
-    document.getElementById('dateRangeSection').style.display = 'none';
-    document.getElementById('restaurantId').value = '';
-  }
-});
-
-document.getElementById('aggregatorSelect').addEventListener('change', function () {
-  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
-  const aggregator = this.value;
-  if (!aggregator) return;
-
-  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.restaurant_id) {
-        document.getElementById('restaurantId').value = data.restaurant_id;
-        document.getElementById('dateRangeSection').style.display = 'block';
-        loadDateRanges();
-      }
-    });
-});
-
-function loadDateRanges() {
-  const dateSelect = document.getElementById('date_range_select');
-  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
-
-  const staticOptions = [
-    { value: 'this_month', text: 'This Month' },
-    { value: 'last_month', text: 'Last Month' },
-    { value: 'this_year', text: 'This Year' },
-    { value: 'q1', text: 'Q1 (Jan–Mar)' },
-    { value: 'q2', text: 'Q2 (Apr–Jun)' },
-    { value: 'q3', text: 'Q3 (Jul–Sep)' },
-    { value: 'q4', text: 'Q4 (Oct–Dec)' },
-    { value: 'custom', text: 'Custom Range' },
-    { value: 'all', text: 'All' }
-  ];
-
-  staticOptions.forEach(opt => {
-    const optionEl = document.createElement('option');
-    optionEl.value = opt.value;
-    optionEl.text = opt.text;
-    dateSelect.appendChild(optionEl);
-  });
-}
-
-document.getElementById('date_range_select').addEventListener('change', function () {
-  const customPicker = document.getElementById('customDatePickers');
-  if (this.value === 'custom') {
-    customPicker.style.display = 'flex';
-  } else {
-    customPicker.style.display = 'none';
-  }
-});
-
-document.getElementById('fetchSummary').addEventListener('click', () => {
-  const aggregator = document.getElementById('aggregatorSelect').value;
-  const restaurantId = document.getElementById('restaurantId').value;
-  const dateRange = document.getElementById('date_range_select').value;
-
-  if (!dateRange) {
-    alert('Please select a date range');
-    return;
-  }
-
-  function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  let url = '';
-  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
-
-  if (isMultiSummary) {
-    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
-  } else if (dateRange === 'all') {
-    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
-  } else if (dateRange === 'custom') {
-    const start = document.getElementById('customStartDate').value;
-    const end = document.getElementById('customEndDate').value;
-
-    if (!start || !end) {
-      alert("Please pick both start and end dates.");
-      return;
-    }
-
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-
-    if (startDate > endDate) {
-      alert("Start date must be before or equal to end date.");
-      return;
-    }
-
-    const formattedStart = formatDate(startDate);
-    const formattedEnd = formatDate(endDate);
-    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
-  }
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      console.log('Received Data:', data);
-      document.getElementById("summaryContainer").style.display = "block";
-
-      // For multi-summary, ensure data.bars is present and populate table
-      if (isMultiSummary && data.bars) {
-        const labels = data.bars.map(bar => bar.label);
-        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
-        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
-        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
-
-        // Update the table with summary counts for the multi-summary response
-        const totalDisputes = raisedData.reduce((sum, value) => sum + value, 0) +
-                              clarificationData.reduce((sum, value) => sum + value, 0) +
-                              resolvedData.reduce((sum, value) => sum + value, 0);
-
-        document.getElementById("raisedCount").textContent = raisedData.reduce((sum, value) => sum + value, 0);
-        document.getElementById("clarificationCount").textContent = clarificationData.reduce((sum, value) => sum + value, 0);
-        document.getElementById("resolvedCount").textContent = resolvedData.reduce((sum, value) => sum + value, 0);
-        document.getElementById("totalDisputes").textContent = totalDisputes;
-
-        // Chart population
-        if (chart) chart.destroy();
-
-        chart = new Chart(document.getElementById('statusChart'), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [
-              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
-              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
-              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' },
-              tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-              x: { stacked: true, title: { display: true, text: 'Date Range' } },
-              y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
-            }
-          }
-        });
-        return;
-      }
-
-      // Custom date range handling (if no multi-summary)
-      const raised = data.summary["Dispute Raised"] || 0;
-      const clarification = data.summary["Dispute in Clarification"] || 0;
-      const resolved = data.summary["Issue Resolved"] || 0;
-      const totalDisputes = raised + clarification + resolved;
-
-      document.getElementById("raisedCount").textContent = raised;
-      document.getElementById("clarificationCount").textContent = clarification;
-      document.getElementById("resolvedCount").textContent = resolved;
-      document.getElementById("totalDisputes").textContent = totalDisputes;
-
-      if (chart) chart.destroy();
-
-      chart = new Chart(document.getElementById('statusChart'), {
-        type: 'bar',
-        data: {
-          labels: ['Selected Date Range'],
-          datasets: [
-            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
-            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
-            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: { mode: 'index', intersect: false }
-          },
-          scales: {
-            x: { stacked: true },
-            y: { stacked: true, beginAtZero: true, title: { display: true, text: 'Count' } }
-          }
-        }
-      });
-    })
-    .catch(err => {
-      console.error('Error fetching summary:', err);
-    });
 }); {% endcomment %}
 
 
 
 
 
-
-
-
-  {% comment %} let chart;
-
-document.getElementById('clientTable').addEventListener('click', function (event) {
-  if (event.target && event.target.classList.contains('view-btn')) {
-    const clientId = event.target.dataset.clientId;
-    document.getElementById('aggregatorSection').style.display = 'block';
-    document.getElementById('aggregatorSection').dataset.clientId = clientId;
-    document.getElementById('dateRangeSection').style.display = 'none';
-    document.getElementById('restaurantId').value = '';
-  }
-});
-
-document.getElementById('aggregatorSelect').addEventListener('change', function () {
-  const clientId = document.getElementById('aggregatorSection').dataset.clientId;
-  const aggregator = this.value;
-  if (!aggregator) return;
-
-  fetch(`/api/get-restaurant-id/?client_id=${clientId}&aggregator=${aggregator}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.restaurant_id) {
-        document.getElementById('restaurantId').value = data.restaurant_id;
-        document.getElementById('dateRangeSection').style.display = 'block';
-        loadDateRanges();
-      }
-    });
-});
-
-function loadDateRanges() {
-  const dateSelect = document.getElementById('date_range_select');
-  dateSelect.innerHTML = '<option value="">Select Date Range</option>';
-
-  const staticOptions = [
-    { value: 'this_month', text: 'This Month' },
-    { value: 'last_month', text: 'Last Month' },
-    { value: 'this_year', text: 'This Year' },
-    { value: 'q1', text: 'Q1 (Jan–Mar)' },
-    { value: 'q2', text: 'Q2 (Apr–Jun)' },
-    { value: 'q3', text: 'Q3 (Jul–Sep)' },
-    { value: 'q4', text: 'Q4 (Oct–Dec)' },
-    { value: 'custom', text: 'Custom Range' },
-    { value: 'all', text: 'All' }
-  ];
-
-  staticOptions.forEach(opt => {
-    const optionEl = document.createElement('option');
-    optionEl.value = opt.value;
-    optionEl.text = opt.text;
-    dateSelect.appendChild(optionEl);
-  });
-}
-
-document.getElementById('date_range_select').addEventListener('change', function () {
-  const customPicker = document.getElementById('customDatePickers');
-  if (this.value === 'custom') {
-    customPicker.style.display = 'flex';
-  } else {
-    customPicker.style.display = 'none';
-  }
-});
-
-document.getElementById('fetchSummary').addEventListener('click', () => {
-  const aggregator = document.getElementById('aggregatorSelect').value;
-  const restaurantId = document.getElementById('restaurantId').value;
-  const dateRange = document.getElementById('date_range_select').value;
-
-  if (!dateRange) {
-    alert('Please select a date range');
-    return;
-  }
-
-  function formatDate(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  }
-
-  let url = '';
-  const isMultiSummary = ['this_month', 'last_month', 'this_year', 'q1', 'q2', 'q3', 'q4'].includes(dateRange);
-
-  if (isMultiSummary) {
-    url = `/api/get-multi-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&mode=${dateRange}`;
-  } else if (dateRange === 'all') {
-    url = `/api/get-summary-all/?aggregator=${aggregator}&restaurant_id=${restaurantId}`;
-  } else if (dateRange === 'custom') {
-    const start = document.getElementById('customStartDate').value;
-    const end = document.getElementById('customEndDate').value;
-
-    if (!start || !end) {
-      alert("Please pick both start and end dates.");
-      return;
-    }
-
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-
-    if (startDate > endDate) {
-      alert("Start date must be before or equal to end date.");
-      return;
-    }
-
-    const formattedStart = formatDate(startDate);
-    const formattedEnd = formatDate(endDate);
-    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${formattedStart}&end_date=${formattedEnd}`;
-  } else {
-    const [startDateStr, endDateStr] = dateRange.split(' to ');
-    url = `/api/get-summary/?aggregator=${aggregator}&restaurant_id=${restaurantId}&start_date=${startDateStr}&end_date=${endDateStr}`;
-  }
-
-  fetch(url)
-    .then(res => res.json())
-    .then(data => {
-      console.log('Received Data:', data); 
-      document.getElementById("summaryContainer").style.display = "block";
-
-      if (isMultiSummary && data.bars) {
-        const labels = data.bars.map(bar => bar.label);
-        const raisedData = data.bars.map(bar => bar.summary['Dispute Raised'] || 0);
-        const clarificationData = data.bars.map(bar => bar.summary['Dispute in Clarification'] || 0);
-        const resolvedData = data.bars.map(bar => bar.summary['Issue Resolved'] || 0);
-
-        if (chart) chart.destroy();
-
-        chart = new Chart(document.getElementById('statusChart'), {
-          type: 'bar',
-          data: {
-            labels: labels,
-            datasets: [
-              { label: 'Dispute Raised', data: raisedData, backgroundColor: '#dc3545' },
-              { label: 'Dispute in Clarification', data: clarificationData, backgroundColor: '#ffc107' },
-              { label: 'Issue Resolved', data: resolvedData, backgroundColor: '#28a745' }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              legend: { position: 'bottom' },
-              tooltip: { mode: 'index', intersect: false }
-            },
-            scales: {
-              x: {
-                stacked: true,
-                title: { display: true, text: 'Date Range' }
-              },
-              y: {
-                stacked: true,
-                beginAtZero: true,
-                title: { display: true, text: 'Count' }
-              }
-            }
-          }
-        });
-        return;
-      }
-
-      const raised = data.summary["Dispute Raised"] || 0;
-      const clarification = data.summary["Dispute in Clarification"] || 0;
-      const resolved = data.summary["Issue Resolved"] || 0;
-      const totalDisputes = raised + clarification + resolved;
-
-      document.getElementById("raisedCount").textContent = raised;
-      document.getElementById("clarificationCount").textContent = clarification;
-      document.getElementById("resolvedCount").textContent = resolved;
-      document.getElementById("totalDisputes").textContent = totalDisputes;
-
-      if (chart) chart.destroy();
-
-      chart = new Chart(document.getElementById('statusChart'), {
-        type: 'bar',
-        data: {
-          labels: ['Selected Date Range'],
-          datasets: [
-            { label: 'Dispute Raised', data: [raised], backgroundColor: '#dc3545' },
-            { label: 'Dispute in Clarification', data: [clarification], backgroundColor: '#ffc107' },
-            { label: 'Issue Resolved', data: [resolved], backgroundColor: '#28a745' }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: { mode: 'index', intersect: false }
-          },
-          scales: {
-            x: { stacked: true },
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              title: { display: true, text: 'Count' }
-            }
-          }
-        }
-      });
-    })
-    .catch(err => {
-      console.error('Error fetching summary:', err);
-    });
-}); {% endcomment %}
 
 
 

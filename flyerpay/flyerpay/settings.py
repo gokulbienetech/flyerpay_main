@@ -28,12 +28,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-CORS_ALLOWED_ORIGINS = [
-     "http://localhost:8000",
-     "http://127.0.0.1:8000",
-     "http://10.0.2.2:8000",
-      ]
-
+# CORS_ALLOWED_ORIGINS = [
+#      "http://localhost:8000",
+#      "http://127.0.0.1:8000",
+#      "http://10.0.2.2:8000",
+#      'http://localhost:3000',
+#      "http://127.0.0.1:5500",
+#      "http://127.0.0.1:5501",
+#       ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -58,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'flyerpay.urls'
@@ -159,10 +161,13 @@ EMAIL_PORT = 587  # Use 465 if using SSL instead of TLS
 EMAIL_USE_TLS = True  # Use True for TLS, False for SSL
 EMAIL_USE_SSL = False  # Set to True if using port 465
 EMAIL_HOST_USER = "gokulms7885@gmail.com"  # Replace with your email
-EMAIL_HOST_PASSWORD = "lisctsqrmwxmmytx"  # Replace with your app password
+EMAIL_HOST_PASSWORD = "zuzlkxveloqlbhro"  # Replace with your app password
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # Default sender email
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'Payout_Reconciliation.CustomUser'
+

@@ -1,5 +1,6 @@
 import json
 from django.db import models
+from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 class zomato_order(models.Model):
@@ -224,8 +225,8 @@ class ClientDetails(models.Model):
     fe_finance_poc = models.EmailField(blank=True, null=True)
     fe_escalation_manager = models.EmailField(blank=True, null=True)
 
-    fp_username = models.CharField(max_length=20)
-    fp_password = models.CharField(max_length=10)
+    # fp_username = models.CharField(max_length=20)
+    # fp_password = models.CharField(max_length=10)
 
     create_date = models.DateTimeField(null=True)  # Automatically set when created
     updated_date = models.DateTimeField(null=True) # Automatically update when modified
@@ -423,3 +424,89 @@ class EmailConversation(models.Model):
     subject = models.CharField(max_length=255)
     body = models.TextField()
     date = models.DateTimeField()
+    
+    
+    
+    
+
+# class DemoRequest(models.Model):
+#     FULL_NAME_CHOICES = (
+#         ('Existing user', 'Existing user'),
+#         ('New user', 'New user'),
+#     )
+#     full_name = models.CharField(max_length=255)
+#     email = models.EmailField()
+#     phone_number = models.CharField(max_length=20)
+#     user_type = models.CharField(max_length=50, choices=FULL_NAME_CHOICES)
+#     message = models.TextField()
+
+#     def __str__(self):
+#         return f"Demo Request by {self.full_name}"
+
+
+class DemoRequest(models.Model):
+    # FULL_NAME_CHOICES = (
+    #     ('Existing user', 'Existing user'),
+    #     ('New user', 'New user'),
+    # )
+
+    REASON_CHOICES = (
+        ('book-demo', 'Book demo'),
+        ('onboarding', 'New Merchant onboarding'),
+        ('client-queries', 'Existing Client Queries'),
+        ('feedback', 'General Feedback'),
+        ('investor', 'Investor Relations'),
+    )
+
+    full_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=20)  # Store full number or you can store separately
+    # country_code = models.CharField(max_length=10, blank=True, null=True)  # Store country code
+    # user_type = models.CharField(max_length=50, choices=FULL_NAME_CHOICES)
+    reason = models.CharField(max_length=50, choices=REASON_CHOICES)  # New field
+    message = models.TextField()
+
+    def __str__(self):
+        return f"Demo Request by {self.full_name}"
+    
+    
+    
+    
+class UserType(models.Model):
+    user_type = models.CharField(max_length=100)
+    delflag = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.name
+
+class CustomUser(AbstractUser):
+    full_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=15)
+    user_type = models.ForeignKey(UserType, on_delete=models.SET_NULL, null=True)
+    clients = models.ManyToManyField(ClientDetails, blank=True)
+    delflag = models.IntegerField(default=1)  # 1 = Active, 0 = Deleted (Soft delete)
+    
+    groups = models.ManyToManyField(
+        'auth.Group', 
+        related_name='customuser_set',  # Change the reverse name to avoid conflict
+        blank=True
+    )
+
+    user_permissions = models.ManyToManyField(
+        'auth.Permission', 
+        related_name='customuser_permissions',  # Change the reverse name to avoid conflict
+        blank=True
+    )
+
+    def __str__(self):
+        return self.username
+    
+
+
+class PopupLead(models.Model):
+    name = models.CharField(max_length=255)
+    email = models.EmailField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

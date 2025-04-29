@@ -7,9 +7,9 @@ import pandas as pd
 from django.core.files.storage import default_storage
 from django.contrib import messages
 from sqlalchemy import create_engine, text
-from .models import  EmailConversation, SentEmailLog, SummeryLog, zomato_order,sales_report,sales_report_swiggy,SwiggyOrder,ReconciliationSummary, ClientDetails,Aggregator,Membership,clients_zomato,clients_swiggy,swiggy_CPC_Ads,zomato_cpc_ads
+from .models import  CustomUser, EmailConversation, PopupLead, SentEmailLog, SummeryLog, UserType, zomato_order,sales_report,sales_report_swiggy,SwiggyOrder,ReconciliationSummary, ClientDetails,Aggregator,Membership,clients_zomato,clients_swiggy,swiggy_CPC_Ads,zomato_cpc_ads
 from django.http import HttpResponse, JsonResponse
-from .forms import ClientDetailsForm ,UploadExcelForm_Zomato,AggregatorForm,UploadExcelForm_Swiggy,UploadExcelForm_FlyerEats,MembershipForm
+from .forms import ClientDetailsForm, DemoRequestForm ,UploadExcelForm_Zomato,AggregatorForm,UploadExcelForm_Swiggy,UploadExcelForm_FlyerEats,MembershipForm,UserTypeForm
 from datetime import datetime,date, timedelta
 from django.db.models import Sum, F
 from django.utils.timezone import make_aware        
@@ -119,8 +119,8 @@ def client_edit(request, pk):
         "swiggy_escalation_manager": client.swiggy_escalation_manager,
         "fe_finance_poc": client.fe_finance_poc,
         "fe_escalation_manager": client.fe_escalation_manager,
-        "fp_username": client.fp_username,
-        "fp_password": client.fp_password,
+        # "fp_username": client.fp_username,
+        # "fp_password": client.fp_password,
         "zomato_restaurant_id": client.zomato_restaurant_id,
         "swiggy_restaurant_id": client.swiggy_restaurant_id,
         "flyereats_restaurant_id": client.flyereats_restaurant_id,
@@ -148,6 +148,66 @@ def client_delete(request, pk):
     client.delflag = 0  # Soft delete
     client.save()
     return JsonResponse({"message": "Client deleted successfully!"}, status=200)
+
+
+
+#Create User 
+
+# def add_user_type_ajax(request):
+#     if request.method == "POST":
+#         name = request.POST.get("name")
+#         if name:
+#             user_type, created = UserType.objects.get_or_create(name=name, delflag=1)
+#             return JsonResponse({"success": True, "id": user_type.id, "name": user_type.name})
+#     return JsonResponse({"success": False})
+
+# def user_list(request):
+#     users = CustomUser.objects.filter(delflag=1)
+#     return render(request, 'user_list.html', {'users': users})
+
+# def get_user(request, user_id):
+#     user = CustomUser.objects.get(id=user_id)
+#     return JsonResponse({
+#         "id": user.id,
+#         "full_name": user.full_name,
+#         "email": user.email,
+#         "phone_number": user.phone_number,
+#         "username": user.username,
+#         "user_type": user.user_type.id if user.user_type else None,
+#         "clients": list(user.clients.values_list('id', flat=True)),
+#     })
+
+# @csrf_exempt
+# def save_user(request):
+#     if request.method == 'POST':
+#         data = request.POST
+#         user_id = data.get("user_id")
+#         if user_id:
+#             user = CustomUser.objects.get(id=user_id)
+#         else:
+#             user = CustomUser()
+
+#         user.full_name = data.get("full_name")
+#         user.email = data.get("email")
+#         user.phone_number = data.get("phone_number")
+#         user.username = data.get("username")
+#         if data.get("password"):
+#             user.password = make_password(data.get("password"))
+#         user.user_type_id = data.get("user_type")
+#         user.save()
+#         if "clients" in data:
+#             user.clients.set(data.getlist("clients"))
+#         return JsonResponse({"success": True})
+#     return JsonResponse({"success": False}, status=400)
+
+# @csrf_exempt
+# def delete_user(request, user_id):
+#     user = CustomUser.objects.get(id=user_id)
+#     user.delflag = 0
+#     user.save()
+#     return JsonResponse({"success": True})
+
+
 
 
 
@@ -848,6 +908,9 @@ def process_zomato_payout(file_path, client_name,zomato_restaurant_id):
     cancelled_orders = df[df["Order_status"] == "CANCELLED"][["order_id", "Cancelled_Rejected_State"]].to_dict(orient="records")
     rejected_orders = df[df["Order_status"] == "REJECTED"][["order_id","Cancelled_Rejected_State", "Cancellation_Rejection_Reason"]].to_dict(orient="records")
     ordinary_order = df[df["Order_status"] == "DELIVERED"][["order_id", "Customer_Compensation_Recoupment"]].to_dict(orient="records")
+    print(cancelled_orders,"cancelled_orders")
+    print(rejected_orders,"rejected_orders")
+    print(ordinary_order,"ordinary_order")
     return {
         "status": "success",
         "message": "File processed successfully.",
@@ -1023,6 +1086,8 @@ def process_zomato_sales(file_path, db_config, client_name, zomato_restaurant_id
         for order in rejected_orders
     }    
     print(rejected_dict,"rejected_dict")
+    print(cancelled_dict,"cancelled_dict")
+    print(ordinary_dict,"ordinary_dict")
     # Initialize Expected_Payout column
     df["Expected_Payout"] = 0.0
     df["fp_status"] = "PENDING"
@@ -2196,9 +2261,9 @@ def get_email_replies(request):
     # subject_filter = f"Issue in {aggregator} Payout from {selected_date_range}-{restaurant_id } ({client_name})"
     # print(subject_filter,"subject_filter_get")
     if aggregator == "Zomato":
-        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@bienetech.com",since_days=days_since_email)
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@zomato.com",since_days=days_since_email)
     if aggregator == "Swiggy":
-        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@bienetech.com",since_days=days_since_email)
+        replies = fetch_replies_from_gmail(client.email, client.email_password, subject_filter=subject_filter,sender_filter="@swiggy.com",since_days=days_since_email)
     # replies = fetch_replies_from_gmail(aggregator,restaurant_id)
     print(replies,"function_Called")
     for reply in replies:
@@ -2762,12 +2827,14 @@ def get_multi_summary(request):
     restaurant_id = request.GET.get('restaurant_id')
     mode = request.GET.get('mode')  # this_month, last_month, q1, q2, q3, q4, this_year
 
+    c_name = None
     # Choose the correct model based on aggregator
     if aggregator.lower() == 'zomato':
         model = clients_zomato
+        c_name = ClientDetails.objects.filter(zomato_restaurant_id = restaurant_id).first()
     elif aggregator.lower() == 'swiggy' :
         model = clients_swiggy
-
+        c_name = ClientDetails.objects.filter(swiggy_restaurant_id = restaurant_id).first()
     # Determine the date ranges based on the mode
     if mode == 'this_month':
         print(mode,"mode")
@@ -2799,8 +2866,11 @@ def get_multi_summary(request):
         # Fetch the summary for the specific date range
         summary = get_summary_for_date_range(client.from_date, client.to_date, aggregator, restaurant_id)
         bars.append({
+            
             'label': f'{client.from_date.strftime("%d-%b-%Y")} to {client.to_date.strftime("%d-%b-%Y")}',
-            'summary': summary
+            'summary': summary,
+            'res_id':restaurant_id,
+            'client_name':c_name.client_name
         })
         print(bars,"bars")
 
@@ -2897,31 +2967,188 @@ def get_quarter_range(quarter):
 
 
 
+# create user_type
+
+
+def usertype_list(request):
+    usertypes = UserType.objects.filter(delflag=1)  # Active only
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        data = list(usertypes.values("id", "user_type"))
+        return JsonResponse({"usertypes": data})
+
+    if request.method == "POST":
+        form = UserTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"success": True, "message": "User Type added successfully!"})
+        else:
+            return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
+    form = UserTypeForm()
+    return render(request, 'user_list.html', {'form': form, 'usertypes': usertypes})
+
+def usertype_add(request):
+    if request.method == "POST":
+        form = UserTypeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"success": True, "message": "User Type added successfully!"})
+        return JsonResponse({"success": False, "errors": form.errors}, status=400)
+    
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+def usertype_edit(request, pk):
+    usertype = get_object_or_404(UserType, pk=pk)
+
+    if request.method == "POST":
+        form = UserTypeForm(request.POST, instance=usertype)
+        if form.is_valid():
+            form.save()
+            return JsonResponse({"success": True, "message": "User Type updated successfully!"})
+        else:
+            return JsonResponse({"success": False, "errors": form.errors}, status=400)
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form_data = {
+            "user_type": usertype.user_type
+        }
+        return JsonResponse(form_data)
+
+    form = UserTypeForm(instance=usertype)
+    return render(request, 'usertype_edit.html', {'form': form, 'usertype': usertype})
+
+def usertype_delete(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method!"})
+    
+    usertype = get_object_or_404(UserType, pk=pk)
+    usertype.delflag = 0  # Soft delete
+    usertype.save()
+    
+    return JsonResponse({"success": True, "message": "User Type deleted successfully!"})
 
 
 #For Flutter App 
 
 @csrf_exempt
 def client_login(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
+    
+    pass
+    # if request.method == "POST":
+    #     data = json.loads(request.body)
+    #     username = data.get("username")
+    #     password = data.get("password")
 
-        try:
-            client = ClientDetails.objects.get(fp_username=username, fp_password=password, delflag=1)
-            response = {
-                "status": "success",
-                "message": "Login successful",
-                "client_id": client.id,
-                "client_name": client.client_name,
-                "email": client.email,
-                "business_type": client.business_type,
-            }
-        except ClientDetails.DoesNotExist:
-            response = {
-                "status": "error",
-                "message": "Invalid username or password"
-            }
+    #     try:
+    #         client = ClientDetails.objects.get(fp_username=username, fp_password=password, delflag=1)
+    #         response = {
+    #             "status": "success",
+    #             "message": "Login successful",
+    #             "client_id": client.id,
+    #             "client_name": client.client_name,
+    #             "email": client.email,
+    #             "business_type": client.business_type,
+    #         }
+    #     except ClientDetails.DoesNotExist:
+    #         response = {
+    #             "status": "error",
+    #             "message": "Invalid username or password"
+    #         }
 
-        return JsonResponse(response)
+    #     return JsonResponse(response)
+    
+    
+    
+# For Landing Page 
+
+@csrf_exempt
+def request_demo(request):
+    print("Request_demo.....")
+    if request.method == 'POST':
+        form = DemoRequestForm(request.POST)
+        if form.is_valid():
+            demo_request = form.save()
+            phone_number = demo_request.phone_number  # e.g., "+91 9876543210"
+            # country_code = demo_request.country_code  # e.g., "+91"
+            demo_request.phone_number = phone_number
+            # demo_request.country_code = country_code
+            # Extract phone number and country code
+            demo_request.save()
+
+            subject = f"Demo Request from {demo_request.full_name} - {demo_request.reason.replace('-', ' ').title()}"
+            message = (
+                f"New Request Received:\n\n"
+                f"Full Name: {demo_request.full_name}\n"
+                f"Email: {demo_request.email}\n"
+                f"Phone:{demo_request.phone_number}\n"
+                f"Reason: {demo_request.reason.replace('-', ' ').title()}\n\n"
+                f"Message:\n{demo_request.message}"
+            )
+            from_email = demo_request.email
+            recipient_list = ["gokulms7885@gmail.com"]
+
+            send_mail(subject, message, from_email, recipient_list)
+
+            return JsonResponse({'status': 'success', 'message': 'Demo request submitted successfully'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid form data'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+@csrf_exempt
+def submit_popup_form(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        PopupLead.objects.create(name=name, email=email)
+        return JsonResponse({'message': 'Form submitted successfully!'})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+# @csrf_exempt 
+# def request_demo(request):
+#     print("Request_demo.....")
+#     if request.method == 'POST':
+#         form = DemoRequestForm(request.POST)
+#         if form.is_valid():
+#             demo_request = form.save()
+
+#             # Send email
+#             subject = f"Demo Request from {demo_request.full_name}"
+#             message = f"New Demo Request:\n\n{demo_request.message}\n\nContact: {demo_request.phone_number}\n\nEmail: {demo_request.email}"
+#             from_email = demo_request.email  # You can make this dynamic as per your need
+#             recipient_list = ["gokulms7885@gmail.com"] 
+
+#             send_mail(subject, message, from_email, recipient_list)
+
+#             return JsonResponse({'status': 'success', 'message': 'Demo request submitted successfully'})
+#         else:
+#             return JsonResponse({'status': 'error', 'message': 'Invalid form data'})
+
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+# @csrf_exempt
+# def request_demo(request):
+#     if request.method == "POST":
+#         full_name = request.POST.get("full_name")
+#         email = request.POST.get("email")
+#         phone_number = request.POST.get("phone_number")
+#         user_type = request.POST.get("user_type")
+#         message = request.POST.get("message")
+
+#         # For now, skip email sending — just return the data
+#         return JsonResponse({
+#             "status": "success",
+#             "message": "Request received",
+#             "data": {
+#                 "full_name": full_name,
+#                 "email": email,
+#                 "phone": phone_number,
+#                 "user_type": user_type,
+#                 "message": message
+#             }
+#         })
+
+#     return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
